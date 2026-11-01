@@ -356,3 +356,4 @@ class GroupComparisonResponse(BaseModel):
     overlapping_portfolios: List[str]
     distinct_portfolios_group_1: List[str]
     distinct_portfolios_group_2: List[str]
+

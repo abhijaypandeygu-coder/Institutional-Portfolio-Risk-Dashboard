@@ -50,3 +50,4 @@ The **M05.08 Multi-Portfolio Management** engine provides institutional logical 
    - Portfolios belonging to multiple nested or overlapping groups are deduplicated before consolidation to prevent double-counting.
 5. **Currency Segregation:**
    - Cash balances in different currencies are never added together directly. Reporting-currency conversions require explicit FX rates and preserve native currency figures.
+

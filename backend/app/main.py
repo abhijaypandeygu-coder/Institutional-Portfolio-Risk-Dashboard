@@ -32,6 +32,7 @@ from backend.app.modules.portfolio_management.transaction_management.router impo
 from backend.app.modules.portfolio_management.portfolio_reconciliation.router import router as portfolio_reconciliation_router
 from backend.app.modules.portfolio_management.portfolio_history.router import router as portfolio_history_router
 from backend.app.modules.portfolio_management.multi_portfolio_management.router import router as multi_portfolio_management_router
+from backend.app.modules.risk_management.gross_exposure.router import router as gross_exposure_router
 
 
 @asynccontextmanager
@@ -84,6 +85,7 @@ app.include_router(transaction_management_router)
 app.include_router(portfolio_reconciliation_router)
 app.include_router(portfolio_history_router)
 app.include_router(multi_portfolio_management_router)
+app.include_router(gross_exposure_router)
 
 
 @app.get("/health", tags=["System"])
@@ -119,5 +121,6 @@ async def root_health_check():
             "M05.06 - Portfolio Reconciliation Engine",
             "M05.07 - Portfolio History Engine",
             "M05.08 - Multi-Portfolio Management Engine",
+            "M06.01 - Gross Exposure Engine",
         ],
     }

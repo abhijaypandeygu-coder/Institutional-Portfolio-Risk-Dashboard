@@ -81,3 +81,4 @@ All endpoints are mounted under `/api/v1/portfolio-groups`.
 - **URL:** `POST /api/v1/portfolio-groups/compare?group_id_1=GRP-1&group_id_2=GRP-2`
 - **Status:** `200 OK`
 - **Description:** Computes net exposure differences and analyzes overlapping vs distinct member portfolios.
+

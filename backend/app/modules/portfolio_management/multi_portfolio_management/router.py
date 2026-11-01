@@ -251,3 +251,4 @@ async def list_snapshots(
     service = MultiPortfolioService(session)
     snaps = await service.repo.list_snapshots(group_id, limit=limit)
     return [PortfolioGroupSnapshotResponse.model_validate(s) for s in snaps]
+

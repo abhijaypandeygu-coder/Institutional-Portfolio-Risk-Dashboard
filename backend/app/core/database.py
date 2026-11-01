@@ -56,6 +56,7 @@ async def init_db() -> None:
     import backend.app.modules.portfolio_management.portfolio_reconciliation.models  # noqa: F401
     import backend.app.modules.portfolio_management.portfolio_history.models  # noqa: F401
     import backend.app.modules.portfolio_management.multi_portfolio_management.models  # noqa: F401
+    import backend.app.modules.risk_management.gross_exposure.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
