@@ -1,7 +1,7 @@
 """
 Module 02: Market Data Ingestion Engine - FastAPI REST Router.
 Provides endpoints for ingestion control, health, order book inspection,
-historical backfill, and operational telemetry.
+historical backfill, operational telemetry, and Alpha Vantage EOD/symbol queries.
 """
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
@@ -13,6 +13,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.database import get_db
 from backend.app.core.security import AuthenticatedUser, UserRole, require_role
+from backend.app.modules.market_data_ingestion.adapters.alpha_vantage import AlphaVantageAdapter
+from backend.app.modules.market_data_ingestion.adapters.quota_scheduler import quota_scheduler
 from backend.app.modules.market_data_ingestion.adapters.registry import ProviderAdapterRegistry
 from backend.app.modules.market_data_ingestion.normalization.schemas import MarketDataChannel
 from backend.app.modules.market_data_ingestion.service import IngestionService
@@ -123,6 +125,68 @@ async def trigger_backfill(
         "records_received": job.records_received,
         "completed_at": job.completed_at,
     }
+
+
+# ============================================================================
+# Alpha Vantage Free EOD & Symbol Search Endpoints (M02 Addendum)
+# ============================================================================
+
+@router.get(
+    "/alpha-vantage/search",
+    summary="Search and resolve global equity tickers (US and Indian BSE/NSE)",
+)
+async def search_alpha_vantage_symbol(
+    keywords: str = Query(..., min_length=1, description="Ticker or company name"),
+    db: AsyncSession = Depends(get_db),
+    actor: AuthenticatedUser = Depends(require_role(UserRole.READ_ONLY)),
+):
+    adapter: AlphaVantageAdapter = ProviderAdapterRegistry.get_or_create_adapter(
+        "FEED_ALPHA_VANTAGE", "ALPHA_VANTAGE"
+    )  # type: ignore
+    results = await adapter.search_symbol(keywords)
+    return {"keywords": keywords, "matches": results}
+
+
+@router.get(
+    "/alpha-vantage/quote/{symbol}",
+    summary="Retrieve end-of-day (EOD) quote for US or Indian ticker",
+)
+async def get_alpha_vantage_quote(
+    symbol: str,
+    db: AsyncSession = Depends(get_db),
+    actor: AuthenticatedUser = Depends(require_role(UserRole.READ_ONLY)),
+):
+    adapter: AlphaVantageAdapter = ProviderAdapterRegistry.get_or_create_adapter(
+        "FEED_ALPHA_VANTAGE", "ALPHA_VANTAGE"
+    )  # type: ignore
+    quote = await adapter.fetch_global_quote(symbol)
+    return quote
+
+
+@router.get(
+    "/alpha-vantage/daily/{symbol}",
+    summary="Retrieve compact daily OHLCV bars (up to 100 observations, raw unadjusted)",
+)
+async def get_alpha_vantage_daily_ohlcv(
+    symbol: str,
+    db: AsyncSession = Depends(get_db),
+    actor: AuthenticatedUser = Depends(require_role(UserRole.READ_ONLY)),
+):
+    adapter: AlphaVantageAdapter = ProviderAdapterRegistry.get_or_create_adapter(
+        "FEED_ALPHA_VANTAGE", "ALPHA_VANTAGE"
+    )  # type: ignore
+    candles = await adapter.fetch_daily_ohlcv(symbol)
+    return {"symbol": symbol, "count": len(candles), "candles": [c.model_dump() for c in candles]}
+
+
+@router.get(
+    "/alpha-vantage/quota",
+    summary="Inspect Alpha Vantage daily request budget, calls made today, and safety margin",
+)
+async def get_alpha_vantage_quota(
+    actor: AuthenticatedUser = Depends(require_role(UserRole.READ_ONLY)),
+):
+    return quota_scheduler.get_quota_status()
 
 
 # ============================================================================

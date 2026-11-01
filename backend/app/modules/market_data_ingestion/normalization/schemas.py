@@ -1,7 +1,7 @@
 """
 Module 02: Market Data Ingestion Engine - Canonical Schemas (Pydantic 2.x).
 Defines institutional typed schemas for ticks, OHLCV, trades, order book snapshots/deltas,
-heartbeats, errors, and backfill requests.
+heartbeats, errors, backfill requests, and Alpha Vantage data freshness.
 """
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -41,6 +41,27 @@ class BackfillJobStatus(str, Enum):
     FAILED = "FAILED"
 
 
+class DataFreshness(str, Enum):
+    END_OF_DAY = "END_OF_DAY"
+    HISTORICAL = "HISTORICAL"
+    SIMULATED_REALTIME = "SIMULATED_REALTIME"
+    STALE = "STALE"
+    UNAVAILABLE = "UNAVAILABLE"
+
+
+class AlphaVantageErrorType(str, Enum):
+    INVALID_API_KEY = "INVALID_API_KEY"
+    UNSUPPORTED_SYMBOL = "UNSUPPORTED_SYMBOL"
+    UNSUPPORTED_ENDPOINT = "UNSUPPORTED_ENDPOINT"
+    PREMIUM_ENTITLEMENT_REQUIRED = "PREMIUM_ENTITLEMENT_REQUIRED"
+    RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED"
+    DAILY_QUOTA_EXHAUSTED = "DAILY_QUOTA_EXHAUSTED"
+    EMPTY_RESPONSE = "EMPTY_RESPONSE"
+    MALFORMED_RESPONSE = "MALFORMED_RESPONSE"
+    NETWORK_TIMEOUT = "NETWORK_TIMEOUT"
+    SERVER_ERROR = "SERVER_ERROR"
+
+
 # ============================================================================
 # Canonical Event Schemas
 # ============================================================================
@@ -65,6 +86,7 @@ class MarketTick(BaseModel):
     normalization_timestamp: datetime = Field(default_factory=utc_now)
     provider_sequence: Optional[int] = None
     source_metadata: Dict[str, Any] = Field(default_factory=dict)
+    data_freshness: DataFreshness = DataFreshness.SIMULATED_REALTIME
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -75,7 +97,7 @@ class OHLCVCandle(BaseModel):
     feed_id: str
     instrument_id: str
     exchange: str = "NSE"
-    interval: str = "1m"  # 1m, 5m, 15m, 1h, 1d
+    interval: str = "1m"  # 1m, 5m, 15m, 1h, 1d, 1w, 1M
     open: Decimal
     high: Decimal
     low: Decimal
@@ -85,6 +107,9 @@ class OHLCVCandle(BaseModel):
     candle_end: datetime
     source_provider: str
     receive_timestamp: datetime = Field(default_factory=utc_now)
+    data_freshness: DataFreshness = DataFreshness.HISTORICAL
+    is_adjusted: bool = False
+    currency: str = "INR"
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -104,6 +129,7 @@ class TradeEvent(BaseModel):
     sequence_number: Optional[int] = None
     trade_type: Optional[str] = None
     source_metadata: Dict[str, Any] = Field(default_factory=dict)
+    data_freshness: DataFreshness = DataFreshness.SIMULATED_REALTIME
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -130,6 +156,7 @@ class OrderBookSnapshot(BaseModel):
     asks: List[OrderBookLevel] = Field(default_factory=list)
     receive_timestamp: datetime = Field(default_factory=utc_now)
     source_metadata: Dict[str, Any] = Field(default_factory=dict)
+    data_freshness: DataFreshness = DataFreshness.SIMULATED_REALTIME
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -149,6 +176,7 @@ class OrderBookDelta(BaseModel):
     operation: OrderBookOperation
     order_count: Optional[int] = None
     receive_timestamp: datetime = Field(default_factory=utc_now)
+    data_freshness: DataFreshness = DataFreshness.SIMULATED_REALTIME
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -1,8 +1,10 @@
 """
 Module 02: Market Data Ingestion Engine - Provider Adapter Registry.
-Manages provider adapter lifecycle and registration across multiple providers.
+Manages provider adapter lifecycle and registration across multiple providers
+(Simulation Provider & Alpha Vantage REST Provider).
 """
 from typing import Dict, Type
+from backend.app.modules.market_data_ingestion.adapters.alpha_vantage import AlphaVantageAdapter
 from backend.app.modules.market_data_ingestion.adapters.base import BaseProviderAdapter
 from backend.app.modules.market_data_ingestion.adapters.simulator import SimulatedMarketDataAdapter
 
@@ -13,6 +15,7 @@ class ProviderAdapterRegistry:
     _adapter_classes: Dict[str, Type[BaseProviderAdapter]] = {
         "SIMULATOR": SimulatedMarketDataAdapter,
         "SIM_EXCHANGE_01": SimulatedMarketDataAdapter,
+        "ALPHA_VANTAGE": AlphaVantageAdapter,
     }
     _instances: Dict[str, BaseProviderAdapter] = {}
 
