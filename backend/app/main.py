@@ -12,6 +12,7 @@ from backend.app.modules.market_data_ingestion.router import router as market_da
 from backend.app.modules.market_data_quality.missing_data.router import router as missing_data_router
 from backend.app.modules.market_data_quality.price_validation.router import router as price_validation_router
 from backend.app.modules.market_data_quality.timestamp_validation.router import router as timestamp_validation_router
+from backend.app.modules.market_data_quality.order_book.router import router as order_book_router
 
 
 @asynccontextmanager
@@ -44,6 +45,7 @@ app.include_router(market_data_router, prefix="/api/v1")
 app.include_router(missing_data_router, prefix="/api/v1")
 app.include_router(price_validation_router, prefix="/api/v1")
 app.include_router(timestamp_validation_router, prefix="/api/v1")
+app.include_router(order_book_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
@@ -59,5 +61,6 @@ async def root_health_check():
             "M03.01 - Missing Data Detection",
             "M03.02 - Price Validation Engine",
             "M03.03 - Timestamp Validation Engine",
+            "M03.04 - Order Book Validation Engine",
         ],
     }
