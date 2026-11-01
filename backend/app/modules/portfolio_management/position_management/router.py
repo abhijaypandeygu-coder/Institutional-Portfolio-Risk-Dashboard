@@ -169,3 +169,4 @@ async def rebuild_position(position_id: str, db: AsyncSession = Depends(get_db))
         return await service.rebuild_position_history(position_id)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+

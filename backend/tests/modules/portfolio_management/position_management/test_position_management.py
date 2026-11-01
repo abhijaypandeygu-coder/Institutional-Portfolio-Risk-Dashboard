@@ -381,3 +381,4 @@ async def test_position_reconciliation_and_idempotency(setup_portfolio_and_instr
         rec_data = res_rec.json()
         assert rec_data["reconciliation_status"] == "QUANTITY_MISMATCH"
         assert Decimal(rec_data["difference_quantity"]) == Decimal("10.0")
+

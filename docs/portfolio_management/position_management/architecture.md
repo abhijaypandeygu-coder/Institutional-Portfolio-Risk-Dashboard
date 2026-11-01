@@ -59,3 +59,4 @@ All entities are managed via SQLAlchemy 2.x and prefixed with `m05_`:
 5. `m05_position_borrow_metadata`: Locates, lender references, annual borrow rates, and recall dates for short positions.
 6. `m05_position_transfers`: Inter-account and inter-portfolio transfers with linked debit/credit legs.
 7. `m05_position_reconciliations`: Broker/custodian vs. internal position discrepancy records for M03.08 exception routing.
+

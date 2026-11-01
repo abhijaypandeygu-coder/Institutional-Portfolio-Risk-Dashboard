@@ -446,3 +446,4 @@ class PositionManagementService:
             effective_timestamp=effective_ts,
         )
         await self.repo.save_aggregate(agg)
+

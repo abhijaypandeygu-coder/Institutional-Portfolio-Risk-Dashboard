@@ -45,3 +45,4 @@
 ### 7. Deterministic Replay & Rebuild
 - **POST** `/{position_id}/rebuild`
   - Recomputes all position snapshot versions deterministically from the beginning of the immutable event ledger.
+
