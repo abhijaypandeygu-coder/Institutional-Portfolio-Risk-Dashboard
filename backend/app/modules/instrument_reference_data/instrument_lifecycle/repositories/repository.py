@@ -88,3 +88,4 @@ class InstrumentLifecycleRepository:
         res = await self.session.execute(stmt)
         latest_event = res.scalars().first()
         return latest_event.new_status if latest_event else None
+

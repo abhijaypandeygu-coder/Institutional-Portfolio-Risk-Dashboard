@@ -47,6 +47,7 @@ async def init_db() -> None:
     import backend.app.modules.instrument_reference_data.trading_calendar.models  # noqa: F401
     import backend.app.modules.instrument_reference_data.price_reference.models  # noqa: F401
     import backend.app.modules.instrument_reference_data.instrument_lifecycle.models  # noqa: F401
+    import backend.app.modules.instrument_reference_data.instrument_mapping.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

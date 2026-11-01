@@ -96,3 +96,4 @@ class InstrumentLifecycleSummary(BaseModel):
     suspended_listings_count: int
     delisted_listings_count: int
     listings: List[ListingLifecycleResponse]
+

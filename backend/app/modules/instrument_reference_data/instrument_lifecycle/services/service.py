@@ -240,3 +240,4 @@ class InstrumentLifecycleService:
             delisted_listings_count=delisted_count,
             listings=[ListingLifecycleResponse.model_validate(l) for l in listings]
         )
+

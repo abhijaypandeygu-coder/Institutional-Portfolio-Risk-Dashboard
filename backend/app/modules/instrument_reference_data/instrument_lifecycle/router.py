@@ -111,3 +111,4 @@ async def get_instrument_summary(
 ):
     service = InstrumentLifecycleService(db)
     return await service.get_instrument_summary(instrument_id)
+

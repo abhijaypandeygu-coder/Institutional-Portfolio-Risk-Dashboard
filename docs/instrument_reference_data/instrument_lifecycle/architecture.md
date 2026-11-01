@@ -58,3 +58,4 @@ Consider an equity listed on both the National Stock Exchange (NSE) and BSE Limi
 - `suspension_events`: Structured parameters for regulatory/voluntary halts.
 - `resumption_events`: Resumption terms and link back to parent suspensions.
 - `delisting_events`: Last trading date, announcement date, and effective removal dates.
+

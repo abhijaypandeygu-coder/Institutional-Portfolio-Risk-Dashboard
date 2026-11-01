@@ -82,3 +82,4 @@ def validate_listing_transition(current: ListingLifecycleStatus, target: Listing
         return True
     allowed = VALID_LISTING_TRANSITIONS.get(current, set())
     return target in allowed
+

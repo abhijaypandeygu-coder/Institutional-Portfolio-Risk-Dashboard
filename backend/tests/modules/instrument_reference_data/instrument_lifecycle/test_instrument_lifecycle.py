@@ -243,3 +243,4 @@ async def test_rest_api_lifecycle(sample_instrument):
         res_sum = await client.get(f"/api/v1/instrument-lifecycle/instruments/{sample_instrument.instrument_id}/summary")
         assert res_sum.status_code == 200
         assert res_sum.json()["total_listings"] >= 1
+
