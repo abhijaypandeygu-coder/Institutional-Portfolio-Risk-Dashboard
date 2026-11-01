@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """Institutional Portfolio Risk Dashboard - Module 01 Settings."""
+    APP_NAME: str = Field(default="Institutional Portfolio Risk Dashboard", description="Service name")
     ENVIRONMENT: str = Field(default="development", description="Environment: development, staging, production")
     LOG_LEVEL: str = Field(default="INFO", description="Standard logging level")
     APP_HOST: str = Field(default="0.0.0.0", description="API bind host")
@@ -23,9 +24,9 @@ class Settings(BaseSettings):
     )
 
     # API Keys for RBAC (Admin, Operator, ReadOnly)
-    ADMIN_API_KEY: str = Field(default="admin_dev_secret_key", description="Admin API key")
-    OPERATOR_API_KEY: str = Field(default="operator_dev_secret_key", description="Operator API key")
-    READONLY_API_KEY: str = Field(default="readonly_dev_secret_key", description="Read-only API key")
+    API_KEY_ADMIN: str = Field(default="admin_dev_secret_key_2026", description="Admin API key")
+    API_KEY_OPERATOR: str = Field(default="operator_dev_secret_key_2026", description="Operator API key")
+    API_KEY_READ_ONLY: str = Field(default="readonly_dev_secret_key_2026", description="Read-only API key")
 
     # Secret Reference Provider Backend: 'ENV', 'VAULT', 'KEYRING'
     SECRETS_PROVIDER_BACKEND: str = Field(default="ENV", description="Secrets provider backend driver")
@@ -38,4 +39,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-

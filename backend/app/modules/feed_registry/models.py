@@ -1,9 +1,9 @@
-"""SQLAlchemy Database Models for Module 01 — Feed Registry & Configuration.
+"""SQLAlchemy 2.x Database Models for Module 01 — Feed Registry & Configuration.
 
 Tables:
 1. feed_registry (UUID PK, feed_code unique, classification, desired_state, record_status)
-2. feed_config_versions (UUID PK, feed_id FK, version_number, config_json, schema_version)
-3. feed_schedules (id, feed_id, timezone, session_start/end, active_days, polling_interval)
+2. feed_config_versions (UUID PK, feed_id FK, version_number, config_payload, schema_version)
+3. feed_schedules (id, feed_id, timezone, sessions, active_days, polling_interval)
 4. feed_failover_groups (id, group_name, description, required_capabilities)
 5. feed_priority_members (id, group_id, feed_id, priority, enabled)
 6. feed_health_events (id, feed_id, runtime_state, latency_ms, heartbeat_at, error_code)
@@ -11,43 +11,111 @@ Tables:
 8. feed_audit_logs (actor, operation, resource_id, success, timestamp, details)
 """
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
+from enum import Enum
 from sqlalchemy import (
     Column, String, Integer, Boolean, DateTime, ForeignKey, Text, JSON, Float, BigInteger, Index, UniqueConstraint
 )
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import relationship
 from backend.app.core.database import Base
 
 
-def generate_uuid() -> str:
-    return str(uuid.uuid4())
+# ============================================================================
+# Enums
+# ============================================================================
 
+class AssetClass(str, Enum):
+    EQUITIES = "EQUITIES"
+    FUTURES = "FUTURES"
+    OPTIONS = "OPTIONS"
+    FX = "FX"
+    COMMODITIES = "COMMODITIES"
+
+
+class FeedCategory(str, Enum):
+    DIRECT_EXCHANGE = "DIRECT_EXCHANGE"
+    BROKER_FEED = "BROKER_FEED"
+    VENDOR_CONSOLIDATED = "VENDOR_CONSOLIDATED"
+    SIMULATED = "SIMULATED"
+
+
+class TransportProtocol(str, Enum):
+    WEBSOCKET = "WEBSOCKET"
+    TCP_SOCKET = "TCP_SOCKET"
+    UDP_MULTICAST = "UDP_MULTICAST"
+    HTTP_REST = "HTTP_REST"
+    SIMULATED = "SIMULATED"
+
+
+class FeedDesiredState(str, Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    PAUSED = "PAUSED"
+    DRAINING = "DRAINING"
+
+
+class FeedRuntimeState(str, Enum):
+    STOPPED = "STOPPED"
+    CONNECTING = "CONNECTING"
+    CONNECTED = "CONNECTED"
+    DEGRADED = "DEGRADED"
+    DISCONNECTED = "DISCONNECTED"
+    ERROR = "ERROR"
+
+
+class FeedRecordStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    ARCHIVED = "ARCHIVED"
+    DELETED = "DELETED"
+
+
+class FeedCommandType(str, Enum):
+    START = "START"
+    STOP = "STOP"
+    RESTART = "RESTART"
+    PAUSE = "PAUSE"
+    DRAIN = "DRAIN"
+
+
+class CommandStatus(str, Enum):
+    PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
+    PROCESSED = "PROCESSED"
+    FAILED = "FAILED"
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+# ============================================================================
+# SQLAlchemy Models
+# ============================================================================
 
 class FeedRegistry(Base):
     __tablename__ = "feed_registry"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     feed_code = Column(String(64), unique=True, nullable=False, index=True)
-    name = Column(String(128), nullable=False)
+    feed_name = Column(String(128), nullable=False)
     description = Column(String(512), nullable=True)
-    provider_name = Column(String(128), nullable=False)
-    provider_type = Column(String(64), nullable=False)  # BROKER_FEED, DIRECT_EXCHANGE, VENDOR, SIMULATOR
-    feed_category = Column(String(64), nullable=False)  # MARKET_DATA, ORDER_BOOK, TRADE_DATA, HISTORICAL
-    asset_class = Column(String(32), default="EQUITIES", nullable=False)
-    transport = Column(String(32), default="WEBSOCKET", nullable=False)  # WEBSOCKET, TCP, UDP_MULTICAST, REST
-    capabilities = Column(JSON, default=list, nullable=False)  # ["LTP", "OHLCV", "LEVEL_1", "LEVEL_2", "TRADE_TICKS"]
-    desired_state = Column(String(32), default="DISABLED", nullable=False)  # ENABLED, DISABLED
-    record_status = Column(String(32), default="ACTIVE", nullable=False)  # ACTIVE, ARCHIVED
-    current_version = Column(Integer, default=1, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    created_by = Column(String(128), default="system", nullable=False)
-    updated_by = Column(String(128), default="system", nullable=False)
-    archived_at = Column(DateTime, nullable=True)
+    category = Column(String(64), nullable=False)
+    asset_class = Column(String(32), default=AssetClass.EQUITIES.value, nullable=False)
+    transport_protocol = Column(String(32), nullable=False)
+    capabilities = Column(JSON, default=dict, nullable=False)
+    desired_state = Column(String(32), default=FeedDesiredState.INACTIVE.value, nullable=False)
+    record_status = Column(String(32), default=FeedRecordStatus.ACTIVE.value, nullable=False)
+    current_version = Column(Integer, default=0, nullable=False)
+    is_primary_eligible = Column(Boolean, default=True, nullable=False)
+    is_backup_eligible = Column(Boolean, default=True, nullable=False)
+    metadata_json = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
 
     # Relationships
     config_versions = relationship("FeedConfigVersion", back_populates="feed", cascade="all, delete-orphan")
-    schedules = relationship("FeedSchedule", back_populates="feed", cascade="all, delete-orphan")
+    schedule = relationship("FeedSchedule", back_populates="feed", uselist=False, cascade="all, delete-orphan")
     priority_memberships = relationship("FeedPriorityMember", back_populates="feed", cascade="all, delete-orphan")
     health_events = relationship("FeedHealthEvent", back_populates="feed", cascade="all, delete-orphan")
     lifecycle_commands = relationship("FeedLifecycleCommand", back_populates="feed", cascade="all, delete-orphan")
@@ -56,14 +124,15 @@ class FeedRegistry(Base):
 class FeedConfigVersion(Base):
     __tablename__ = "feed_config_versions"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    feed_id = Column(String(36), ForeignKey("feed_registry.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    feed_id = Column(PG_UUID(as_uuid=True), ForeignKey("feed_registry.id", ondelete="CASCADE"), nullable=False, index=True)
     version_number = Column(Integer, nullable=False)
-    config_json = Column(JSON, nullable=False)
     schema_version = Column(String(32), default="1.0.0", nullable=False)
-    change_description = Column(String(255), nullable=False)
-    created_by = Column(String(128), default="system", nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    config_payload = Column(JSON, nullable=False)
+    config_hash = Column(String(64), nullable=False)
+    change_reason = Column(String(256), nullable=False)
+    author = Column(String(128), default="system", nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     feed = relationship("FeedRegistry", back_populates="config_versions")
 
@@ -76,66 +145,69 @@ class FeedConfigVersion(Base):
 class FeedSchedule(Base):
     __tablename__ = "feed_schedules"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    feed_id = Column(String(36), ForeignKey("feed_registry.id", ondelete="CASCADE"), nullable=False, index=True)
-    schedule_name = Column(String(128), nullable=False)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    feed_id = Column(PG_UUID(as_uuid=True), ForeignKey("feed_registry.id", ondelete="CASCADE"), unique=True, nullable=False)
     timezone = Column(String(64), default="Asia/Kolkata", nullable=False)
-    schedule_type = Column(String(32), default="MARKET_SESSION", nullable=False)  # MARKET_SESSION, CONTINUOUS, POLLING
-    session_start = Column(String(8), default="09:15:00", nullable=False)
-    session_end = Column(String(8), default="15:30:00", nullable=False)
-    polling_interval_seconds = Column(Integer, nullable=True)
-    active_days = Column(JSON, default=lambda: ["MON", "TUE", "WED", "THU", "FRI"], nullable=False)
-    enabled = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    auto_start_stop_enabled = Column(Boolean, default=True, nullable=False)
+    sessions = Column(JSON, default=list, nullable=False)
+    polling_interval_ms = Column(Integer, default=1000, nullable=False)
+    active_days = Column(JSON, default=lambda: [0, 1, 2, 3, 4], nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
 
-    feed = relationship("FeedRegistry", back_populates="schedules")
+    feed = relationship("FeedRegistry", back_populates="schedule")
 
 
 class FeedFailoverGroup(Base):
     __tablename__ = "feed_failover_groups"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    group_name = Column(String(128), unique=True, nullable=False)
-    description = Column(String(512), nullable=True)
-    required_capabilities = Column(JSON, default=list, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    group_name = Column(String(64), unique=True, nullable=False)
+    description = Column(String(256), nullable=True)
+    required_capabilities = Column(JSON, default=dict, nullable=False)
+    failover_latency_threshold_ms = Column(Float, default=500.0, nullable=False)
+    consecutive_error_threshold = Column(Integer, default=3, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
 
-    members = relationship("FeedPriorityMember", back_populates="group", cascade="all, delete-orphan")
+    priority_members = relationship("FeedPriorityMember", back_populates="group", cascade="all, delete-orphan")
 
 
 class FeedPriorityMember(Base):
     __tablename__ = "feed_priority_members"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    group_id = Column(String(36), ForeignKey("feed_failover_groups.id", ondelete="CASCADE"), nullable=False, index=True)
-    feed_id = Column(String(36), ForeignKey("feed_registry.id", ondelete="CASCADE"), nullable=False, index=True)
-    priority = Column(Integer, default=1, nullable=False)  # 1 = primary, 2 = secondary, etc.
-    enabled = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    group_id = Column(PG_UUID(as_uuid=True), ForeignKey("feed_failover_groups.id", ondelete="CASCADE"), nullable=False, index=True)
+    feed_id = Column(PG_UUID(as_uuid=True), ForeignKey("feed_registry.id", ondelete="CASCADE"), nullable=False, index=True)
+    priority_rank = Column(Integer, default=1, nullable=False)
+    is_active_in_group = Column(Boolean, default=True, nullable=False)
+    custom_weight = Column(Float, default=1.0, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
 
-    group = relationship("FeedFailoverGroup", back_populates="members")
+    group = relationship("FeedFailoverGroup", back_populates="priority_members")
     feed = relationship("FeedRegistry", back_populates="priority_memberships")
 
     __table_args__ = (
         UniqueConstraint("group_id", "feed_id", name="uq_group_feed_membership"),
-        UniqueConstraint("group_id", "priority", name="uq_group_priority_slot"),
+        UniqueConstraint("group_id", "priority_rank", name="uq_group_priority_rank"),
     )
 
 
 class FeedHealthEvent(Base):
     __tablename__ = "feed_health_events"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    feed_id = Column(String(36), ForeignKey("feed_registry.id", ondelete="CASCADE"), nullable=False, index=True)
-    runtime_state = Column(String(32), default="STOPPED", nullable=False)  # STOPPED, CONNECTING, CONNECTED, DEGRADED, ERROR, UNKNOWN
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    feed_id = Column(PG_UUID(as_uuid=True), ForeignKey("feed_registry.id", ondelete="CASCADE"), nullable=False, index=True)
+    timestamp = Column(DateTime(timezone=True), default=utc_now, nullable=False, index=True)
+    runtime_state = Column(String(32), default=FeedRuntimeState.STOPPED.value, nullable=False)
     latency_ms = Column(Float, nullable=True)
-    heartbeat_at = Column(DateTime, nullable=True)
-    last_data_at = Column(DateTime, nullable=True)
+    messages_received_delta = Column(BigInteger, default=0, nullable=False)
+    bytes_received_delta = Column(BigInteger, default=0, nullable=False)
+    error_count_delta = Column(Integer, default=0, nullable=False)
+    last_heartbeat_timestamp = Column(DateTime(timezone=True), nullable=True)
+    last_data_timestamp = Column(DateTime(timezone=True), nullable=True)
     error_code = Column(String(64), nullable=True)
-    error_message = Column(String(512), nullable=True)
-    observed_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    error_details = Column(JSON, nullable=True)
 
     feed = relationship("FeedRegistry", back_populates="health_events")
 
@@ -144,17 +216,16 @@ class FeedLifecycleCommand(Base):
     """Transactional Outbox for reliable event dispatch to M02."""
     __tablename__ = "feed_lifecycle_commands"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    feed_id = Column(String(36), ForeignKey("feed_registry.id", ondelete="CASCADE"), nullable=False, index=True)
-    command_type = Column(String(32), nullable=False)  # START, STOP, RESTART, ENABLE, DISABLE
-    command_status = Column(String(32), default="PENDING", nullable=False)  # PENDING, DISPATCHED, COMPLETED, FAILED
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    feed_id = Column(PG_UUID(as_uuid=True), ForeignKey("feed_registry.id", ondelete="CASCADE"), nullable=False, index=True)
+    command_type = Column(String(32), nullable=False)
+    parameters = Column(JSON, default=dict, nullable=False)
     idempotency_key = Column(String(128), unique=True, nullable=False, index=True)
-    requested_by = Column(String(128), nullable=False)
-    requested_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    dispatched_at = Column(DateTime, nullable=True)
-    completed_at = Column(DateTime, nullable=True)
-    error_code = Column(String(64), nullable=True)
+    status = Column(String(32), default=CommandStatus.PENDING.value, nullable=False)
+    attempts = Column(Integer, default=0, nullable=False)
+    executed_at = Column(DateTime(timezone=True), nullable=True)
     error_message = Column(String(512), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     feed = relationship("FeedRegistry", back_populates="lifecycle_commands")
 
@@ -162,12 +233,12 @@ class FeedLifecycleCommand(Base):
 class FeedAuditLog(Base):
     __tablename__ = "feed_audit_logs"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     actor = Column(String(128), nullable=False)
     operation = Column(String(64), nullable=False)
-    resource_type = Column(String(64), default="FEED", nullable=False)
-    resource_id = Column(String(64), nullable=False, index=True)
+    resource_type = Column(String(64), default="feed_registry", nullable=False)
+    resource_id = Column(String(64), nullable=True, index=True)
     success = Column(Boolean, default=True, nullable=False)
-    details = Column(JSON, nullable=True)
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
-
+    details = Column(JSON, default=dict, nullable=False)
+    client_ip = Column(String(45), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False, index=True)

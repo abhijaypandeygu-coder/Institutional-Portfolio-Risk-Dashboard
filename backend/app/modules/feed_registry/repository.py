@@ -278,4 +278,3 @@ class FeedRepository:
         stmt = stmt.order_by(desc(FeedAuditLog.created_at)).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
-

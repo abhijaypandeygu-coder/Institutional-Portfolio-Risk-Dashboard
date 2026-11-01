@@ -102,4 +102,3 @@ def validate_configuration_payload(transport: TransportProtocol, payload: Config
 
     if payload.reconnect_backoff_initial_ms > payload.reconnect_backoff_max_ms:
         raise ValidationError("reconnect_backoff_initial_ms cannot exceed reconnect_backoff_max_ms.")
-

@@ -60,4 +60,3 @@ class IM01FeedRegistryClient:
     async def report_health(self, feed_id: UUID, report: M02HealthReportPayload) -> None:
         """Report runtime connection health, state, and metrics to M01."""
         raise NotImplementedError
-

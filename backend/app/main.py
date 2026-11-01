@@ -46,4 +46,3 @@ async def root_health_check():
         "environment": settings.ENVIRONMENT,
         "module": "M01 - Feed Registry & Configuration",
     }
-

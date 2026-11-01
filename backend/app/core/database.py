@@ -28,6 +28,14 @@ AsyncSessionLocal = async_sessionmaker(
 Base = declarative_base()
 
 
+async def init_db() -> None:
+    """Initialize database tables."""
+    # Ensure all models are imported before creating tables
+    import backend.app.modules.feed_registry.models  # noqa: F401
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency providing a transaction-managed async session."""
     async with AsyncSessionLocal() as session:
@@ -39,4 +47,3 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             raise
         finally:
             await session.close()
-
