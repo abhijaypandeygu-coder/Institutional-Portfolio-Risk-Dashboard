@@ -36,6 +36,7 @@ from backend.app.modules.risk_management.gross_exposure.router import router as 
 from backend.app.modules.risk_management.net_exposure.router import router as net_exposure_router
 from backend.app.modules.risk_management.sector_exposure.router import router as sector_exposure_router
 from backend.app.modules.risk_management.instrument_exposure.router import router as instrument_exposure_router
+from backend.app.modules.risk_management.geographic_exposure.router import router as geographic_exposure_router
 
 
 @asynccontextmanager
@@ -92,6 +93,7 @@ app.include_router(gross_exposure_router)
 app.include_router(net_exposure_router)
 app.include_router(sector_exposure_router)
 app.include_router(instrument_exposure_router, prefix="/api/v1")
+app.include_router(geographic_exposure_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
@@ -131,5 +133,6 @@ async def root_health_check():
             "M06.02 - Net Exposure Engine",
             "M06.03 - Sector Exposure Engine",
             "M06.04 - Instrument Exposure Engine",
+            "M06.05 - Geographic Exposure Engine",
         ],
     }

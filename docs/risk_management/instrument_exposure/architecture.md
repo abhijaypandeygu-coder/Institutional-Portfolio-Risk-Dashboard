@@ -85,3 +85,4 @@ Compares current and prior snapshots bitemporally:
 - $\Delta G_i = G_{i,current} - G_{i,prior}$
 - $\%\Delta G_i = \frac{G_{i,current} - G_{i,prior}}{G_{i,prior}} \times 100$
 - Derived lifecycle indicators: `NEW_POSITION`, `CLOSED_POSITION`, `INCREASED_EXPOSURE`, `REDUCED_EXPOSURE`, `DIRECTION_CHANGED`, `UNCHANGED_EXPOSURE`.
+

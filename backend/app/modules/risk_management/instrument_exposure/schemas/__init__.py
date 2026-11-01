@@ -196,3 +196,4 @@ class InstrumentExposureSettingsSchema(BaseModel):
     long_nav_elevated_threshold: Decimal = Decimal("0.080000")
     short_nav_elevated_threshold: Decimal = Decimal("0.050000")
     gross_contribution_threshold: Decimal = Decimal("0.150000")
+
