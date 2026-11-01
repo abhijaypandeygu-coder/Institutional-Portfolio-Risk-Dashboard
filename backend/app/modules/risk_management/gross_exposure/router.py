@@ -72,3 +72,4 @@ async def get_group_gross_exposure(
         return await service.calculate_group_exposure(group_id, req)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+

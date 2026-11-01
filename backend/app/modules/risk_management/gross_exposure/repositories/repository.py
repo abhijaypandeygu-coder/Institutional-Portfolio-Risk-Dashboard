@@ -116,3 +116,4 @@ class GrossExposureRepository:
         stmt = select(ExposureThresholdEvent).where(ExposureThresholdEvent.calculation_run_id == run_id)
         res = await self.session.execute(stmt)
         return res.scalars().all()
+

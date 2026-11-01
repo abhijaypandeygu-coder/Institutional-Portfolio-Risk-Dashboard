@@ -122,3 +122,4 @@ class GrossExposureSummaryResponse(BaseModel):
     contributions: List[ExposureContributionResponse] = Field(default_factory=list)
     threshold_events: List[ExposureThresholdEventResponse] = Field(default_factory=list)
     ratio_explanation: str
+

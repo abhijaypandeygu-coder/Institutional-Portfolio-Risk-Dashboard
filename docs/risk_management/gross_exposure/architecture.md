@@ -58,3 +58,4 @@ Integrating with **M05.08 Multi-Portfolio Management**, M06.01 supports calculat
 Every exposure run generates an immutable `ExposureCalculationRun` record with an SHA-256 hash `manifest_hash`:
 $$\text{manifest\_hash} = \text{SHA256}(\text{run\_id} \parallel \text{portfolio\_or\_group\_id} \parallel \text{gross\_exposure} \parallel \text{long\_exposure} \parallel \text{short\_exposure} \parallel \text{as\_of})$$
 This guarantees tamper-evident provenance across regulatory filings and risk disclosures.
+
