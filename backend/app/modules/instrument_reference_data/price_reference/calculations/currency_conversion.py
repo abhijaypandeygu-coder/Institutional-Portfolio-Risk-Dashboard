@@ -31,3 +31,4 @@ def convert_currency_price(
 
     quantize_format = Decimal("10") ** -decimal_places
     return converted.quantize(quantize_format, rounding=ROUND_HALF_EVEN)
+

@@ -101,3 +101,4 @@ class CurrencyConversionResponse(BaseModel):
     conversion_direction: str
     conversion_timestamp: datetime
     converted_price_value: Optional[Decimal] = None
+

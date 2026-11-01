@@ -79,3 +79,4 @@ classDiagram
 - `AUCTION_REFERENCE_PRICE`: Other auction reference or indicative prices.
 - `SETTLEMENT_PRICE`: Regulatory or exchange-specified settlement reference.
 - `THEORETICAL_REFERENCE_PRICE`: Synthetic or mathematically derived reference values.
+

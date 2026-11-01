@@ -271,3 +271,4 @@ async def test_rest_api_lifecycle(sample_instrument_and_calendar):
         data_prev = res_prev.json()
         assert data_prev["previous_trading_date"] == "2026-09-01"
         assert Decimal(data_prev["resolved_price_value"]) == Decimal("250.750000")
+

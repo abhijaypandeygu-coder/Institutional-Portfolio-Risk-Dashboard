@@ -81,3 +81,4 @@ class PriceReferenceRepository:
         self.session.add(meta)
         await self.session.flush()
         return meta
+
