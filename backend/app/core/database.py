@@ -64,6 +64,7 @@ async def init_db() -> None:
     import backend.app.modules.risk_management.geographic_exposure.models  # noqa: F401
     import backend.app.modules.risk_management.concentration_analytics.models  # noqa: F401
     import backend.app.modules.risk_management.portfolio_allocation.models  # noqa: F401
+    import backend.app.modules.risk_management.exposure_limits.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

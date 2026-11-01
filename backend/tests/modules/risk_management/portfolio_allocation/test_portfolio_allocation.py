@@ -239,3 +239,4 @@ async def test_portfolio_allocation_targets_drift_and_comparison():
         assert comp_data["comparability_status"] == "COMPARABLE"
         assert comp_data["current_result_id"] == r2_data["result_id"]
         assert comp_data["prior_result_id"] == r1_data["result_id"]
+

@@ -102,3 +102,4 @@ async def compare_allocations(
         return await service.compare_allocations(req.base_result_id, req.comparison_result_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+

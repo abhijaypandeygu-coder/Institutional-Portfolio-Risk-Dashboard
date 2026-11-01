@@ -103,3 +103,4 @@ class PortfolioAllocationRepository:
         self.session.add(comp)
         await self.session.flush()
         return comp
+

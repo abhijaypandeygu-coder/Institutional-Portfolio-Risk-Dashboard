@@ -49,3 +49,4 @@
 ### 5. Compare Allocation Runs
 - **Endpoint**: `POST /api/v1/risk/portfolio-allocation/compare`
 - **Description**: Compares two allocation runs (e.g. historical T vs T-1), measuring $\Delta \text{NAV}$, cash weight change in percentage points, and invested weight change.
+

@@ -54,3 +54,4 @@ $$\text{Drift}_i^{pp} = \text{Actual Weight}_i - \text{Target Weight}_i$$
 - Computations use pure Python `Decimal` and PostgreSQL `NUMERIC(18, 6)` with `ROUND_HALF_UP`.
 - Floating point arithmetic is prohibited.
 - Integrates with M05.04 cash ledger without creating duplicate cash or valuation records.
+

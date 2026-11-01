@@ -280,3 +280,4 @@ class PortfolioAllocationComparison(Base):
 
     comparability_status: Mapped[str] = mapped_column(String(32), default="COMPARABLE", nullable=False)
     compared_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
