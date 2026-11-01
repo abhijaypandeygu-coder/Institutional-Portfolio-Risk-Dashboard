@@ -27,6 +27,7 @@ from backend.app.modules.instrument_reference_data.instrument_mapping.router imp
 from backend.app.modules.portfolio_management.portfolio_creation.router import router as portfolio_creation_router
 from backend.app.modules.portfolio_management.position_management.router import router as position_management_router
 from backend.app.modules.portfolio_management.position_valuation.router import router as position_valuation_router
+from backend.app.modules.portfolio_management.cash_management.router import router as cash_management_router
 
 
 @asynccontextmanager
@@ -74,6 +75,7 @@ app.include_router(instrument_mapping_router, prefix="/api/v1")
 app.include_router(portfolio_creation_router, prefix="/api/v1")
 app.include_router(position_management_router, prefix="/api/v1")
 app.include_router(position_valuation_router, prefix="/api/v1")
+app.include_router(cash_management_router)
 
 
 @app.get("/health", tags=["System"])
@@ -104,5 +106,6 @@ async def root_health_check():
             "M05.01 - Portfolio Creation Engine",
             "M05.02 - Position Management Engine",
             "M05.03 - Position Valuation Engine",
+            "M05.04 - Cash Management Engine",
         ],
     }
