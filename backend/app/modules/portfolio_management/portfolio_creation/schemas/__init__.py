@@ -389,3 +389,4 @@ class PortfolioOperationalMetricsResponse(BaseModel):
     portfolios_by_currency: Dict[str, int]
     portfolios_by_type: Dict[str, int]
     portfolios_by_market: Dict[str, int]
+

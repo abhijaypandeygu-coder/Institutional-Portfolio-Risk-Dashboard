@@ -25,6 +25,7 @@ from backend.app.modules.instrument_reference_data.price_reference.router import
 from backend.app.modules.instrument_reference_data.instrument_lifecycle.router import router as instrument_lifecycle_router
 from backend.app.modules.instrument_reference_data.instrument_mapping.router import router as instrument_mapping_router
 from backend.app.modules.portfolio_management.portfolio_creation.router import router as portfolio_creation_router
+from backend.app.modules.portfolio_management.position_management.router import router as position_management_router
 
 
 @asynccontextmanager
@@ -70,6 +71,7 @@ app.include_router(price_reference_router, prefix="/api/v1")
 app.include_router(instrument_lifecycle_router, prefix="/api/v1")
 app.include_router(instrument_mapping_router, prefix="/api/v1")
 app.include_router(portfolio_creation_router, prefix="/api/v1")
+app.include_router(position_management_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
@@ -98,5 +100,6 @@ async def root_health_check():
             "M04.06 - Instrument Lifecycle Engine",
             "M04.07 - Instrument Mapping Engine",
             "M05.01 - Portfolio Creation Engine",
+            "M05.02 - Position Management Engine",
         ],
     }

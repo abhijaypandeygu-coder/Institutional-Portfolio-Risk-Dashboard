@@ -560,3 +560,4 @@ class PortfolioAuditEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
     portfolio: Mapped["Portfolio"] = relationship("Portfolio", back_populates="audit_events")
+

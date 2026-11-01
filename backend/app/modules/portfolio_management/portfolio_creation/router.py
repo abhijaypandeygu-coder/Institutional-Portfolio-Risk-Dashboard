@@ -376,3 +376,4 @@ async def get_configuration_as_of(portfolio_id: str, as_of_date: date = Query(..
         change_reason=ver.change_reason,
         snapshot=json.loads(ver.snapshot_json),
     )
+

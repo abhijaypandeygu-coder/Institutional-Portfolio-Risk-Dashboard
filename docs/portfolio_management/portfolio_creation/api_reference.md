@@ -62,3 +62,4 @@
   - Retrieve point-in-time configuration snapshot active on a specified historical date.
 - **GET** `/metrics/operational`
   - Retrieve aggregated metrics: total, active, draft, suspended, closed, and breakdowns by currency, type, and market.
+

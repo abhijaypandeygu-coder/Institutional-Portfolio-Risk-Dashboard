@@ -346,3 +346,4 @@ class PortfolioRepository:
             "portfolios_by_type": portfolios_by_type,
             "portfolios_by_market": portfolios_by_market,
         }
+

@@ -70,3 +70,4 @@ All entities are prefixed with `m05_` and managed via SQLAlchemy 2.x:
 10. `m05_portfolio_configuration_versions`: Immutable JSON snapshots for point-in-time audit and calculation reproducibility.
 11. `m05_portfolio_lifecycle_events`: Audit trail for state transitions.
 12. `m05_portfolio_audit_events`: Full compliance action logging.
+

@@ -423,3 +423,4 @@ async def test_full_lifecycle_and_point_in_time_snapshot():
         assert res_metrics.status_code == 200
         metrics = res_metrics.json()
         assert metrics["total_portfolios"] >= 1
+

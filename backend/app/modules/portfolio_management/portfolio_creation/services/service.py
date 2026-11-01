@@ -573,3 +573,4 @@ class PortfolioCreationService:
             change_reason=reason,
         )
         await self.repo.save_configuration_version(ver)
+
