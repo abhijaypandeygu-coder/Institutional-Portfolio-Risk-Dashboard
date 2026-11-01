@@ -97,3 +97,4 @@ class NetExposureRepository:
         stmt = select(DirectionalThresholdEvent).where(DirectionalThresholdEvent.calculation_run_id == run_id)
         res = await self.session.execute(stmt)
         return list(res.scalars().all())
+

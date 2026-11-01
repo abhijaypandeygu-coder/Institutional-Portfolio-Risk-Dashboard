@@ -67,3 +67,4 @@ Direct addition or netting between incompatible currencies (e.g. INR and USD) is
 - Integrates with `MultiPortfolioService.resolve_group_portfolios(group_id, as_of)` from M05.08.
 - Strictly deduplicates member portfolios across recursive hierarchies.
 - Maintains complete contributor lineage back to originating portfolio, account, instrument, and position snapshot.
+
