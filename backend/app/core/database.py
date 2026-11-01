@@ -38,6 +38,7 @@ async def init_db() -> None:
     import backend.app.modules.market_data_quality.timestamp_validation.models  # noqa: F401
     import backend.app.modules.market_data_quality.order_book.models  # noqa: F401
     import backend.app.modules.market_data_quality.duplicate_detection.models  # noqa: F401
+    import backend.app.modules.market_data_quality.consistency.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
