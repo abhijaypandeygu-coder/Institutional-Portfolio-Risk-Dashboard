@@ -173,3 +173,4 @@ class PortfolioHistoryRepository:
         stmt = select(RiskRunInputManifest).where(RiskRunInputManifest.risk_run_id == risk_run_id)
         res = await self.session.execute(stmt)
         return res.scalar_one_or_none()
+

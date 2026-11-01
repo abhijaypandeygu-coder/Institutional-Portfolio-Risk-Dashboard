@@ -64,3 +64,4 @@ It solves the fundamental temporal accounting problem in institutional finance:
 - Snapshots are never mutated in place. When a late-arriving trade break or backdated correction occurs, a new restated snapshot record (e.g. `v2`) is captured, explicitly pointing to `superseded_snapshot_id`.
 - Every snapshot and risk run manifest is cryptographically fingerprinted using deterministic canonical JSON hashing (`SHA-256`).
 - Downstream risk runs reference immutable `RiskRunInputManifest` identifiers, guaranteeing 100% reproducible historical simulations.
+

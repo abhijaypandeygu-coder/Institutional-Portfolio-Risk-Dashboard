@@ -69,3 +69,4 @@ All endpoints are mounted under `/api/v1/portfolios/{portfolio_id}/history`.
 - **URL:** `GET /api/v1/portfolios/{portfolio_id}/history/risk-manifests/{manifest_id}`
 - **Status:** `200 OK`
 - **Description:** Retrieves the exact manifest payload and hash for historical verification.
+

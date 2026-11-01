@@ -263,3 +263,4 @@ class RiskRunInputManifest(Base):
     
     manifest_hash: Mapped[str] = mapped_column(String(128), nullable=False)
     manifest_payload: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=False)
+
