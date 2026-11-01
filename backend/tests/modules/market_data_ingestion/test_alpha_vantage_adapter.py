@@ -238,3 +238,4 @@ async def test_alpha_vantage_rest_endpoints(read_only_headers):
         quota = res_quota.json()
         assert quota["daily_budget"] == 20
         assert quota["safety_margin"] == 5
+

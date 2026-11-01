@@ -50,3 +50,4 @@ MARKET_DATA_DEFAULT_PROVIDER=alpha_vantage
 
 > [!IMPORTANT]
 > The API key is injected strictly at the adapter layer via environment configuration and is redacted (`***REDACTED***`) in all HTTP logging and application outputs.
+

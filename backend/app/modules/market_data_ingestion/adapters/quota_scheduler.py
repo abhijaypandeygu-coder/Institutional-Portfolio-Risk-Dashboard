@@ -97,3 +97,4 @@ class AlphaVantageQuotaScheduler:
 
 # Global singleton instance
 quota_scheduler = AlphaVantageQuotaScheduler()
+
