@@ -174,3 +174,4 @@ class ReferencePriceComparator:
             status=status,
             notes=notes,
         )
+

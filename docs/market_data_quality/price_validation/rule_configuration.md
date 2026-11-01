@@ -23,3 +23,4 @@ The validation pipeline enforces rules in order of severity and priority:
   Evaluated only when $\text{Reference Price} > 0$.
 - **Cross-Source Discrepancy:**
   $$\text{Percentage Discrepancy} = \frac{|\text{Price}_A - \text{Price}_B|}{\max(\text{Price}_A, \text{Price}_B)} \times 100$$
+

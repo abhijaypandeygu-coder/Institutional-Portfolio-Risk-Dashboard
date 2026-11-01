@@ -383,3 +383,4 @@ class PriceValidationService:
             open_anomalies_count=open_anomalies,
             eligibility_rate_percentage=round(eligible_rate, 2),
         )
+

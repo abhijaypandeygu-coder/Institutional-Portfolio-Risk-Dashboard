@@ -108,3 +108,4 @@ class ZeroPriceValidator:
             )
 
         return evidence_list
+

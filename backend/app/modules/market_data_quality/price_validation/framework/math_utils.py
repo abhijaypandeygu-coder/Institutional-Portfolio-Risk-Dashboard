@@ -106,3 +106,4 @@ def is_ohlc_structurally_valid(
     if low_p > close_p:
         return False, f"Low ({low_p}) is higher than Close ({close_p})"
     return True, None
+

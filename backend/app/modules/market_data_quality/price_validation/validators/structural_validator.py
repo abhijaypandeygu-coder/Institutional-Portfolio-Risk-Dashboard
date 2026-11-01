@@ -186,3 +186,4 @@ class StructuralPriceValidator:
                     )
 
         return parsed, evidence_list
+

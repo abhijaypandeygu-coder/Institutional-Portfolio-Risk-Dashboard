@@ -244,3 +244,4 @@ class PriceMovementValidator:
                     )
 
         return evidence_list
+

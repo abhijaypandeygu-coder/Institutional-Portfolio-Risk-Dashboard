@@ -271,3 +271,4 @@ class PriceQualitySummary(BaseModel):
     quarantined_count: int
     open_anomalies_count: int
     eligibility_rate_percentage: float
+

@@ -237,3 +237,4 @@ class InstrumentReferenceService:
         if clean_id not in self._reference_snapshots:
             self._reference_snapshots[clean_id] = {}
         self._reference_snapshots[clean_id][snapshot.reference_type] = snapshot
+

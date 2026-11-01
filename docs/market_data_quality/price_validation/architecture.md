@@ -76,3 +76,4 @@ backend/app/modules/market_data_quality/price_validation/
 ├── service.py                   # Central coordination service
 └── router.py                    # FastAPI REST endpoints (/api/v1/quality/price-validation/*)
 ```
+

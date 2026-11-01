@@ -156,3 +156,4 @@ Authentication uses standard header: `X-API-Key`.
   "eligibility_rate_percentage": 95.56
 }
 ```
+
