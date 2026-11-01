@@ -152,3 +152,4 @@ All endpoints are hosted under `/api/v1/exceptions`.
   "idempotency_key": "IDEMP_REPLAY_CORR_101"
 }
 ```
+

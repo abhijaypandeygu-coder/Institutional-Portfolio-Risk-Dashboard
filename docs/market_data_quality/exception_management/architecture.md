@@ -57,3 +57,4 @@ M03.08 strictly separates **Workflow Status** (operational triage of the inciden
 2. **Provenance Guard:** Synthetic market simulator data is prevented from being used as authoritative evidence to correct real provider observations.
 3. **Payload Immutability:** Payloads are hashed (SHA-256) upon arrival and stored in tamper-evident snapshot records; original records in M02 are never overwritten.
 4. **Idempotent Replay:** Replays use deterministic keys derived from observation ID, correction version, and operation scope to prevent duplicate trade prints or double-counting in downstream VaR engines.
+

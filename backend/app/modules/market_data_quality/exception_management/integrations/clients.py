@@ -78,3 +78,4 @@ class QualityResultClient:
             "hard_gates_passed": True,
             "evaluated_at": "2026-11-01T12:00:00Z",
         }
+

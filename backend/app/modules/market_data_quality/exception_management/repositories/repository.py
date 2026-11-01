@@ -251,3 +251,4 @@ class ExceptionRepository:
             "successful_replays": succeeded_rpl,
             "failed_replays": failed_rpl,
         }
+

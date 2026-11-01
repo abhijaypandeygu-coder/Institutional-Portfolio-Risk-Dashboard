@@ -761,3 +761,4 @@ class ExceptionManagementService:
         )
         await session.commit()
         return exc
+

@@ -42,3 +42,4 @@ When an approved correction is submitted for replay:
 2. The replay command is dispatched to M02's ingestion engine.
 3. If an identical replay request is submitted again (e.g., during network retries or worker restarts), M03.08 returns the existing replay record rather than re-triggering ingestion.
 4. Downstream validation and M03.07 use-eligibility evaluations are re-run on the reprocessed record.
+
