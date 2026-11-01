@@ -90,3 +90,4 @@ class TradingCalendarRepository:
         self.session.add(exception)
         await self.session.flush()
         return exception
+

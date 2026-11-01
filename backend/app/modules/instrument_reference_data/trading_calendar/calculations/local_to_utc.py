@@ -45,3 +45,4 @@ def get_utc_offset_str(dt: datetime, timezone_name: str) -> str:
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
     return f"{sign}{hours:02d}:{minutes:02d}"
+

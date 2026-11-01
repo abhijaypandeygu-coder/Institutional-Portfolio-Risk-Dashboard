@@ -141,3 +141,4 @@ All endpoints are mounted under `/api/v1/trading-calendars`.
 ## 7. Next / Previous Trading Day Lookups
 - **`GET /api/v1/trading-calendars/lookup/next-trading-day?exchange_code=NSE&start_date=2026-05-01`**
 - **`GET /api/v1/trading-calendars/lookup/previous-trading-day?exchange_code=NSE&start_date=2026-05-05`**
+

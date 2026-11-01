@@ -46,3 +46,4 @@ flowchart TD
 - `POST_MARKET`: Post-close reporting and trade adjustments.
 - `SPECIAL_SESSION`: Exchange-sanctioned one-off trading windows (e.g. Diwali Muhurat trading).
 - `CLOSED`: Market is non-operational.
+

@@ -294,3 +294,4 @@ async def test_rest_api_lifecycle():
         data_res = res_res.json()
         assert data_res["session_classification"] == "REGULAR_TRADING"
         assert data_res["scheduled_trading_permitted"] is True
+

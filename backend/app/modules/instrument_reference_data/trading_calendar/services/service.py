@@ -374,3 +374,4 @@ class TradingCalendarService:
                 return curr
             curr -= timedelta(days=1)
         raise ValueError(f"No trading day found within {max_lookback_days} days before {start_date}")
+

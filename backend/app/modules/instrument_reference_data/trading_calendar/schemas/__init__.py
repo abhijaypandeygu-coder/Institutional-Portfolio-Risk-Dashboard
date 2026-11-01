@@ -167,3 +167,4 @@ class SessionResolutionResponse(BaseModel):
     active_session: Optional[SessionOccurrence] = None
     scheduled_trading_permitted: bool
     reason: Optional[str] = None
+
