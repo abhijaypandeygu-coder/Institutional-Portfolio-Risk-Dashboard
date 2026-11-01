@@ -34,6 +34,7 @@ async def init_db() -> None:
     import backend.app.modules.feed_registry.models  # noqa: F401
     import backend.app.modules.market_data_ingestion.persistence.models  # noqa: F401
     import backend.app.modules.market_data_quality.missing_data.models  # noqa: F401
+    import backend.app.modules.market_data_quality.price_validation.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

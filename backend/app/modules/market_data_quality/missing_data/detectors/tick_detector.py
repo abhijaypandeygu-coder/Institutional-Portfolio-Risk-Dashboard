@@ -128,3 +128,4 @@ class MissingTickDetector:
                 "threshold_seconds": inactivity_threshold_seconds,
             },
         )
+

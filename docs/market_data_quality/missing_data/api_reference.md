@@ -119,3 +119,4 @@ Authentication and RBAC follow the standard header: `X-API-Key`.
 }
 ```
 - **Response**: `200 OK`
+

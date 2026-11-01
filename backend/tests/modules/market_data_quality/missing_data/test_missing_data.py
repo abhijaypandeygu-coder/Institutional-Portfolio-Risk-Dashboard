@@ -284,9 +284,11 @@ async def test_missing_data_service_and_apis(operator_headers, read_only_headers
         service = MissingDataService(session)
 
         # 1. Create Policy
+        import uuid
+        code = f"POL_NSE_{uuid.uuid4().hex[:8]}"
         policy = await service.create_policy(
             payload={  # type: ignore
-                "policy_code": "POL_NSE_EQUITY_L1",
+                "policy_code": code,
                 "exchange": "NSE",
                 "provider_id": "SIMULATOR",
                 "data_channel": "TICK",
@@ -298,7 +300,7 @@ async def test_missing_data_service_and_apis(operator_headers, read_only_headers
                 "policy_parameters": {},
             }
         )
-        assert policy.policy_code == "POL_NSE_EQUITY_L1"
+        assert policy.policy_code == code
 
         # 2. Record Coverage Window
         now = datetime.now(timezone.utc)
@@ -332,3 +334,4 @@ async def test_missing_data_service_and_apis(operator_headers, read_only_headers
         res_pol = await ac.get("/api/v1/quality/missing-data/policies", headers=read_only_headers)
         assert res_pol.status_code == 200
         assert len(res_pol.json()) >= 1
+

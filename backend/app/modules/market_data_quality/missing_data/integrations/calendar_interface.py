@@ -95,3 +95,4 @@ class ExchangeSessionResolver:
             curr += delta
 
         return timestamps
+

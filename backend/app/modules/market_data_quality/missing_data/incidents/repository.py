@@ -106,3 +106,4 @@ class MissingDataRepository:
         stmt = stmt.order_by(desc(CoverageWindow.window_end)).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
+

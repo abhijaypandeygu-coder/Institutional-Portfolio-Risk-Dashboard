@@ -60,3 +60,4 @@ class ExpectationPolicyResolver:
                 return ExpectationStatus.MARKET_CLOSED, f"{local_date} is a holiday or weekend for exchange '{exchange}'."
 
         return ExpectationStatus.EXPECTED, "Observation is expected according to exchange calendar and provider capability."
+

@@ -113,3 +113,4 @@ class QualitySummaryResponse(BaseModel):
     critical_incidents_count: int
     recent_coverage_average: float
     status: str
+

@@ -10,6 +10,7 @@ from backend.app.core.database import init_db
 from backend.app.modules.feed_registry.router import router as feed_registry_router
 from backend.app.modules.market_data_ingestion.router import router as market_data_router
 from backend.app.modules.market_data_quality.missing_data.router import router as missing_data_router
+from backend.app.modules.market_data_quality.price_validation.router import router as price_validation_router
 
 
 @asynccontextmanager
@@ -40,6 +41,7 @@ app.add_middleware(
 app.include_router(feed_registry_router, prefix="/api/v1")
 app.include_router(market_data_router, prefix="/api/v1")
 app.include_router(missing_data_router, prefix="/api/v1")
+app.include_router(price_validation_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
@@ -51,7 +53,8 @@ async def root_health_check():
         "module": "M01 - Feed Registry & Configuration",
         "modules": [
             "M01 - Feed Registry & Configuration",
-            "M02 - Market Data Ingestion Engine",
+            "M02 - Market Data Ingestion Engine (Alpha Vantage + Simulator)",
             "M03.01 - Missing Data Detection",
+            "M03.02 - Price Validation Engine",
         ],
     }

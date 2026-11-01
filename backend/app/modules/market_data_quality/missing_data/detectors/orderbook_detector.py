@@ -104,3 +104,4 @@ class MissingOrderBookDetector:
             )
 
         return None
+

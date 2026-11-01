@@ -63,3 +63,4 @@ backend/app/modules/market_data_quality/missing_data/
   - Order Book: `book-gap-{feed_id}-{instrument_id}-{expected_seq}-{observed_seq}`
 - **Upsert Semantics**: If an incident is re-detected, existing records are updated with latest evidence rather than duplicated.
 - **Resolution Tracking**: Incidents can transition through `OPEN` -> `INVESTIGATING` -> `RESOLVED` / `SUPPRESSED` / `FALSE_POSITIVE`.
+

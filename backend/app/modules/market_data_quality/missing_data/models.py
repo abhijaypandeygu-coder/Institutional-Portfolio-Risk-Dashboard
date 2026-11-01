@@ -151,3 +151,4 @@ class CoverageWindow(Base):
     calculation_timestamp = Column(DateTime(timezone=True), default=utc_now, nullable=False)
     policy_version = Column(String(32), default="1.0.0", nullable=False)
     calculation_metadata = Column(JSON, default=dict, nullable=False)
+

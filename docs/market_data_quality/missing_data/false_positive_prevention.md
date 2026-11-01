@@ -30,3 +30,4 @@ Before flagging an absent daily candle or a lack of ticks:
 ### C. Grace Periods & Late Arrival Handling
 - Ticks and candles are subject to configurable `grace_period_seconds` (default: 3.0s - 30.0s).
 - If an out-of-order tick arrives within the grace period, the state machine resolves the gap without flagging a dropped message.
+

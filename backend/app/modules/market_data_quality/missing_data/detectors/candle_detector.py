@@ -125,3 +125,4 @@ class MissingCandleDetector:
                 incidents.append(incident)
 
         return incidents
+

@@ -65,3 +65,4 @@ class CoverageCalculator:
             coverage_status=status,
             calculation_metadata=metadata or {},
         )
+
