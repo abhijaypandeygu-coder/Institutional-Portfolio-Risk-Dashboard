@@ -25,3 +25,4 @@ Historical portfolio attribution, factor returns, and sector concentration must 
 - A point-in-time lookup filters records satisfying:
   $$V_{\text{from}} \le T_V < V_{\text{to}} \quad \text{and} \quad R_{\text{recorded}} \le T_R$$
 - Reclassifications (e.g. conglomerate spin-offs or cloud migrations) bump `assignment_version` and preserve the entire prior history.
+

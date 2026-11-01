@@ -412,3 +412,4 @@ class SecurityClassificationService:
             total_requested=len(req.instrument_ids),
             total_classified=classified_count,
         )
+

@@ -126,3 +126,4 @@ class ClassificationCoverageMetrics(BaseModel):
     industry_coverage_percentage: float
     asset_category_coverage_percentage: float
     conflicted_assignments_count: int
+

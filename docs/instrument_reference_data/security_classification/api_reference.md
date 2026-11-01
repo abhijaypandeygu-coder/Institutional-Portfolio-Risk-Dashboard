@@ -103,3 +103,4 @@ All endpoints are hosted under `/api/v1/classifications`.
 ### Coverage Metrics
 - **GET** `/api/v1/classifications/metrics/coverage`
 - **Headers:** `X-API-Key: readonly_dev_secret_key_2026`
+

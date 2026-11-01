@@ -52,3 +52,4 @@ flowchart TD
    - **Valid Time:** The real-world date range (`valid_from` to `valid_to`) when the classification applies.
    - **Transaction Time:** The exact timestamp (`recorded_at`) when the platform learned of the assignment.
    - Look-ahead bias is eliminated during historical backtesting by querying both axes.
+

@@ -155,3 +155,4 @@ async def get_coverage_metrics(
 ):
     """Retrieves sector, industry, and asset-category coverage statistics across active instruments."""
     return await ClassificationRepository.get_coverage_metrics(session)
+

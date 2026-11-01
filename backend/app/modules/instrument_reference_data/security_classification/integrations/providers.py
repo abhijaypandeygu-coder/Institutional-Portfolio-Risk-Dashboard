@@ -51,3 +51,4 @@ class RiskClassificationProvider:
             scheme_code=scheme_code,
             as_of_valid_time=as_of_date,
         )
+

@@ -76,3 +76,4 @@ def validate_asset_category_compatibility(instrument_type: str, asset_category: 
     if not allowed:
         return True  # If not explicitly restricted, allow with warning
     return AssetCategoryCode(asset_category) in allowed
+

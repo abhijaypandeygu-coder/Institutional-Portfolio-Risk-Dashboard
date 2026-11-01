@@ -236,3 +236,4 @@ class ClassificationRepository:
             "asset_category_coverage_percentage": cat_pct,
             "conflicted_assignments_count": 0,
         }
+
