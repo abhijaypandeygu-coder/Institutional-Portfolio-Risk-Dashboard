@@ -15,6 +15,7 @@ from backend.app.modules.market_data_quality.timestamp_validation.router import 
 from backend.app.modules.market_data_quality.order_book.router import router as order_book_router
 from backend.app.modules.market_data_quality.duplicate_detection.router import router as duplicate_detection_router
 from backend.app.modules.market_data_quality.consistency.router import router as consistency_router
+from backend.app.modules.market_data_quality.quality_scoring.router import router as quality_scoring_router
 
 
 @asynccontextmanager
@@ -50,6 +51,7 @@ app.include_router(timestamp_validation_router, prefix="/api/v1")
 app.include_router(order_book_router, prefix="/api/v1")
 app.include_router(duplicate_detection_router, prefix="/api/v1")
 app.include_router(consistency_router, prefix="/api/v1")
+app.include_router(quality_scoring_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
@@ -68,5 +70,6 @@ async def root_health_check():
             "M03.04 - Order Book Validation Engine",
             "M03.05 - Duplicate Detection & Idempotency Engine",
             "M03.06 - Data Consistency Engine",
+            "M03.07 - Quality Scoring & Use Eligibility Engine",
         ],
     }
