@@ -51,3 +51,4 @@ External identifiers can never be used as primary canonical keys within the plat
 
 ### 2.3 Ambiguity & Conflict Recording (`mapping_conflict_records`)
 - Enforces strict institutional fail-closed semantics: when a ticker or code maps to multiple canonical targets without sufficient context (e.g. missing exchange MIC), resolution returns `AMBIGUOUS_MATCH`, rejects ingestion eligibility (`is_eligible_for_ingestion = False`), and logs a structured conflict record for administrative resolution.
+

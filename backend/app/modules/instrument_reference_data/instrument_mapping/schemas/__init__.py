@@ -98,3 +98,4 @@ class BulkResolveResponse(BaseModel):
     resolved_count: int
     unresolved_count: int
     results: List[ResolvedIdentifierResponse]
+

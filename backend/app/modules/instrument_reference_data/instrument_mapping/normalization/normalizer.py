@@ -29,3 +29,4 @@ def normalize_identifier(
         normalized = normalized.upper()
         
     return normalized
+
