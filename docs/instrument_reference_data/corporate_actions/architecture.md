@@ -69,3 +69,4 @@ $$G_{\text{cumulative quantity}} = \prod_{i=1}^n F_{Q, i}$$
 - `corporate_action_mergers`: Successor mapping, conversion ratios, and cash consideration.
 - `corporate_action_adjustment_runs`: Audit runs with input/output SHA-256 checksums.
 - `corporate_action_adjustment_lineage`: Step-by-step audit lineage per adjusted observation.
+

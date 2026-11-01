@@ -43,3 +43,4 @@ To detect data tampering and ensure reproducible quantitative pipelines, each ru
    $$\text{SHA256}(\text{adjusted\_price} : \text{adjusted\_quantity} : \text{cum\_price\_factor} : \text{cum\_quantity\_factor} : \text{total\_events})$$
 
 This cryptographic linkage guarantees that whenever downstream models consume adjusted time series, the calculation can be reconstructed bit-for-bit from the source repository.
+

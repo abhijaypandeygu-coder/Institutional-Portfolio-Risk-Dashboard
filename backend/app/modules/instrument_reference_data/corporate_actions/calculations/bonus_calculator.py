@@ -32,3 +32,4 @@ def compute_bonus_factors(additional_shares: int, existing_shares: int) -> dict:
         "price_factor": price_factor,
         "bonus_ratio_repr": f"{additional_shares}-for-{existing_shares}"
     }
+

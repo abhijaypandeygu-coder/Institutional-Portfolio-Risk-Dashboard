@@ -20,6 +20,7 @@ from backend.app.modules.market_data_quality.exception_management.router import 
 from backend.app.modules.instrument_reference_data.instrument_master.router import router as instrument_master_router
 from backend.app.modules.instrument_reference_data.security_classification.router import router as security_classification_router
 from backend.app.modules.instrument_reference_data.corporate_actions.router import router as corporate_actions_router
+from backend.app.modules.instrument_reference_data.trading_calendar.router import router as trading_calendar_router
 
 
 @asynccontextmanager
@@ -60,6 +61,7 @@ app.include_router(exception_management_router, prefix="/api/v1")
 app.include_router(instrument_master_router, prefix="/api/v1")
 app.include_router(security_classification_router, prefix="/api/v1")
 app.include_router(corporate_actions_router, prefix="/api/v1")
+app.include_router(trading_calendar_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
@@ -83,5 +85,6 @@ async def root_health_check():
             "M04.01 - Instrument Master Engine",
             "M04.02 - Security Classification Engine",
             "M04.03 - Corporate Actions Engine",
+            "M04.04 - Trading Calendar Engine",
         ],
     }

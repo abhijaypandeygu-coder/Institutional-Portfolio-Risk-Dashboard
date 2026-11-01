@@ -42,3 +42,4 @@ def compute_cash_dividend_factor(
         "withholding_tax_rate": tax_rate,
         "use_net_basis": use_net_basis
     }
+

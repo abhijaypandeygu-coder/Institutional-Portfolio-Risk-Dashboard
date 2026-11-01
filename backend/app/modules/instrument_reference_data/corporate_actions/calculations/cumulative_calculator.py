@@ -42,3 +42,4 @@ def compound_factors(events: List[Dict[str, Any]]) -> Dict[str, Any]:
         "step_count": len(events),
         "steps": lineage_steps
     }
+

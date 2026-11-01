@@ -70,3 +70,4 @@ class CorporateActionRepository:
         stmt = select(CorporateActionAdjustmentRun).where(CorporateActionAdjustmentRun.run_id == run_id)
         res = await self.session.execute(stmt)
         return res.scalar_one_or_none()
+
