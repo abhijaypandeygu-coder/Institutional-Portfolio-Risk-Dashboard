@@ -58,3 +58,4 @@ class CompletenessCalculator:
             "field_completeness_ratio": str(field_ratio),
         }
         return comp_score, field_ratio, classification, metadata
+

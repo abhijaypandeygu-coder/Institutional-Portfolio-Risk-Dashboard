@@ -50,3 +50,4 @@ A dataset may have a high availability or completeness score, but if a single st
 - **Order Book Continuity Gate:** Ensures bid/ask spread is non-crossed and sequence deltas have no gaps.
 - **Cross-Feed Consistency Gate:** Ensures no irreconcilable deviation between primary and secondary feeds.
 - **Provider Capability Gate:** Checks whether the feed legitimately supports the requested data type.
+

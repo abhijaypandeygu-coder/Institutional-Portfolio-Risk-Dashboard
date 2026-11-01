@@ -104,3 +104,4 @@ All endpoints are hosted under `/api/v1/quality/scoring`.
 ### Summary Metrics
 - **GET** `/api/v1/quality/scoring/summary`
 - **Headers:** `X-API-Key: operator_dev_secret_key_2026`
+

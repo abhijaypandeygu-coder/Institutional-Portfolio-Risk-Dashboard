@@ -28,3 +28,4 @@ Regardless of numeric score attainment, every evaluation evaluates hard gates fi
 - **`RESTRICTED`:** Non-critical validation or moderate score deficit prevents unconditional use. Allowed only in fallback or conservative scenarios.
 - **`REJECTED`:** Critical hard gate failure or score below minimum tolerance. Strictly barred from production use.
 - **`NOT_SUPPORTED`:** Provider does not support requested capability (e.g. streaming L2 order book requested from Alpha Vantage Free).
+

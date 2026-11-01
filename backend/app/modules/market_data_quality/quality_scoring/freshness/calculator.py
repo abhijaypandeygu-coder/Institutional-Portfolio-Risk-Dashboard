@@ -57,3 +57,4 @@ class FreshnessCalculator:
             "freshness_classification": classification,
         }
         return fresh_score, classification, metadata
+

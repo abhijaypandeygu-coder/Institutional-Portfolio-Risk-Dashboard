@@ -45,3 +45,4 @@ $$S_{\text{fresh}} = \begin{cases}
 ### Cadence & Market Closed Awareness
 - **Historical EOD Bars:** For Alpha Vantage EOD bars or historical daily feeds, age is calculated relative to end-of-day settlement or publication schedule. Real-time intraday SLA degradation is not applied.
 - **Market Closed / Holiday Periods:** Feeds are evaluated according to exchange market session schedules. No false staleness or completeness penalties are levied when the underlying exchange is closed.
+

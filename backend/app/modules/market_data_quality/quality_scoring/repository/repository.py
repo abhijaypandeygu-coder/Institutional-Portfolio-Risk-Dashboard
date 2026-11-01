@@ -159,3 +159,4 @@ class QualityScoringRepository:
             "average_completeness": round(avg_compl, 2),
             "average_freshness": round(avg_fresh, 2),
         }
+

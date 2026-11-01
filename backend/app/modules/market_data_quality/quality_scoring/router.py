@@ -147,3 +147,4 @@ async def get_scoring_summary(
     Retrieves summary statistics for quality scores across feeds.
     """
     return await QualityScoringRepository.get_summary_scores(session, feed_id)
+
