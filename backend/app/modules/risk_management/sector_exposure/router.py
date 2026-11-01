@@ -129,3 +129,4 @@ async def add_benchmark_sector_composition(
     )
     saved = await service.repo.save_benchmark_composition(comp)
     return saved
+

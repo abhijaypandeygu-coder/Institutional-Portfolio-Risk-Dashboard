@@ -700,3 +700,4 @@ class SectorExposureService:
             relative_exposures=[RelativeSectorExposureItemResponse.model_validate(r) for r in relative_results],
             completeness_status="COMPLETE" if unclassified_positions == 0 else "PARTIAL",
         )
+

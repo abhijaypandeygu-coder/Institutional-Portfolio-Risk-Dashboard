@@ -156,3 +156,4 @@ class BenchmarkSectorCompositionResponse(BaseModel):
     benchmark_weight: Decimal
     effective_date: datetime
     source_reference: str
+

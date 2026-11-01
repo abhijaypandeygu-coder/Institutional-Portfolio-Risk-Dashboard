@@ -82,3 +82,4 @@ Institutional risk reporting requires clarity between NAV leverage and relative 
 ## 4. Multi-Portfolio Consolidation
 
 Group exposure calculations invoke M05.08 `MultiPortfolioService.resolve_group_portfolios` to obtain unique portfolio constituents, aggregating holdings across all underlying portfolios and netting or summing consistently.
+
