@@ -153,3 +153,4 @@ async def create_concentration_policy(
     """
     service = ConcentrationAnalyticsService(session)
     return await service.create_policy(req)
+

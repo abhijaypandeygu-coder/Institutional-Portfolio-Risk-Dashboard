@@ -59,3 +59,4 @@ $$N_{\text{effective}} = \frac{1}{\text{HHI}_{\text{decimal}}}$$
 - All computations use Python `Decimal` and PostgreSQL `NUMERIC(18, 6)` with `ROUND_HALF_UP`.
 - Floating point arithmetic is prohibited.
 - Unclassified sectors and unknown geographic distributions are explicitly retained in the concentration universe.
+

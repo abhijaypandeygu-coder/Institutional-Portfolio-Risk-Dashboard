@@ -194,3 +194,4 @@ class ConcentrationPolicyResponse(BaseModel):
     is_active: bool
     policy_version: str
     effective_from: datetime
+

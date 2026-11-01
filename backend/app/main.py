@@ -38,6 +38,7 @@ from backend.app.modules.risk_management.sector_exposure.router import router as
 from backend.app.modules.risk_management.instrument_exposure.router import router as instrument_exposure_router
 from backend.app.modules.risk_management.geographic_exposure.router import router as geographic_exposure_router
 from backend.app.modules.risk_management.concentration_analytics.router import router as concentration_analytics_router
+from backend.app.modules.risk_management.portfolio_allocation.router import router as portfolio_allocation_router
 
 
 @asynccontextmanager
@@ -96,6 +97,7 @@ app.include_router(sector_exposure_router)
 app.include_router(instrument_exposure_router, prefix="/api/v1")
 app.include_router(geographic_exposure_router, prefix="/api/v1")
 app.include_router(concentration_analytics_router, prefix="/api/v1")
+app.include_router(portfolio_allocation_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
@@ -137,5 +139,6 @@ async def root_health_check():
             "M06.04 - Instrument Exposure Engine",
             "M06.05 - Geographic Exposure Engine",
             "M06.06 - Concentration Analytics Engine",
+            "M06.07 - Portfolio Allocation Engine",
         ],
     }

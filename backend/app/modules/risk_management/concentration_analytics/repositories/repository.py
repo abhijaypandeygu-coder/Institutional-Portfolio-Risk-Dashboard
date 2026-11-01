@@ -112,3 +112,4 @@ class ConcentrationRepository:
         stmt = stmt.order_by(desc(ConcentrationPolicy.created_at)).limit(1)
         res = await self.session.execute(stmt)
         return res.scalar_one_or_none()
+
