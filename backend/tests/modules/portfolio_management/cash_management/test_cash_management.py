@@ -256,3 +256,4 @@ async def test_currency_isolation_and_cross_currency_transfer():
         avail_usd_post = await svc.calculate_available_cash(port_id, acc_id, "USD")
         assert avail_usd_post.settled_balance == Decimal("5000.000000")
         assert avail_inr_post.settled_balance == Decimal("1417500.000000")
+

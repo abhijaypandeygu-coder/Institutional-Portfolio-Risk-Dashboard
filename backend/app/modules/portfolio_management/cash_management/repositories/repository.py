@@ -271,3 +271,4 @@ class CashManagementRepository:
         self.session.add(policy)
         await self.session.flush()
         return policy
+

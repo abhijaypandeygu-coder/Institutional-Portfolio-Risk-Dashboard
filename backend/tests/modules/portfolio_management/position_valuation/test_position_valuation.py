@@ -308,3 +308,4 @@ async def test_currency_conversion_valuation(setup_valuation_fixture):
         assert Decimal(sum_data["gross_long_market_value"]) == Decimal("3000.0")
         assert Decimal(sum_data["total_cost_basis"]) == Decimal("2400.0")
         assert Decimal(sum_data["total_unrealized_pnl"]) == Decimal("600.0")
+

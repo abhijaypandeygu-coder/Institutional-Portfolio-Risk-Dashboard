@@ -34,3 +34,4 @@ When an executed trade settles:
 2. The corresponding reservation is atomically converted to `SETTLED` (`remaining_amount = 0`).
 3. The underlying commitment status is marked `SETTLED`.
 This ensures that the obligation does not reduce available cash twice.
+

@@ -108,3 +108,4 @@ async def list_realized_pnl_allocations(
 async def list_portfolio_cost_basis_lots(portfolio_id: str, db: AsyncSession = Depends(get_db)):
     service = PositionValuationService(db)
     return await service.repo.list_lots_for_portfolio(portfolio_id)
+

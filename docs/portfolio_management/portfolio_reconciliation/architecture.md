@@ -21,3 +21,4 @@
 4. **Complete Break Lifecycle:**
    - Breaks progress through: `DETECTED` $\to$ `OPEN` $\to$ `ASSIGNED` $\to$ `INVESTIGATING` $\to$ `PENDING_REVIEW` $\to$ `RESOLVED` / `CLOSED` / `REOPENED`.
    - Investigation notes and resolution root-cause classifications (`TIMING_DIFFERENCE`, `PENDING_SETTLEMENT`, etc.) are preserved in immutable audit tables.
+

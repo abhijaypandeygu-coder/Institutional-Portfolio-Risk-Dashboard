@@ -21,3 +21,4 @@
    - Approved adjustments publish compensating events to the appropriate destination module.
 5. **Transactional Outbox Pattern:**
    - Ingestion of executions commits both the execution record and downstream outbox events atomically in the same database transaction.
+

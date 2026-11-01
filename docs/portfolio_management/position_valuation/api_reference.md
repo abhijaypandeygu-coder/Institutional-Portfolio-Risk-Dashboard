@@ -41,3 +41,4 @@
 ### 5. Cost Basis Lots
 - **GET** `/portfolios/{portfolio_id}/lots`
   - Inspect active and historical acquisition lots (`CostBasisLotResponse`) including remaining shares, remaining consideration, original price, and accounting status (`OPEN`, `PARTIALLY_CLOSED`, `CLOSED`).
+

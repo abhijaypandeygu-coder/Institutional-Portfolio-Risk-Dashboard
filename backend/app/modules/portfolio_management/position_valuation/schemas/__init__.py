@@ -111,3 +111,4 @@ class RunValuationRequest(BaseModel):
     valuation_date: Optional[datetime] = None
     mark_prices: Optional[dict] = Field(None, description="Optional map of instrument_id -> Decimal mark price")
     fx_rates_to_base: Optional[dict] = Field(None, description="Optional map of currency -> Decimal FX rate to base")
+

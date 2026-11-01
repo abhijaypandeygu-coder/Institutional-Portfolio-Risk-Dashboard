@@ -206,3 +206,4 @@ async def reopen_break(
         return await svc.reopen_break(break_id, reason)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+

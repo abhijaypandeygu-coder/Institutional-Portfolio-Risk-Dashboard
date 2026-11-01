@@ -284,3 +284,4 @@ class OutboxDeliveryStatusResponse(BaseModel):
     last_error: Optional[str]
     delivered_at: Optional[datetime]
     created_at: datetime
+

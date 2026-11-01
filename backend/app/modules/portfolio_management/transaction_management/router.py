@@ -226,3 +226,4 @@ async def get_delivery_status(
     """Query downstream event delivery status for a transaction."""
     svc = TransactionManagementService(db)
     return await svc.repo.list_outbox_events_for_aggregate(transaction_id)
+

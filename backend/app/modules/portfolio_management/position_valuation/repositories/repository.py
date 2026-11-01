@@ -129,3 +129,4 @@ class ValuationRepository:
         ).order_by(PortfolioValuationSnapshot.valuation_timestamp.desc(), PortfolioValuationSnapshot.id.desc())
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
+

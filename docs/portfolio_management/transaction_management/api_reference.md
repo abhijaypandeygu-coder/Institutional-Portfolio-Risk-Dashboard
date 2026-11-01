@@ -38,3 +38,4 @@ Base prefix: `/api/v1/portfolios/{portfolio_id}/transactions`
   - Submits manual adjustment request.
 - `POST /adjustments/{adjustment_id}/approve`
   - Approves adjustment under separation of duties.
+

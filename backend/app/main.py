@@ -30,6 +30,7 @@ from backend.app.modules.portfolio_management.position_valuation.router import r
 from backend.app.modules.portfolio_management.cash_management.router import router as cash_management_router
 from backend.app.modules.portfolio_management.transaction_management.router import router as transaction_management_router
 from backend.app.modules.portfolio_management.portfolio_reconciliation.router import router as portfolio_reconciliation_router
+from backend.app.modules.portfolio_management.portfolio_history.router import router as portfolio_history_router
 
 
 @asynccontextmanager
@@ -80,6 +81,7 @@ app.include_router(position_valuation_router, prefix="/api/v1")
 app.include_router(cash_management_router)
 app.include_router(transaction_management_router)
 app.include_router(portfolio_reconciliation_router)
+app.include_router(portfolio_history_router)
 
 
 @app.get("/health", tags=["System"])
@@ -113,5 +115,6 @@ async def root_health_check():
             "M05.04 - Cash Management Engine",
             "M05.05 - Transaction Management Engine",
             "M05.06 - Portfolio Reconciliation Engine",
+            "M05.07 - Portfolio History Engine",
         ],
     }
