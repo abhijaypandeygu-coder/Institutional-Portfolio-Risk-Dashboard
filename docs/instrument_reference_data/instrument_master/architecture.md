@@ -46,3 +46,4 @@ flowchart TD
 - Ticker strings (`AAPL`, `RELIANCE`) are never globally unique across venues.
 - Resolution requires either verified ISIN or explicit Venue Context (`exchange + symbol`).
 - If an ambiguous symbol query is received across multiple venues without exchange context, M04.01 returns `AMBIGUOUS_MATCH` alongside all candidate listings rather than guessing.
+

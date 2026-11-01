@@ -20,3 +20,4 @@ Whenever an identity attribute (such as `canonical_name` or `lifecycle_status`) 
 - The previous state is archived in `m04_instrument_attribute_history` with `effective_from` and `effective_to` timestamps.
 - The `current_version` counter on `m04_instruments` is incremented.
 - Downstream backtesting and risk engines can query the exact historical metadata as it existed on any historical date without look-ahead bias.
+

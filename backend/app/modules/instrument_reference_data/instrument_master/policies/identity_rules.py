@@ -101,3 +101,4 @@ def validate_isin_checksum(isin: str) -> bool:
 
     check_digit = (10 - (total % 10)) % 10
     return check_digit == int(isin[-1])
+

@@ -35,3 +35,4 @@ class QualityReferenceProvider:
             session=session, exchange=exchange, symbol=symbol
         )
         return res.match_status == "EXACT_MATCH" and res.listing_status == "ACTIVE"
+
