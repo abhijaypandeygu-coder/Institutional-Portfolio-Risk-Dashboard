@@ -544,3 +544,4 @@ class CovarianceService:
             estimator=request.estimator,
             series=series_points,
         )
+

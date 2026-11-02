@@ -89,3 +89,4 @@ class CovarianceRepository:
         await self.session.commit()
         await self.session.refresh(result)
         return result
+

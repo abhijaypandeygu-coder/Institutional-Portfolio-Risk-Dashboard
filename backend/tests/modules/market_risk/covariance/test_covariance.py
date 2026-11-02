@@ -284,3 +284,4 @@ async def test_end_to_end_covariance_api():
         h_res = await client.get("/health")
         assert h_res.status_code == 200
         assert "M07.06 - Covariance Analysis Engine" in h_res.json()["modules"]
+

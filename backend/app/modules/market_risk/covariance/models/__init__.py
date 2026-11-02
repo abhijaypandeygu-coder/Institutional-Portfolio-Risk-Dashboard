@@ -259,3 +259,4 @@ class PortfolioCovarianceResult(Base):
     marginal_contributions_volatility: Mapped[List[float]] = mapped_column(JSON, nullable=False)
     component_contributions_volatility: Mapped[List[float]] = mapped_column(JSON, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+

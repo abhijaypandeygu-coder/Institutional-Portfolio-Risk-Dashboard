@@ -123,3 +123,4 @@ When empirical covariance matrices fail PSD constraints ($\lambda_{\min} < -10^{
 4. Reconstruct covariance matrix:
    $$\Sigma^* = D R^* D$$
 Original empirical matrices are never mutated in-place; all transformed matrices are recorded in `m07_covariance_matrix_transformations`.
+

@@ -195,3 +195,4 @@ class PortfolioPairCovarianceResponse(BaseModel):
     portfolio_a_volatility: Decimal
     portfolio_b_volatility: Decimal
     derived_correlation: Decimal
+
