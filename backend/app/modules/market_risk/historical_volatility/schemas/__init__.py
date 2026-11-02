@@ -244,3 +244,4 @@ class VolatilityDiagnosticItemResponse(BaseModel):
     affected_timestamp: Optional[datetime] = None
     source_reference: Optional[str] = None
     created_at: datetime
+

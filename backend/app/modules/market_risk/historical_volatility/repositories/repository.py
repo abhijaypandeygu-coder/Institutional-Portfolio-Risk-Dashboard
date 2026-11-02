@@ -164,3 +164,4 @@ class VolatilityRepository:
             stmt = stmt.where(VolatilityCalculationDiagnostic.instrument_id == instrument_id)
         res = await self.session.execute(stmt)
         return list(res.scalars().all())
+

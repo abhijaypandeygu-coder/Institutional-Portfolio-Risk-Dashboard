@@ -612,3 +612,4 @@ class HistoricalVolatilityService:
             status=st,
             calculated_at=utc_now(),
         )
+

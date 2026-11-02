@@ -80,3 +80,4 @@ $$Ratio_{S,L} = \frac{\sigma_S}{\sigma_L} \quad (\sigma_L > 0)$$
 ### 3.5 Ordinary Least Squares (OLS) Trend Slope
 $$\sigma_t = \alpha + \beta t$$
 $$\beta = \frac{\sum (t - \bar{t})(\sigma_t - \bar{\sigma})}{\sum (t - \bar{t})^2}$$
+

@@ -241,3 +241,4 @@ async def list_diagnostics(
     svc = HistoricalVolatilityService(db)
     items = await svc.repo.list_diagnostics(result_id=result_id, instrument_id=instrument_id)
     return [VolatilityDiagnosticItemResponse.model_validate(d) for d in items]
+

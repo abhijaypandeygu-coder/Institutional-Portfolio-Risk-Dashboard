@@ -162,3 +162,4 @@ def compare_volatility_horizons(
         return VolatilityWindowComparisonLabel.SHORT_TERM_LOWER
     else:
         return VolatilityWindowComparisonLabel.HORIZONS_SIMILAR
+
