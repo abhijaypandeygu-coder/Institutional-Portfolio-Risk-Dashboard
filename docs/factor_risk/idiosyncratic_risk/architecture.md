@@ -58,3 +58,4 @@ The engine persists all calculations across 8 dedicated tables:
 6. `m08_06_issuer_risk_contributions`: Consolidated issuer-level risk allocations.
 7. `m08_06_residual_diagnostic_runs`: Econometric misspecification checks, skewness, kurtosis, tests.
 8. `m08_06_residual_outliers`: Granular records of point-in-time residual outliers.
+
