@@ -80,6 +80,11 @@ from backend.app.modules.factor_risk.factor_definition.router import (
     router as factor_definition_router,
     models_router as factor_models_router,
 )
+from backend.app.modules.factor_risk.factor_exposure.router import (
+    router as factor_exposure_router,
+    portfolio_router as factor_exposure_portfolio_router,
+    instrument_router as factor_exposure_instrument_router,
+)
 
 
 @asynccontextmanager
@@ -163,6 +168,9 @@ app.include_router(risk_forecasting_router, tags=["M07.10 - Risk Forecasting"])
 app.include_router(risk_forecasting_portfolio_router, tags=["M07.10 - Portfolio Risk Forecasting"])
 app.include_router(factor_definition_router, tags=["M08.01 - Factor Definition"])
 app.include_router(factor_models_router, tags=["M08.01 - Factor Models"])
+app.include_router(factor_exposure_router, tags=["M08.02 - Factor Exposure"])
+app.include_router(factor_exposure_portfolio_router, tags=["M08.02 - Portfolio Factor Exposure"])
+app.include_router(factor_exposure_instrument_router, tags=["M08.02 - Instrument Factor Exposure"])
 
 
 @app.get("/health", tags=["System"])
@@ -217,5 +225,6 @@ async def root_health_check():
             "M07.09 - Risk Contribution Engine",
             "M07.10 - Risk Forecasting Engine",
             "M08.01 - Factor Definition Engine",
+            "M08.02 - Factor Exposure Engine",
         ],
     }

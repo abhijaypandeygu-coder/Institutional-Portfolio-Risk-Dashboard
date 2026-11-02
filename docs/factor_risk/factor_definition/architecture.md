@@ -97,3 +97,4 @@ M08.01 establishes the foundational data contracts for subsequent M08 modules:
 - **M08.02 (Factor Returns):** Computes time series of daily returns strictly consuming approved/active `FactorDefinitionVersion` contracts.
 - **M08.03 (Factor Exposures):** Computes security-level factor loadings ($\beta_{i,k}$) referencing exact pinned factor characteristics and definitions.
 - **M08.04 (Systematic vs. Idiosyncratic Risk):** Decomposes portfolio risk variance based on `FactorModelVersion` covariance matrices.
+

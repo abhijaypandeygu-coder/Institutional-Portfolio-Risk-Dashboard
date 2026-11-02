@@ -81,3 +81,4 @@ Retrieves full factor model metadata, pinned factor memberships, positions, and 
 - **Path Parameters:**
   - `model_id` (UUID): Model identifier.
 - **Response:** `FactorModelResponse`
+
