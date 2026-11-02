@@ -104,3 +104,4 @@ For exits: $\text{Effect} = - w_{i,t-1} \beta_{i,k,t-1}$.
 
 $$\text{Total Change} \equiv \text{Weight Effect} + \text{Loading Effect} + \text{Entry/Exit Effect}$$
 Reconciles to observed delta with zero mathematical residual.
+
