@@ -94,6 +94,9 @@ from backend.app.modules.factor_risk.factor_attribution.router import (
 from backend.app.modules.factor_risk.systematic_risk.router import (
     router as systematic_risk_router,
 )
+from backend.app.modules.factor_risk.idiosyncratic_risk.router import (
+    router as idiosyncratic_risk_router,
+)
 
 
 @asynccontextmanager
@@ -183,6 +186,7 @@ app.include_router(factor_exposure_instrument_router, tags=["M08.02 - Instrument
 app.include_router(factor_sensitivity_router, tags=["M08.03 - Factor Sensitivity"])
 app.include_router(factor_attribution_router, tags=["M08.04 - Factor Attribution"])
 app.include_router(systematic_risk_router, tags=["M08.05 - Systematic Risk"])
+app.include_router(idiosyncratic_risk_router, tags=["M08.06 - Idiosyncratic Risk"])
 
 
 @app.get("/health", tags=["System"])
@@ -241,5 +245,6 @@ async def root_health_check():
             "M08.03 - Factor Sensitivity Engine",
             "M08.04 - Factor Attribution Engine",
             "M08.05 - Systematic Risk Engine",
+            "M08.06 - Idiosyncratic Risk Engine",
         ],
     }

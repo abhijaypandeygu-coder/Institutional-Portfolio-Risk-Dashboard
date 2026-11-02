@@ -53,3 +53,4 @@ The module introduces 10 SQLAlchemy 2.x declarative tables:
 - `m08_05_factor_scenario_runs`: Simulation results.
 - `m08_05_factor_scenario_components`: Factor-level dollar and return contributions.
 - `m08_05_model_coverage_records`: Point-in-time holding coverage diagnostics.
+

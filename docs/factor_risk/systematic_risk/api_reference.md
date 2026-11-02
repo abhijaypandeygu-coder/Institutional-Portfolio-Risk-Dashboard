@@ -108,3 +108,4 @@ Simulate the return and monetary impact of factor shocks.
 
 ### GET `/api/v1/systematic-risk/portfolios/{portfolio_id}/coverage?as_of_date=2026-10-30`
 Query portfolio coverage summary, holding-level statuses, absolute market weights, and missing factor diagnostics.
+
