@@ -80,3 +80,4 @@ $$\text{Shortfall} = \text{Measured Exposure} - \text{Limit Value}$$
 - `util_ratio < warning_threshold` $\rightarrow$ `WITHIN_LIMIT`
 - `limit_value == 0` and `measured_exp > 0` $\rightarrow$ `ZERO_LIMIT_BREACH`
 - Missing Denominator / Unresolved Data $\rightarrow$ `EVALUATION_UNAVAILABLE` (Never passing!)
+

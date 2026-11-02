@@ -83,3 +83,4 @@ class ExposureLimitRepository:
         stmt = stmt.order_by(desc(ExposureLimitBreachHistory.recorded_at)).limit(limit)
         res = await self.session.execute(stmt)
         return list(res.scalars().all())
+

@@ -231,3 +231,4 @@ async def test_exposure_limit_hypothetical_simulation():
         assert Decimal(sim_data["projected_headroom"]) == Decimal("-10000.000000")
         assert Decimal(sim_data["projected_utilization"]) == Decimal("120.000000")
         assert sim_data["projected_status"] == "SEVERELY_BREACHED"
+

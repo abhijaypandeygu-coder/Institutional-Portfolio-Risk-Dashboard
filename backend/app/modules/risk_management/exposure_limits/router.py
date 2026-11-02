@@ -101,3 +101,4 @@ async def simulate_hypothetical_exposure(
         return await service.simulate_hypothetical_exposure(req)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+

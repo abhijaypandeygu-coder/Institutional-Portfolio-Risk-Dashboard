@@ -40,6 +40,7 @@ from backend.app.modules.risk_management.geographic_exposure.router import route
 from backend.app.modules.risk_management.concentration_analytics.router import router as concentration_analytics_router
 from backend.app.modules.risk_management.portfolio_allocation.router import router as portfolio_allocation_router
 from backend.app.modules.risk_management.exposure_limits.router import router as exposure_limits_router
+from backend.app.modules.market_risk.historical_volatility.router import router as historical_volatility_router
 
 
 @asynccontextmanager
@@ -100,6 +101,7 @@ app.include_router(geographic_exposure_router, prefix="/api/v1")
 app.include_router(concentration_analytics_router, prefix="/api/v1")
 app.include_router(portfolio_allocation_router, prefix="/api/v1")
 app.include_router(exposure_limits_router, prefix="/api/v1")
+app.include_router(historical_volatility_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
@@ -143,5 +145,6 @@ async def root_health_check():
             "M06.06 - Concentration Analytics Engine",
             "M06.07 - Portfolio Allocation Engine",
             "M06.08 - Exposure Limits Engine",
+            "M07.01 - Historical Volatility Engine",
         ],
     }
