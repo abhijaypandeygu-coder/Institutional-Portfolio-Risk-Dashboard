@@ -90,3 +90,4 @@ M08.01 Factor Definition ──► M08.02 Factor Exposure ──► M08.03 Facto
                         ├── Factor Risk Attribution (Euler)
                         └── Audit Reconciliation Bridge
 ```
+
