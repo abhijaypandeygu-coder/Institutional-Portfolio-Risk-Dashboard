@@ -70,6 +70,7 @@ async def init_db() -> None:
     import backend.app.modules.market_risk.expected_shortfall.models  # noqa: F401
     import backend.app.modules.market_risk.drawdown_analytics.models  # noqa: F401
     import backend.app.modules.market_risk.correlation.models  # noqa: F401
+    import backend.app.modules.market_risk.covariance.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
