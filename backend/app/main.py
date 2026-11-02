@@ -68,6 +68,10 @@ from backend.app.modules.market_risk.sharpe_sortino.router import (
     router as sharpe_sortino_router,
     portfolio_router as sharpe_sortino_portfolio_router,
 )
+from backend.app.modules.market_risk.risk_contribution.router import (
+    router as risk_contribution_router,
+    portfolio_nested_router as risk_contribution_portfolio_router,
+)
 
 
 @asynccontextmanager
@@ -145,6 +149,8 @@ app.include_router(beta_router, prefix="/api/v1/market-risk/beta", tags=["M07.07
 app.include_router(beta_portfolio_router, prefix="/api/v1/portfolios", tags=["M07.07 - Portfolio Beta"])
 app.include_router(sharpe_sortino_router, prefix="/api/v1/market-risk/ratios", tags=["M07.08 - Sharpe & Sortino Ratios"])
 app.include_router(sharpe_sortino_portfolio_router, prefix="/api/v1/portfolios", tags=["M07.08 - Portfolio Ratios"])
+app.include_router(risk_contribution_router, tags=["M07.09 - Risk Contribution"])
+app.include_router(risk_contribution_portfolio_router, tags=["M07.09 - Portfolio Risk Attribution"])
 
 
 @app.get("/health", tags=["System"])
@@ -196,5 +202,6 @@ async def root_health_check():
             "M07.06 - Covariance Analysis Engine",
             "M07.07 - Portfolio Beta Engine",
             "M07.08 - Sharpe & Sortino Ratios Engine",
+            "M07.09 - Risk Contribution Engine",
         ],
     }
