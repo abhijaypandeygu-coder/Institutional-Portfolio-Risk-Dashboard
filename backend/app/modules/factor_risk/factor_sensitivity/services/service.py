@@ -300,12 +300,13 @@ class FactorSensitivityService:
 
             if len(snapshots) >= 2:
                 for i in range(1, len(snapshots)):
-                    nav_curr = snapshots[i].net_asset_value
-                    nav_prev = snapshots[i - 1].net_asset_value
-                    if nav_prev > 0:
+                    nav_curr = getattr(snapshots[i], "net_asset_value", getattr(snapshots[i], "net_market_value", None))
+                    nav_prev = getattr(snapshots[i - 1], "net_asset_value", getattr(snapshots[i - 1], "net_market_value", None))
+                    if nav_prev is not None and nav_prev > 0 and nav_curr is not None:
                         ret = (nav_curr - nav_prev) / nav_prev
-                        d = snapshots[i].valuation_date
-                        target_returns[d] = ret
+                        d = getattr(snapshots[i], "valuation_date", snapshots[i].valuation_timestamp.date() if hasattr(snapshots[i], "valuation_timestamp") else None)
+                        if d:
+                            target_returns[d] = ret
 
         # Intersect dates (LISTWISE_COMPLETE)
         common_dates = set(target_returns.keys())

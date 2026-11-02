@@ -78,6 +78,7 @@ async def init_db() -> None:
     import backend.app.modules.factor_risk.factor_definition.models  # noqa: F401
     import backend.app.modules.factor_risk.factor_exposure.models  # noqa: F401
     import backend.app.modules.factor_risk.factor_sensitivity.models  # noqa: F401
+    import backend.app.modules.factor_risk.factor_attribution.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

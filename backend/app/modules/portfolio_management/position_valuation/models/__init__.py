@@ -228,5 +228,6 @@ class PortfolioValuationSnapshot(Base):
     valuation_status: Mapped[ValuationStatus] = mapped_column(
         SAEnum(ValuationStatus, native_enum=False), default=ValuationStatus.VALUED, nullable=False
     )
+    valuation_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True, index=True)
     valuation_timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
