@@ -363,3 +363,4 @@ def calculate_rolling_correlation(
         prior_rho = curr_rho
 
     return results
+

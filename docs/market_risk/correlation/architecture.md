@@ -112,3 +112,4 @@ When pairwise missing data results in non-positive semidefinite matrices, two no
    $$\hat{C} = V \operatorname{diag}\left(\max(\lambda_k, \varepsilon)\right) V^T, \quad \tilde{C}_{ij} = \frac{\hat{C}_{ij}}{\sqrt{\hat{C}_{ii} \hat{C}_{jj}}}$$
 2. **Higham (2002) Alternating Projections:**
    Iteratively projects between the closed convex cone of PSD matrices and the affine subspace of unit diagonal symmetric matrices.
+
