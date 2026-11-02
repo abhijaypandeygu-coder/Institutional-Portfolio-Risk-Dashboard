@@ -159,3 +159,4 @@ Query active or historical regime alerts filtered by model version and date.
 - `factor_model_version_id` (required): Target factor model version ID
 - `as_of_date` (optional): Query date
 - `status` (optional): Filter by `ACTIVE`, `ACKNOWLEDGED`, `RECOVERED`
+

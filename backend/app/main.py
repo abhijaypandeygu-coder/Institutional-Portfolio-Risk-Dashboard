@@ -100,6 +100,10 @@ from backend.app.modules.factor_risk.idiosyncratic_risk.router import (
 from backend.app.modules.factor_risk.factor_correlation.router import (
     router as factor_correlation_router,
 )
+from backend.app.modules.factor_risk.factor_monitoring.router import (
+    router as factor_monitoring_router,
+    portfolio_router as factor_monitoring_portfolio_router,
+)
 
 
 @asynccontextmanager
@@ -191,6 +195,8 @@ app.include_router(factor_attribution_router, tags=["M08.04 - Factor Attribution
 app.include_router(systematic_risk_router, tags=["M08.05 - Systematic Risk"])
 app.include_router(idiosyncratic_risk_router, tags=["M08.06 - Idiosyncratic Risk"])
 app.include_router(factor_correlation_router, tags=["M08.07 - Factor Correlation"])
+app.include_router(factor_monitoring_router, tags=["M08.08 - Factor Monitoring"])
+app.include_router(factor_monitoring_portfolio_router, tags=["M08.08 - Portfolio Factor Monitoring"])
 
 
 @app.get("/health", tags=["System"])
@@ -251,5 +257,6 @@ async def root_health_check():
             "M08.05 - Systematic Risk Engine",
             "M08.06 - Idiosyncratic Risk Engine",
             "M08.07 - Factor Correlation Engine",
+            "M08.08 - Factor Monitoring Engine",
         ],
     }

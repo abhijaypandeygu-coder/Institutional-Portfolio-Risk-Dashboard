@@ -98,3 +98,4 @@ The database models reside in `backend/app/modules/factor_risk/factor_correlatio
 7. `m08_07_rolling_factor_correlations`: Rolling time series points and historical summaries.
 8. `m08_07_regime_alert_configs`: Configurable alerting thresholds and confirmation rules.
 9. `m08_07_regime_alerts`: Detected relationship breaks, sign reversals, and co-movement alarms.
+
