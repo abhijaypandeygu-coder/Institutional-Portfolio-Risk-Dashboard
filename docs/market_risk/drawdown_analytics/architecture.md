@@ -63,3 +63,4 @@ Mounted under `/api/v1/market-risk/drawdown`, `/api/v1/portfolios/{portfolio_id}
 - `GET /recovery-statistics`: Summary statistics across completed and ongoing episodes.
 - `GET /comparison`: Multi-horizon comparison (1M, 3M, 6M, 1Y, Since Inception).
 - `GET /portfolios/{id}/risk/drawdown`: Executive summary dashboard for a portfolio.
+

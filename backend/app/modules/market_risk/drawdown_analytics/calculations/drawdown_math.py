@@ -270,3 +270,4 @@ def calculate_recovery_summary_statistics(
         "longest_underwater_days": longest_underwater,
         "as_of_date": as_of_dt,
     }
+

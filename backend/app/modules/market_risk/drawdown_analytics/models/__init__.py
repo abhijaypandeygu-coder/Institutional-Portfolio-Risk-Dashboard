@@ -279,3 +279,4 @@ class DrawdownDiagnostic(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     details: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+

@@ -229,3 +229,4 @@ class DrawdownSummaryResponse(BaseModel):
     average_recovery_days: Optional[Decimal] = None
     longest_underwater_days: int
     data_quality_status: str
+

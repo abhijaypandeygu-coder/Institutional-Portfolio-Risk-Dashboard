@@ -236,3 +236,4 @@ async def get_group_drawdown_summary(
         portfolio_group_id=group_id,
         as_of=as_of,
     )
+
