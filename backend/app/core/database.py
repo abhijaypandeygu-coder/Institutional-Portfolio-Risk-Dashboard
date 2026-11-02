@@ -67,6 +67,7 @@ async def init_db() -> None:
     import backend.app.modules.risk_management.exposure_limits.models  # noqa: F401
     import backend.app.modules.market_risk.historical_volatility.models  # noqa: F401
     import backend.app.modules.market_risk.value_at_risk.models  # noqa: F401
+    import backend.app.modules.market_risk.expected_shortfall.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

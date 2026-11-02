@@ -179,3 +179,4 @@ class VaRDiagnosticItemResponse(BaseModel):
     severity: str
     description: str
     created_at: datetime
+

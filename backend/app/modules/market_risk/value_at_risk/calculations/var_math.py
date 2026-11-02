@@ -185,3 +185,4 @@ def simulate_monte_carlo_portfolio_var(
     loss_sample = simulated_losses[::sample_stride].tolist()
 
     return signed_loss, non_negative_var, simulation_count, loss_sample
+

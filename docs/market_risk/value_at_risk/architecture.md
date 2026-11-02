@@ -66,3 +66,4 @@ Mounted under `/api/v1/portfolios/{portfolio_id}/risk/var` and `/api/v1/risk/var
 - `GET /risk-contributions`: Retrieve Euler component risk contributions and marginal risk metrics.
 - `GET /historical-trend`: Retrieve time series of historical VaR results.
 - `POST /configs`: Create or register reusable model configurations.
+

@@ -122,3 +122,4 @@ Base path: `/api/v1/portfolios/{portfolio_id}/risk/var` and `/api/v1/risk/var`
   "min_var_amount": "4652.70"
 }
 ```
+

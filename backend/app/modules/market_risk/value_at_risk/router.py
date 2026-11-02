@@ -283,3 +283,4 @@ async def get_var_diagnostics(
     svc = VaRService(db)
     diags = await svc.repo.list_diagnostics(result_id=result_id, portfolio_id=portfolio_id)
     return [VaRDiagnosticItemResponse.model_validate(d) for d in diags]
+

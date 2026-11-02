@@ -116,3 +116,4 @@ class VaRRepository:
             stmt = stmt.where(VaRCalculationDiagnostic.portfolio_id == portfolio_id)
         res = await self.session.execute(stmt)
         return list(res.scalars().all())
+

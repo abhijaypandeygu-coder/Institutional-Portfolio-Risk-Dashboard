@@ -42,6 +42,11 @@ from backend.app.modules.risk_management.portfolio_allocation.router import rout
 from backend.app.modules.risk_management.exposure_limits.router import router as exposure_limits_router
 from backend.app.modules.market_risk.historical_volatility.router import router as historical_volatility_router
 from backend.app.modules.market_risk.value_at_risk.router import router as var_router, config_router as var_config_router
+from backend.app.modules.market_risk.expected_shortfall.router import (
+    router as es_router,
+    group_router as es_group_router,
+    config_router as es_config_router,
+)
 
 
 @asynccontextmanager
@@ -105,6 +110,9 @@ app.include_router(exposure_limits_router, prefix="/api/v1")
 app.include_router(historical_volatility_router, prefix="/api/v1")
 app.include_router(var_router, prefix="/api/v1")
 app.include_router(var_config_router, prefix="/api/v1")
+app.include_router(es_router)
+app.include_router(es_group_router)
+app.include_router(es_config_router)
 
 
 @app.get("/health", tags=["System"])
@@ -150,5 +158,6 @@ async def root_health_check():
             "M06.08 - Exposure Limits Engine",
             "M07.01 - Historical Volatility Engine",
             "M07.02 - Value at Risk (VaR) Engine",
+            "M07.03 - Expected Shortfall (ES) Engine",
         ],
     }
