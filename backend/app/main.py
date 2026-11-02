@@ -76,6 +76,10 @@ from backend.app.modules.market_risk.risk_forecasting.router import (
     router as risk_forecasting_router,
     portfolio_nested_router as risk_forecasting_portfolio_router,
 )
+from backend.app.modules.factor_risk.factor_definition.router import (
+    router as factor_definition_router,
+    models_router as factor_models_router,
+)
 
 
 @asynccontextmanager
@@ -157,6 +161,8 @@ app.include_router(risk_contribution_router, tags=["M07.09 - Risk Contribution"]
 app.include_router(risk_contribution_portfolio_router, tags=["M07.09 - Portfolio Risk Attribution"])
 app.include_router(risk_forecasting_router, tags=["M07.10 - Risk Forecasting"])
 app.include_router(risk_forecasting_portfolio_router, tags=["M07.10 - Portfolio Risk Forecasting"])
+app.include_router(factor_definition_router, tags=["M08.01 - Factor Definition"])
+app.include_router(factor_models_router, tags=["M08.01 - Factor Models"])
 
 
 @app.get("/health", tags=["System"])
@@ -210,5 +216,6 @@ async def root_health_check():
             "M07.08 - Sharpe & Sortino Ratios Engine",
             "M07.09 - Risk Contribution Engine",
             "M07.10 - Risk Forecasting Engine",
+            "M08.01 - Factor Definition Engine",
         ],
     }
