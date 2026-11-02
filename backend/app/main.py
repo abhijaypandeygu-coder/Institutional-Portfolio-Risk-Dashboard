@@ -60,6 +60,10 @@ from backend.app.modules.market_risk.covariance.router import (
     router as covariance_router,
     portfolio_router as covariance_portfolio_router,
 )
+from backend.app.modules.market_risk.beta.router import (
+    router as beta_router,
+    portfolio_router as beta_portfolio_router,
+)
 
 
 @asynccontextmanager
@@ -133,6 +137,8 @@ app.include_router(correlation_router, prefix="/api/v1/market-risk/correlation",
 app.include_router(correlation_portfolio_router, prefix="/api/v1/portfolios", tags=["M07.05 - Portfolio Correlation"])
 app.include_router(covariance_router, prefix="/api/v1/market-risk/covariance", tags=["M07.06 - Covariance Analysis"])
 app.include_router(covariance_portfolio_router, prefix="/api/v1/portfolios", tags=["M07.06 - Portfolio Covariance"])
+app.include_router(beta_router, prefix="/api/v1/market-risk/beta", tags=["M07.07 - Portfolio Beta"])
+app.include_router(beta_portfolio_router, prefix="/api/v1/portfolios", tags=["M07.07 - Portfolio Beta"])
 
 
 @app.get("/health", tags=["System"])
@@ -182,5 +188,6 @@ async def root_health_check():
             "M07.04 - Drawdown Analytics Engine",
             "M07.05 - Correlation Analysis Engine",
             "M07.06 - Covariance Analysis Engine",
+            "M07.07 - Portfolio Beta Engine",
         ],
     }
