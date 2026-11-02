@@ -47,6 +47,11 @@ from backend.app.modules.market_risk.expected_shortfall.router import (
     group_router as es_group_router,
     config_router as es_config_router,
 )
+from backend.app.modules.market_risk.drawdown_analytics.router import (
+    global_router as drawdown_global_router,
+    portfolio_router as drawdown_portfolio_router,
+    group_router as drawdown_group_router,
+)
 
 
 @asynccontextmanager
@@ -113,6 +118,9 @@ app.include_router(var_config_router, prefix="/api/v1")
 app.include_router(es_router)
 app.include_router(es_group_router)
 app.include_router(es_config_router)
+app.include_router(drawdown_global_router)
+app.include_router(drawdown_portfolio_router)
+app.include_router(drawdown_group_router)
 
 
 @app.get("/health", tags=["System"])
@@ -159,5 +167,6 @@ async def root_health_check():
             "M07.01 - Historical Volatility Engine",
             "M07.02 - Value at Risk (VaR) Engine",
             "M07.03 - Expected Shortfall (ES) Engine",
+            "M07.04 - Drawdown Analytics Engine",
         ],
     }

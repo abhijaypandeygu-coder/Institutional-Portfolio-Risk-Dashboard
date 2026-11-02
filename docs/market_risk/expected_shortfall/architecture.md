@@ -65,3 +65,4 @@ Mounted under `/api/v1/portfolios/{portfolio_id}/risk/expected-shortfall` and `/
 - `GET /{result_id}/tail-scenarios`: Granular scenario drill-down in the adverse tail.
 - `GET /{result_id}/contributions`: Scenario-weighted constituent tail attributions.
 - `GET /{result_id}/tail-diagnostics`: Tail sample size and stability diagnostics.
+

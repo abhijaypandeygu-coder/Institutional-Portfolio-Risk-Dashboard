@@ -1006,3 +1006,4 @@ class ExpectedShortfallService:
             peak_es_amount=max(amounts),
             min_es_amount=min(amounts),
         )
+

@@ -244,3 +244,4 @@ class ESHistoricalTrendResponse(BaseModel):
     average_es_amount: Decimal
     peak_es_amount: Decimal
     min_es_amount: Decimal
+

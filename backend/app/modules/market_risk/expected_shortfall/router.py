@@ -202,3 +202,4 @@ async def list_es_configs(
 ):
     svc = ExpectedShortfallService(db)
     return await svc.list_configs(portfolio_id=portfolio_id)
+

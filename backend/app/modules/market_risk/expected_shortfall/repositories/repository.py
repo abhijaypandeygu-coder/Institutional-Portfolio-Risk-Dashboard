@@ -131,3 +131,4 @@ class ExpectedShortfallRepository:
         points = list(res.scalars().all())
         points.reverse()  # Return in chronological order
         return points
+

@@ -297,3 +297,4 @@ def calculate_scenario_tail_attributions(
         })
 
     return results
+
