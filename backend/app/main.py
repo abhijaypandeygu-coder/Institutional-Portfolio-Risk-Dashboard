@@ -104,6 +104,9 @@ from backend.app.modules.factor_risk.factor_monitoring.router import (
     router as factor_monitoring_router,
     portfolio_router as factor_monitoring_portfolio_router,
 )
+from backend.app.modules.market_microstructure.bid_ask_spread.router import (
+    router as bid_ask_spread_router,
+)
 
 
 @asynccontextmanager
@@ -197,6 +200,7 @@ app.include_router(idiosyncratic_risk_router, tags=["M08.06 - Idiosyncratic Risk
 app.include_router(factor_correlation_router, tags=["M08.07 - Factor Correlation"])
 app.include_router(factor_monitoring_router, tags=["M08.08 - Factor Monitoring"])
 app.include_router(factor_monitoring_portfolio_router, tags=["M08.08 - Portfolio Factor Monitoring"])
+app.include_router(bid_ask_spread_router, tags=["M09.01 - Bid-Ask Spread Analytics"])
 
 
 @app.get("/health", tags=["System"])
@@ -258,5 +262,6 @@ async def root_health_check():
             "M08.06 - Idiosyncratic Risk Engine",
             "M08.07 - Factor Correlation Engine",
             "M08.08 - Factor Monitoring Engine",
+            "M09.01 - Bid-Ask Spread Engine",
         ],
     }

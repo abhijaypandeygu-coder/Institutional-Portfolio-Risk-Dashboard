@@ -83,6 +83,7 @@ async def init_db() -> None:
     import backend.app.modules.factor_risk.idiosyncratic_risk.models  # noqa: F401
     import backend.app.modules.factor_risk.factor_correlation.models  # noqa: F401
     import backend.app.modules.factor_risk.factor_monitoring.models  # noqa: F401
+    import backend.app.modules.market_microstructure.bid_ask_spread.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

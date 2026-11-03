@@ -146,3 +146,4 @@ M08.08 defines 10 relational tables:
 8. `m08_08_threshold_evaluations`: Evaluated threshold results, headroom, and utilization rates.
 9. `m08_08_breaches`: Persistent breach lifecycle entity tracking acknowledgment and recovery.
 10. `m08_08_monitoring_events`: Auditable events with deterministic deduplication keys.
+
