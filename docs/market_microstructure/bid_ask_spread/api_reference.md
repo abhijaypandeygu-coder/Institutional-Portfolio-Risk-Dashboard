@@ -69,3 +69,4 @@ Retrieve quality check diagnostic logs and rejection reasons.
 
 ### `GET /instruments/{instrument_id}/spread/venues`
 Compare displayed spreads and coverage across multiple exchanges and venues (e.g. NSE, BSE, NYSE, NASDAQ) without synthetic book blending.
+

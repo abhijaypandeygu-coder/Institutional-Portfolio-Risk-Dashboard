@@ -263,3 +263,4 @@ class VenueSpreadComparisonItem(BaseModel):
     quote_age_seconds: Optional[float] = None
     observation_count: int
     coverage_percentage: float
+

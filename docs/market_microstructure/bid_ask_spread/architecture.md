@@ -91,3 +91,4 @@ $$S_{\text{TW}} = \frac{\sum_{j=1}^J S_j \Delta t_j}{\sum_{j=1}^J \Delta t_j}$$
 4. `m09_01_spread_interval_aggregates`: High-frequency and intraday interval aggregates (1s, 5s, 1m, 5m, 15m, 1h).
 5. `m09_01_spread_session_summaries`: Daily and trading session rollups.
 6. `m09_01_spread_quality_summaries`: Rolling quality health indicators across venues.
+

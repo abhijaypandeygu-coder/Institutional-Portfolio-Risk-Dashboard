@@ -202,3 +202,4 @@ async def get_venue_comparison(
 ):
     orchestrator = SpreadCalculationOrchestrator(db)
     return await orchestrator.get_venue_comparison(instrument_id)
+

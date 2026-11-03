@@ -209,3 +209,4 @@ class SpreadRepository:
         stmt = stmt.order_by(desc(SpreadQualitySummary.aggregation_end))
         res = await self.session.execute(stmt)
         return res.scalars().first()
+

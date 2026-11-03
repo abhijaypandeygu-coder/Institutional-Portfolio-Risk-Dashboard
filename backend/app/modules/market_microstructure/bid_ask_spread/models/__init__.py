@@ -43,7 +43,7 @@ class SpreadCalculationConfig(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     config_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
-    config_code: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    config_code: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -66,6 +66,10 @@ class SpreadCalculationConfig(Base):
     created_by: Mapped[str] = mapped_column(String(64), default="SYSTEM", nullable=False)
     approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     approved_by: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("config_code", "version", name="uq_m09_01_config_code_version"),
+    )
 
 
 class SpreadObservation(Base):
@@ -274,3 +278,4 @@ class SpreadQualitySummary(Base):
     quality_coverage_percentage: Mapped[float] = mapped_column(Float, default=100.0, nullable=False)
     summary_status: Mapped[str] = mapped_column(String(32), default="HEALTHY", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+

@@ -274,3 +274,4 @@ def compute_time_weighted_spread(
         "coverage_percentage": round(coverage_pct, 4),
         "valid_intervals_count": valid_intervals,
     }
+

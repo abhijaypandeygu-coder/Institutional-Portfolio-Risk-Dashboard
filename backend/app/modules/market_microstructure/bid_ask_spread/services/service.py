@@ -638,3 +638,4 @@ class SpreadCalculationOrchestrator:
             created_at=utc_now(),
         )
         return await self.repo.save_aggregate(agg)
+

@@ -107,6 +107,9 @@ from backend.app.modules.factor_risk.factor_monitoring.router import (
 from backend.app.modules.market_microstructure.bid_ask_spread.router import (
     router as bid_ask_spread_router,
 )
+from backend.app.modules.market_microstructure.order_book_depth.router import (
+    router as order_book_depth_router,
+)
 
 
 @asynccontextmanager
@@ -201,6 +204,7 @@ app.include_router(factor_correlation_router, tags=["M08.07 - Factor Correlation
 app.include_router(factor_monitoring_router, tags=["M08.08 - Factor Monitoring"])
 app.include_router(factor_monitoring_portfolio_router, tags=["M08.08 - Portfolio Factor Monitoring"])
 app.include_router(bid_ask_spread_router, tags=["M09.01 - Bid-Ask Spread Analytics"])
+app.include_router(order_book_depth_router, tags=["M09.02 - Order Book Depth Analytics"])
 
 
 @app.get("/health", tags=["System"])
@@ -263,5 +267,6 @@ async def root_health_check():
             "M08.07 - Factor Correlation Engine",
             "M08.08 - Factor Monitoring Engine",
             "M09.01 - Bid-Ask Spread Engine",
+            "M09.02 - Order Book Depth Engine",
         ],
     }
