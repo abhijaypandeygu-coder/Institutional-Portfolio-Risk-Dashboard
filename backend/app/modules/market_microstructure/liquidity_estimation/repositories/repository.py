@@ -225,3 +225,4 @@ class LiquidityRepository:
                 "bucket_rank": r[8] or 6
             })
         return results
+

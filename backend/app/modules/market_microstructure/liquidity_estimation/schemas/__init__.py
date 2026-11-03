@@ -227,3 +227,4 @@ class LiquidityScreenRequest(BaseModel):
     min_depth_notional: Optional[Decimal] = None
     limit: int = 50
     offset: int = 0
+

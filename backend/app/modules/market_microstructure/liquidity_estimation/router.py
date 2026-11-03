@@ -246,3 +246,4 @@ async def screen_instruments(req: LiquidityScreenRequest, db: AsyncSession = Dep
         "results": results,
         "filters": req.model_dump()
     }
+

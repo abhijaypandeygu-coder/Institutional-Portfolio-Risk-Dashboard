@@ -349,3 +349,4 @@ class LiquidityBucketTransition(Base):
     __table_args__ = (
         Index("ix_m09_03_trans_inst_time", "instrument_id", "transition_timestamp"),
     )
+

@@ -75,3 +75,4 @@ The module implements 9 tables:
 - `m09_03_liquidity_bucket_policies`: Versioned bucket classification threshold definitions.
 - `m09_03_liquidity_bucket_snapshots`: Point-in-time bucket classifications.
 - `m09_03_liquidity_bucket_transitions`: Event log of transitions between liquidity categories.
+

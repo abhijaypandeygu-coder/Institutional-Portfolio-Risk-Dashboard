@@ -113,6 +113,9 @@ from backend.app.modules.market_microstructure.order_book_depth.router import (
 from backend.app.modules.market_microstructure.liquidity_estimation.router import (
     router as liquidity_estimation_router,
 )
+from backend.app.modules.market_microstructure.market_impact.router import (
+    router as market_impact_router,
+)
 
 
 @asynccontextmanager
@@ -209,6 +212,7 @@ app.include_router(factor_monitoring_portfolio_router, tags=["M08.08 - Portfolio
 app.include_router(bid_ask_spread_router, tags=["M09.01 - Bid-Ask Spread Analytics"])
 app.include_router(order_book_depth_router, tags=["M09.02 - Order Book Depth Analytics"])
 app.include_router(liquidity_estimation_router, prefix="/api/v1/market-microstructure", tags=["M09.03 - Liquidity Estimation Analytics"])
+app.include_router(market_impact_router, prefix="/api/v1/market-microstructure", tags=["M09.04 - Market Impact Analytics"])
 
 
 @app.get("/health", tags=["System"])
@@ -273,5 +277,6 @@ async def root_health_check():
             "M09.01 - Bid-Ask Spread Engine",
             "M09.02 - Order Book Depth Engine",
             "M09.03 - Liquidity Estimation Engine",
+            "M09.04 - Market Impact Engine",
         ],
     }
