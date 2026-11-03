@@ -119,6 +119,9 @@ from backend.app.modules.market_microstructure.market_impact.router import (
 from backend.app.modules.market_microstructure.slippage_estimation.router import (
     router as slippage_estimation_router,
 )
+from backend.app.modules.market_microstructure.liquidity_stress_testing.router import (
+    router as liquidity_stress_testing_router,
+)
 
 
 @asynccontextmanager
@@ -217,6 +220,7 @@ app.include_router(order_book_depth_router, tags=["M09.02 - Order Book Depth Ana
 app.include_router(liquidity_estimation_router, prefix="/api/v1/market-microstructure", tags=["M09.03 - Liquidity Estimation Analytics"])
 app.include_router(market_impact_router, prefix="/api/v1/market-microstructure", tags=["M09.04 - Market Impact Analytics"])
 app.include_router(slippage_estimation_router, tags=["M09.05 - Slippage Estimation Analytics"])
+app.include_router(liquidity_stress_testing_router, tags=["M09.06 - Liquidity Stress Testing Analytics"])
 
 
 @app.get("/health", tags=["System"])
@@ -283,5 +287,6 @@ async def root_health_check():
             "M09.03 - Liquidity Estimation Engine",
             "M09.04 - Market Impact Engine",
             "M09.05 - Slippage Estimation Engine",
+            "M09.06 - Liquidity Stress Testing Engine",
         ],
     }

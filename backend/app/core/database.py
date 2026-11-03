@@ -88,6 +88,7 @@ async def init_db() -> None:
     import backend.app.modules.market_microstructure.liquidity_estimation.models  # noqa: F401
     import backend.app.modules.market_microstructure.market_impact.models  # noqa: F401
     import backend.app.modules.market_microstructure.slippage_estimation.models  # noqa: F401
+    import backend.app.modules.market_microstructure.liquidity_stress_testing.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

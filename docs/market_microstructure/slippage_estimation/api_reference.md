@@ -48,3 +48,4 @@ Evaluates calibration bias and dispersion metrics between estimated and realized
     - `order_id`, `symbol`, `side`, `observation_timestamp`, `estimated_slippage_bps`, `realized_slippage_bps`, `predicted_lower_bound_bps`, `predicted_upper_bound_bps`
 - **Response**: `200 OK` -> `CalibrationRunResponse`
   - `observation_count`, `mean_error_bps`, `mean_absolute_error_bps`, `root_mean_squared_error_bps`, `t_statistic`, `p_value`, `is_bias_significant`, `interval_coverage_pct`
+

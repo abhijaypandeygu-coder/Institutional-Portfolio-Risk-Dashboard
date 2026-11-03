@@ -374,4 +374,3 @@ async def test_api_full_slippage_lifecycle():
         assert calib_data["observation_count"] == 2
         assert calib_data["run_code"] == calib_code
         assert Decimal(str(calib_data["interval_coverage_pct"])) == Decimal("100.0")
-

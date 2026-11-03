@@ -49,3 +49,4 @@
 - `repositories/slippage_repository.py`: Async database access patterns.
 - `services/slippage_service.py`: Orchestration service handling calculations and persistence.
 - `router.py`: REST endpoints mounted under `/api/v1/market-microstructure/slippage`.
+
