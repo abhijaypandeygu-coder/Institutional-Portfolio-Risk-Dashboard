@@ -144,3 +144,4 @@ class VenueComparisonRequest(BaseModel):
 class VenueComparisonResponse(BaseModel):
     instrument_id: str
     venues: Dict[str, Any]
+

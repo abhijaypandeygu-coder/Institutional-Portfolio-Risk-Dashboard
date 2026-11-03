@@ -94,3 +94,4 @@ Detects transitions across dominance states using hysteresis thresholds (`entry_
 `POST /venues`
 
 Compares order book imbalance metrics across multiple venues (e.g. XNYS vs XNAS).
+

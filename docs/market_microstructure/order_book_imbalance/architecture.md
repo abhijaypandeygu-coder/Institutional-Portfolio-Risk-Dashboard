@@ -48,3 +48,4 @@ It quantifies quote queue pressure, notional pressure, distance-weighted imbalan
 5. **Persistence & Reversals:**
    - Evaluated using duration-weighted intervals $\sum \Delta t_i$ rather than naive snapshot counts.
    - Reversal detection utilizes hysteresis ($\theta_{\text{enter}}, \theta_{\text{exit}}$) to filter snapshot noise.
+

@@ -72,3 +72,4 @@ class OrderBookImbalanceRepository:
         self.session.add_all(events)
         await self.session.flush()
         return events
+

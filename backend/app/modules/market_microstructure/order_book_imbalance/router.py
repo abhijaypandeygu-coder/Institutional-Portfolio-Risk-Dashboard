@@ -126,3 +126,4 @@ async def compare_venues(
 ):
     service = OrderBookImbalanceService(db)
     return await service.compare_venues(req)
+
