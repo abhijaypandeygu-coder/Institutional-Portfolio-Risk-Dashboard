@@ -92,3 +92,4 @@ Six dedicated SQLAlchemy 2.x declarative tables manage order book depth configur
 4. `m09_02_order_book_depth_bands`: Price-band aggregated liquidity across configured basis point ranges.
 5. `m09_02_order_book_depth_persistence`: Time-weighted rolling persistence statistics ($CV_D$, threshold retention, coverage).
 6. `m09_02_order_book_depth_history_aggregates`: Fixed-interval aggregated metrics (1m, 5m, 1h) for long-horizon liquidity trend analysis.
+

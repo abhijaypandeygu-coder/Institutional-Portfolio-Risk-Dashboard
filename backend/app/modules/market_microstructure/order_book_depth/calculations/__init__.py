@@ -20,3 +20,4 @@ __all__ = [
     "compute_price_band_depth",
     "compute_depth_persistence",
 ]
+

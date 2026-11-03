@@ -39,9 +39,13 @@ class SpreadRepository:
         return res.scalar_one_or_none()
 
     async def get_config_by_code(self, config_code: str) -> Optional[SpreadCalculationConfig]:
-        stmt = select(SpreadCalculationConfig).where(SpreadCalculationConfig.config_code == config_code)
+        stmt = (
+            select(SpreadCalculationConfig)
+            .where(SpreadCalculationConfig.config_code == config_code)
+            .order_by(desc(SpreadCalculationConfig.version))
+        )
         res = await self.session.execute(stmt)
-        return res.scalar_one_or_none()
+        return res.scalars().first()
 
     async def get_default_config(self) -> Optional[SpreadCalculationConfig]:
         stmt = select(SpreadCalculationConfig).where(

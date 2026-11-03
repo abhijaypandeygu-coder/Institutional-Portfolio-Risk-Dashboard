@@ -309,3 +309,4 @@ async def get_depth_history(
         offset=offset,
     )
     return [OrderBookDepthSnapshotResponse.model_validate(s) for s in snapshots]
+

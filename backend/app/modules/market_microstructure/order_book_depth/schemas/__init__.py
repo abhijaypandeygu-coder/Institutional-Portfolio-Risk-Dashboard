@@ -212,3 +212,4 @@ class DepthPersistenceResponse(BaseModel):
     quality_status: str
 
     model_config = ConfigDict(from_attributes=True)
+
