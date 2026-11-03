@@ -135,3 +135,4 @@ Simulates immediate level consumption directly from raw levels without database 
 ### 6. Validation Run Recording
 - **Method:** `POST`
 - **Path:** `/api/v1/market-microstructure/impact/validation/record`
+

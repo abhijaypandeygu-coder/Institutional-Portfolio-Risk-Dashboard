@@ -55,3 +55,4 @@ The module implements 7 relational tables:
 5. `m09_04_market_impact_estimates`: Horizon-based modeled impact estimates (Square-Root, Regression, Kyle OFI).
 6. `m09_04_market_impact_model_configs`: Versioned empirical model specifications and calibrated parameters.
 7. `m09_04_market_impact_model_validation_runs`: Out-of-sample backtest diagnostics (MAE, RMSE, MBE, coverage %).
+

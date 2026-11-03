@@ -277,3 +277,4 @@ class MarketImpactService:
             created_at=datetime.now(timezone.utc)
         )
         return await self.repo.save_validation_run(run)
+

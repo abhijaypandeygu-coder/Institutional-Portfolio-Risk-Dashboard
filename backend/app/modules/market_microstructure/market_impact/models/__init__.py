@@ -222,3 +222,4 @@ class MarketImpactModelValidationRun(Base):
     interval_coverage_pct: Mapped[float] = mapped_column(Float, nullable=False)
     validation_status: Mapped[str] = mapped_column(String(32), default="PASSED", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+

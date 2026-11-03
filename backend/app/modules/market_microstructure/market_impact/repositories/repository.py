@@ -111,3 +111,4 @@ class MarketImpactRepository:
         self.db.add(run)
         await self.db.flush()
         return run
+
