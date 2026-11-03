@@ -68,3 +68,4 @@ Searches for parameter limits:
 - `repositories/stress_repository.py`: Async database access patterns.
 - `services/stress_service.py`: Service orchestrating baseline retrieval, synthetic book generation, liquidation schedules, and reverse stress search.
 - `router.py`: REST endpoints mounted under `/api/v1/market-microstructure/liquidity-stress`.
+
