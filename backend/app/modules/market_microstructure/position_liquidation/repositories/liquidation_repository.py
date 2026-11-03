@@ -78,3 +78,4 @@ class PositionLiquidationRepository:
         self.session.add(summary)
         await self.session.flush()
         return summary
+

@@ -245,3 +245,4 @@ class PortfolioLiquidationSummary(Base):
     completion_status: Mapped[str] = mapped_column(String(32), default="FULLY_LIQUIDATED_ESTIMATED", nullable=False)
     base_currency: Mapped[str] = mapped_column(String(8), default="USD", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+

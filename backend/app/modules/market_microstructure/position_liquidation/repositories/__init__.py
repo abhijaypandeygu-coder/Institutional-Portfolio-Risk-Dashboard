@@ -7,3 +7,4 @@ from backend.app.modules.market_microstructure.position_liquidation.repositories
 )
 
 __all__ = ["PositionLiquidationRepository"]
+

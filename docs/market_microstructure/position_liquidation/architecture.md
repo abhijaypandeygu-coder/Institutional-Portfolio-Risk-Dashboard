@@ -59,3 +59,4 @@ It operates strictly as an analytical decision-support layer:
    - Ensures zero double-counting across spread crossing, depth walk concessions, market impact, slippage, explicit brokerage/fees, and unliquidated opportunity costs.
 5. **Portfolio Aggregation:**
    - Concurrent portfolio liquidation is bounded by the critical path ($\max(T_i)$), preventing erroneous summation of overlapping multi-position liquidations.
+

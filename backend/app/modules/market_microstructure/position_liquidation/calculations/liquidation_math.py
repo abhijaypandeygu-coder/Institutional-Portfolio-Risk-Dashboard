@@ -556,3 +556,4 @@ class PositionLiquidationMath:
             "portfolio_duration_seconds": portfolio_duration,
             "positions": position_results,
         }
+
