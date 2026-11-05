@@ -78,3 +78,4 @@ Returns complete `ReplayRunSummaryResponse` including baseline NAV, scenario NAV
 
 ### `GET /replays/{replay_id}/comparison`
 Returns a `HistoricalDifferenceReport` comparing the tested portfolio composition with the historical reference market.
+

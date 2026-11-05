@@ -130,3 +130,4 @@ class HistoricalScenariosRepository:
         ).order_by(HistoricalScenarioReplayPath.observation_date)
         res = await self.db.execute(stmt)
         return list(res.scalars().all())
+

@@ -134,6 +134,9 @@ from backend.app.modules.market_microstructure.microstructure_monitoring.router 
 from backend.app.modules.scenario_analysis.historical_scenarios.router import (
     router as historical_scenarios_router,
 )
+from backend.app.modules.scenario_analysis.hypothetical_scenarios.router import (
+    router as hypothetical_scenarios_router,
+)
 
 
 @asynccontextmanager
@@ -237,6 +240,7 @@ app.include_router(position_liquidation_router, tags=["M09.07 - Position Liquida
 app.include_router(order_book_imbalance_router, tags=["M09.08 - Order Book Imbalance Analytics"])
 app.include_router(microstructure_monitoring_router, tags=["M09.09 - Microstructure Monitoring"])
 app.include_router(historical_scenarios_router, tags=["M10.01 - Historical Scenarios"])
+app.include_router(hypothetical_scenarios_router, tags=["M10.02 - Hypothetical Scenarios"])
 
 
 @app.get("/health", tags=["System"])
@@ -308,5 +312,6 @@ async def root_health_check():
             "M09.08 - Order Book Imbalance Engine",
             "M09.09 - Microstructure Monitoring Engine",
             "M10.01 - Historical Scenarios Engine",
+            "M10.02 - Hypothetical Scenarios Engine",
         ],
     }

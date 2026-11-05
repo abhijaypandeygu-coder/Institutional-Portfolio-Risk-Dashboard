@@ -205,3 +205,4 @@ def aggregate_portfolio_replay(
         "included_count": len(position_results),
         "excluded_count": len(excluded_positions or [])
     }
+

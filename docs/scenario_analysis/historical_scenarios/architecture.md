@@ -57,3 +57,4 @@ M10.01 defines 9 core relational tables in PostgreSQL:
 7. `historical_scenario_replay_positions`: Position-level revaluation and contributions.
 8. `historical_scenario_replay_warnings`: Audit warnings and limitations.
 9. `historical_scenario_replay_paths`: Daily valuation path points across the event.
+

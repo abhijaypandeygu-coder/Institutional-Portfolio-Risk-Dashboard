@@ -168,3 +168,4 @@ class HistoricalDifferenceReport(BaseModel):
     historical_top_holding: Optional[str] = None
     sector_weight_differences: Dict[str, Decimal]
     mandatory_caveat: str
+
