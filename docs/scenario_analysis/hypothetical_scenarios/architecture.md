@@ -100,3 +100,4 @@ The database entities are structured under SQLAlchemy 2.x and SQLite/PostgreSQL:
 - `GET /api/v1/scenarios/hypothetical/templates/{template_id}`: Retrieve template details and shock parameters.
 - `POST /api/v1/scenarios/hypothetical/runs`: Execute a hypothetical scenario run.
 - `GET /api/v1/scenarios/hypothetical/runs/{run_id}`: Retrieve comprehensive run results (Valuation, Risk, Liquidity, Warnings).
+

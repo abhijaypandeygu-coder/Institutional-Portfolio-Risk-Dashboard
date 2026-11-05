@@ -194,3 +194,4 @@ class HypotheticalScenarioAuditLog(Base):
     new_state = Column(String(50), nullable=True)
     reason = Column(String(255), nullable=True)
     timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+

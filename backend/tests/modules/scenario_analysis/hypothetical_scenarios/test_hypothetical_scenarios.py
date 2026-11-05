@@ -265,3 +265,4 @@ async def test_hypothetical_scenarios_api_full_lifecycle():
         # Check Caveats & Metadata
         assert run_data["caveat_summary"] != ""
         assert run_data["run_status"] in ["COMPLETED", "COMPLETED_WITH_WARNINGS"]
+

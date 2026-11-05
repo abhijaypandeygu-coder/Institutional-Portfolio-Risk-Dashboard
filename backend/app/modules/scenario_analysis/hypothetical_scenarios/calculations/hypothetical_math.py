@@ -304,3 +304,4 @@ def apply_liquidity_overlay(
         "scenario_ask_depth": stressed_ask_depth,
         "scenario_volume": stressed_volume
     }
+

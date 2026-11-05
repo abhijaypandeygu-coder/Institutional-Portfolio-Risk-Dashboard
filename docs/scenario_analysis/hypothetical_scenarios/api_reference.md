@@ -121,3 +121,4 @@ Returns `HypotheticalScenarioRunResponse` with full calculation results:
 
 ### `GET /runs/{run_id}`
 Retrieves a complete persisted scenario run by ID.
+

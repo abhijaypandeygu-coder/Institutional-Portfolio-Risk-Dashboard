@@ -137,6 +137,9 @@ from backend.app.modules.scenario_analysis.historical_scenarios.router import (
 from backend.app.modules.scenario_analysis.hypothetical_scenarios.router import (
     router as hypothetical_scenarios_router,
 )
+from backend.app.modules.scenario_analysis.market_crash.router import (
+    router as market_crash_router,
+)
 
 
 @asynccontextmanager
@@ -241,6 +244,7 @@ app.include_router(order_book_imbalance_router, tags=["M09.08 - Order Book Imbal
 app.include_router(microstructure_monitoring_router, tags=["M09.09 - Microstructure Monitoring"])
 app.include_router(historical_scenarios_router, tags=["M10.01 - Historical Scenarios"])
 app.include_router(hypothetical_scenarios_router, tags=["M10.02 - Hypothetical Scenarios"])
+app.include_router(market_crash_router, tags=["M10.03 - Market Crash Simulation"])
 
 
 @app.get("/health", tags=["System"])
@@ -313,5 +317,6 @@ async def root_health_check():
             "M09.09 - Microstructure Monitoring Engine",
             "M10.01 - Historical Scenarios Engine",
             "M10.02 - Hypothetical Scenarios Engine",
+            "M10.03 - Market Crash Simulation Engine",
         ],
     }

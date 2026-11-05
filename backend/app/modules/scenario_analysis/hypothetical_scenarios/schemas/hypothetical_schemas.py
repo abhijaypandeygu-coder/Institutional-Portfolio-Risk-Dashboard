@@ -208,3 +208,4 @@ class ScenarioRunSummaryResponse(BaseModel):
     liquidity_results: List[LiquidityResultResponse]
     warnings: List[WarningResponse]
     caveat_summary: str
+

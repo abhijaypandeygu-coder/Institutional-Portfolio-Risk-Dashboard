@@ -88,3 +88,4 @@ class HypotheticalScenariosRepository:
         self.db.add(log)
         await self.db.flush()
         return log
+

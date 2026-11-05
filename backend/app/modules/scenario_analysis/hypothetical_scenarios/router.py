@@ -66,3 +66,4 @@ async def execute_scenario(
         return await service.execute_scenario(req)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
