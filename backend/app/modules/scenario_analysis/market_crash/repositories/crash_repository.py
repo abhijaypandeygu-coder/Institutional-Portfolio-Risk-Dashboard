@@ -146,3 +146,4 @@ class MarketCrashRepository:
             self.db.add(w)
         self.db.add(audit_log)
         await self.db.commit()
+

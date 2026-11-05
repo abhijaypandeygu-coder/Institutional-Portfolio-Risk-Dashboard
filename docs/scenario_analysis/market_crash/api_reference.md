@@ -157,3 +157,4 @@ Returns `SimulationSummaryResponse`:
 
 ### `GET /api/v1/scenarios/market-crash/runs/{run_id}`
 Retrieves a complete persisted simulation run by ID.
+

@@ -348,3 +348,4 @@ async def test_market_crash_api_full_lifecycle():
         lin_nl_attrs = [a for a in attributions if a["attribution_type"] == "LINEAR_VS_NONLINEAR"]
         assert any(a["attribution_identifier"] == "LINEAR_BETA_IMPACT" for a in lin_nl_attrs)
         assert any(a["attribution_identifier"] == "NONLINEAR_STRESS_IMPACT" for a in lin_nl_attrs)
+

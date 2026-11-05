@@ -89,3 +89,4 @@ $$R_{\text{base}} = (1 + R_{\text{local}})(1 + R_{\text{FX}}) - 1$$
 10. `MarketCrashSummaryResult`: Aggregated portfolio exposure and position statistics.
 11. `MarketCrashAttributionResult`: Loss attribution by Sector, Benchmark, and Linear/Nonlinear impact.
 12. `MarketCrashWarning` & `MarketCrashAuditLog`: Diagnostic auditing and lifecycle history.
+

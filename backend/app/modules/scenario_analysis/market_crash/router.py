@@ -107,3 +107,4 @@ async def get_simulation_run(
         attribution_results=[AttributionResultResponse.model_validate(a) for a in (run.attribution_results or [])],
         warnings=[WarningResponse.model_validate(w) for w in (run.warnings or [])]
     )
+

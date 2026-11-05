@@ -370,3 +370,4 @@ def decompose_linear_nonlinear_impact(
         pnl_lin.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
         pnl_nl.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     )
+
