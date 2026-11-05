@@ -26,3 +26,4 @@ __all__ = [
     "compute_ewma_series",
     "compute_cusum_detector"
 ]
+

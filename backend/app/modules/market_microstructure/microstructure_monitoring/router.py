@@ -201,3 +201,4 @@ async def get_current_monitoring_overview(
 ):
     service = MicrostructureMonitoringService(db)
     return await service.get_current_overview(instrument_id)
+

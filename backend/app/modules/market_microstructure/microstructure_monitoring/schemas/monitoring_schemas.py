@@ -285,3 +285,4 @@ class CurrentMonitoringOverviewResponse(BaseModel):
     active_anomaly_count: int
     highest_active_severity: str
     quality_status: str
+

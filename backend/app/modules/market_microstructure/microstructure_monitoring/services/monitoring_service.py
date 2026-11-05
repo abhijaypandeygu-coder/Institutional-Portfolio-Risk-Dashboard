@@ -586,3 +586,4 @@ class MicrostructureMonitoringService:
             highest_active_severity=highest_sev,
             quality_status="VALID"
         )
+

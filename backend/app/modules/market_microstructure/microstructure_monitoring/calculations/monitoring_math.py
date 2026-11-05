@@ -407,3 +407,4 @@ def compute_cusum_detector(
         "s_high": s_high.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP),
         "s_low": s_low.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
     }
+

@@ -372,3 +372,4 @@ class MicrostructureMonitoringBaseline(Base):
     coverage_ratio = Column(Numeric(5, 4), nullable=False, default=1.0)
     baseline_version = Column(String(20), nullable=False, default="1.0.0")
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+

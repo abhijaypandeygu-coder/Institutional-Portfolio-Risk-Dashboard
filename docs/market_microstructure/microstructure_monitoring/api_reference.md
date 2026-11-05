@@ -85,3 +85,4 @@ Transitions anomaly state to `RESOLVED` with explicit resolution reason and clos
 
 ### `GET /{instrument_id}/current`
 Provides unified real-time surveillance health across spread, depth, update rate, feed status, and active anomalies.
+
