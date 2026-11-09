@@ -21,3 +21,4 @@ __all__ = [
     "compute_sector_coverage_metrics",
     "decompose_sector_impacts"
 ]
+

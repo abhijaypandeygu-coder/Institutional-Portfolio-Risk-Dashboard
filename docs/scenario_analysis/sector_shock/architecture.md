@@ -71,3 +71,4 @@ Provides hierarchical sector and industry aggregation without double counting pa
 11. `SectorShockAttributionResult`: Channel and group decomposition records.
 12. `SectorShockWarning`: Diagnostic warnings and caveats.
 13. `SectorShockAuditLog`: Lifecycle and execution audit trail.
+

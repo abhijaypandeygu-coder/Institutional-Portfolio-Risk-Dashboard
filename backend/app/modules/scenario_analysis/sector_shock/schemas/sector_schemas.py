@@ -222,3 +222,4 @@ class SectorSimulationSummaryResponse(BaseModel):
     warnings: Optional[List[SectorWarningResponse]] = None
 
     model_config = ConfigDict(from_attributes=True)
+

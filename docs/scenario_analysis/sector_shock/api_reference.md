@@ -158,3 +158,4 @@ Returns `SectorSimulationSummaryResponse`:
 
 ### `GET /api/v1/scenarios/sector-shock/runs/{run_id}`
 Retrieves a complete persisted simulation run by ID.
+

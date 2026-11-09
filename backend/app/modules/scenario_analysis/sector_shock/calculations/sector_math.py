@@ -298,3 +298,4 @@ def decompose_sector_impacts(
         "manual_impact": pnl_man.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
         "total_impact": total_decomp.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     }
+
