@@ -209,3 +209,4 @@ class ExecutionResponse(BaseModel):
     risk_summary: Optional[RiskResultSummary] = None
     contributions: List[RiskContributionItem] = []
     error_message: Optional[str] = None
+

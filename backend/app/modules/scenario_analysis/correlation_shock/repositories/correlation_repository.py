@@ -136,3 +136,4 @@ class CorrelationShockRepository:
         self.session.add(log)
         await self.session.flush()
         return log
+

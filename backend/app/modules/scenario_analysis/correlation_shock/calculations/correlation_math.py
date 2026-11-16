@@ -639,3 +639,4 @@ def compare_baseline_vs_stressed(
         "top_contributor": top_contributor,
         "narrative": " ".join(narrative_points),
     }
+

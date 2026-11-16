@@ -398,3 +398,4 @@ class CorrelationShockAuditLog(Base):
     execution: Mapped[Optional["CorrelationShockExecution"]] = relationship(
         "CorrelationShockExecution", back_populates="audit_logs"
     )
+

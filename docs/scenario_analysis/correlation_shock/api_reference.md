@@ -87,3 +87,4 @@ Mounted Base Path: `/api/v1/scenarios/correlation-shock`
   Supports either portfolio lookup via database (`portfolio_id`) or custom ad-hoc simulation payloads (`custom_asset_ids`, `custom_weights`, `custom_volatilities`, `custom_matrix_data`).
 - **Response Body:** `ExecutionResponse`
   Returns execution status, matrices across stages (baseline, raw stressed, repaired), matrix diagnostics, risk comparison KPIs (volatility, variance, average correlation, diversification benefit), and holding-level Euler risk contributions.
+

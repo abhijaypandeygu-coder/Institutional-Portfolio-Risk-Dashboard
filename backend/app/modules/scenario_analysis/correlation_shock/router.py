@@ -144,3 +144,4 @@ async def execute_scenario(
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Execution error: {str(e)}")
+

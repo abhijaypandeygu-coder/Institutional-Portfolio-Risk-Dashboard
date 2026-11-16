@@ -85,3 +85,4 @@ The module introduces 10 normalized tables:
 - `correlation_shock_risk_results`: Macro-level risk and diversification comparison metrics.
 - `correlation_shock_risk_contributions`: Holding-level Euler risk contributions.
 - `correlation_shock_audit_logs`: Detailed governance audit events.
+

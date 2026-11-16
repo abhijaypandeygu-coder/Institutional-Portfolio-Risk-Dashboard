@@ -6,3 +6,4 @@ from backend.app.modules.scenario_analysis.correlation_shock.services.correlatio
 )
 
 __all__ = ["CorrelationShockService"]
+
