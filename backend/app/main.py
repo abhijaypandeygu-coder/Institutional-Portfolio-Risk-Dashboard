@@ -176,6 +176,9 @@ from backend.app.modules.risk_limits.dynamic_limits.router import (
 from backend.app.modules.risk_limits.breach_detection.router import (
     router as breach_detection_router,
 )
+from backend.app.modules.risk_limits.breach_classification.router import (
+    router as breach_classification_router,
+)
 
 
 @asynccontextmanager
@@ -293,6 +296,7 @@ app.include_router(sector_limits_router, tags=["M11.03 - Sector Limits"])
 app.include_router(liquidity_limits_router, tags=["M11.04 - Liquidity Limits"])
 app.include_router(dynamic_limits_router, tags=["M11.05 - Dynamic Limits"])
 app.include_router(breach_detection_router, tags=["M11.06 - Breach Detection"])
+app.include_router(breach_classification_router, tags=["M11.07 - Breach Classification"])
 
 
 @app.get("/health", tags=["System"])
@@ -378,5 +382,6 @@ async def root_health_check():
             "M11.04 - Liquidity Limits Engine",
             "M11.05 - Dynamic Limits Engine",
             "M11.06 - Breach Detection Engine",
+            "M11.07 - Breach Classification Engine",
         ],
     }
