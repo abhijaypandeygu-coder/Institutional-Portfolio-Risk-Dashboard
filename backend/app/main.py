@@ -158,6 +158,9 @@ from backend.app.modules.scenario_analysis.scenario_comparison.router import (
 from backend.app.modules.scenario_analysis.loss_attribution.router import (
     router as loss_attribution_router,
 )
+from backend.app.modules.risk_limits.portfolio_risk_limits.router import (
+    router as portfolio_risk_limits_router,
+)
 
 
 @asynccontextmanager
@@ -269,6 +272,7 @@ app.include_router(liquidity_stress_router, tags=["M10.06 - Liquidity Stress Tes
 app.include_router(monte_carlo_router, tags=["M10.07 - Monte Carlo Scenarios"])
 app.include_router(scenario_comparison_router, tags=["M10.08 - Scenario Comparison"])
 app.include_router(loss_attribution_router, tags=["M10.09 - Stress Loss Attribution"])
+app.include_router(portfolio_risk_limits_router, tags=["M11.01 - Portfolio Risk Limits"])
 
 
 @app.get("/health", tags=["System"])
@@ -348,5 +352,6 @@ async def root_health_check():
             "M10.07 - Monte Carlo Scenarios Engine",
             "M10.08 - Scenario Comparison Engine",
             "M10.09 - Stress Loss Attribution Engine",
+            "M11.01 - Portfolio Risk Limits Engine",
         ],
     }
