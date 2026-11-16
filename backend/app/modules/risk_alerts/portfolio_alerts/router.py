@@ -153,3 +153,4 @@ async def get_portfolio_alert_detail(
     if not event:
         raise HTTPException(status_code=404, detail="Portfolio alert not found")
     return event
+

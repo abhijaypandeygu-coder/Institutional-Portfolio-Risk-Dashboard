@@ -200,6 +200,9 @@ from backend.app.modules.risk_alerts.portfolio_alerts.router import (
 from backend.app.modules.risk_alerts.alert_prioritization.router import (
     router as alert_prioritization_router,
 )
+from backend.app.modules.risk_alerts.alert_management.router import (
+    router as alert_management_router,
+)
 
 
 @asynccontextmanager
@@ -325,6 +328,7 @@ app.include_router(market_alerts_router, tags=["M12.02 - Market Alerts Engine"])
 app.include_router(liquidity_alerts_router, tags=["M12.03 - Liquidity Alerts Engine"])
 app.include_router(portfolio_alerts_router, tags=["M12.04 - Portfolio Alerts Engine"])
 app.include_router(alert_prioritization_router, prefix="/api/v1", tags=["M12.05 - Alert Prioritization Engine"])
+app.include_router(alert_management_router, prefix="/api/v1", tags=["M12.06 - Alert Management Engine"])
 
 
 @app.get("/health", tags=["System"])

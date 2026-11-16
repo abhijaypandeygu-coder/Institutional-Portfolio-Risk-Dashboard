@@ -311,3 +311,4 @@ async def test_cash_and_reconciliation_alerts():
         # Verify overview metrics
         overview = await service.get_overview(portfolio_id="PORTFOLIO_MAIN")
         assert overview["active_alerts"] >= 2
+

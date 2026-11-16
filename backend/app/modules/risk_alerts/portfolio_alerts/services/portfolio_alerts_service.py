@@ -706,3 +706,4 @@ class PortfolioAlertsService:
 
     async def get_event_detail(self, event_id: str) -> Optional[PortfolioAlertEvent]:
         return await self.repo.get_event_by_id(event_id)
+

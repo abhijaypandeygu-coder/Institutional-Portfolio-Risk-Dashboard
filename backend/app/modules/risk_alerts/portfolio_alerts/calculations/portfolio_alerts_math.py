@@ -239,3 +239,4 @@ def generate_portfolio_event_fingerprint(
 ) -> str:
     raw = f"{category}|{event_type}|{portfolio_id}|{entity_key or ''}|{window_timestamp_str}"
     return hashlib.md5(raw.encode("utf-8")).hexdigest()
+

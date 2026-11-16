@@ -207,3 +207,4 @@ class PortfolioAlertsRepository:
             "cash_alerts_count": cash_count,
             "reconciliation_alerts_count": rec_count,
         }
+

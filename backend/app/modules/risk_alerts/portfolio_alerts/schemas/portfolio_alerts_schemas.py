@@ -175,3 +175,4 @@ class PortfolioAlertOverviewResponse(BaseModel):
     cash_alerts_count: int
     reconciliation_alerts_count: int
     timestamp: datetime
+
