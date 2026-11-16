@@ -98,6 +98,7 @@ async def init_db() -> None:
     import backend.app.modules.scenario_analysis.sector_shock.models  # noqa: F401
     import backend.app.modules.scenario_analysis.correlation_shock.models  # noqa: F401
     import backend.app.modules.scenario_analysis.liquidity_stress.models  # noqa: F401
+    import backend.app.modules.scenario_analysis.monte_carlo.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
