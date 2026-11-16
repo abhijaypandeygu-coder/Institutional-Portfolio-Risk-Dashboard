@@ -179,3 +179,4 @@ List persisted effective limit snapshots with optional query filters: `portfolio
 
 ### `GET /audit`
 Retrieve the immutable audit trail log with optional `entity_id` filter.
+

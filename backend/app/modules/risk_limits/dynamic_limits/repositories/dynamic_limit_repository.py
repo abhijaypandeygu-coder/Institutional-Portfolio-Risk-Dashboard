@@ -223,3 +223,4 @@ class DynamicLimitRepository:
         query = query.order_by(desc(DynamicLimitAuditEvent.timestamp)).limit(limit)
         res = await self.db.execute(query)
         return list(res.scalars().all())
+

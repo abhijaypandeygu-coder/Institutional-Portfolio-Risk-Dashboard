@@ -248,3 +248,4 @@ class DynamicLimitAuditEvent(Base):
     performed_by: Mapped[str] = mapped_column(String(64), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
     details: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
+

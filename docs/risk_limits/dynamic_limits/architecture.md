@@ -125,3 +125,4 @@ When multiple adjustment sources match a target limit:
 - **`dynamic_limit_overrides`**: Time-bounded manual overrides with maker-checker audit details.
 - **`effective_limit_snapshots`**: Immutable point-in-time calculation outputs with full lineage JSON and SHA-256 hash.
 - **`dynamic_limit_audit_events`**: Immutable audit log of all system transitions and approvals.
+

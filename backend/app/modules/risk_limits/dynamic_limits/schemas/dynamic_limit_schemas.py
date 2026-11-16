@@ -236,3 +236,4 @@ class DynamicLimitAuditEventResponse(BaseModel):
     timestamp: datetime
     details: Dict[str, Any] = Field(default_factory=dict)
     model_config = ConfigDict(from_attributes=True)
+

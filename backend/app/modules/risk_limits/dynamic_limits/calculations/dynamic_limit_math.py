@@ -285,3 +285,4 @@ def generate_lineage_hash(lineage_data: Dict[str, Any]) -> str:
     """
     serialized = json.dumps(lineage_data, sort_keys=True, default=str)
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+

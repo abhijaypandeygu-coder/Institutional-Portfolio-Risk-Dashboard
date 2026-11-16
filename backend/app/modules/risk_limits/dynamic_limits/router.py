@@ -182,3 +182,4 @@ async def list_audit_events(
     service: DynamicLimitService = Depends(get_service),
 ):
     return await service.repo.list_audit_events(entity_id=entity_id, limit=limit)
+
