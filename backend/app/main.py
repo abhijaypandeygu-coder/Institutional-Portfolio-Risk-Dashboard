@@ -179,6 +179,9 @@ from backend.app.modules.risk_limits.breach_detection.router import (
 from backend.app.modules.risk_limits.breach_classification.router import (
     router as breach_classification_router,
 )
+from backend.app.modules.risk_limits.risk_escalation.router import (
+    router as risk_escalation_router,
+)
 
 
 @asynccontextmanager
@@ -297,6 +300,7 @@ app.include_router(liquidity_limits_router, tags=["M11.04 - Liquidity Limits"])
 app.include_router(dynamic_limits_router, tags=["M11.05 - Dynamic Limits"])
 app.include_router(breach_detection_router, tags=["M11.06 - Breach Detection"])
 app.include_router(breach_classification_router, tags=["M11.07 - Breach Classification"])
+app.include_router(risk_escalation_router, tags=["M11.08 - Risk Escalation"])
 
 
 @app.get("/health", tags=["System"])

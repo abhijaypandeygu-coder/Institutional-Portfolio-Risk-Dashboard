@@ -250,3 +250,4 @@ class ClassificationAuditEvent(Base):
     reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     correlation_id: Mapped[str] = mapped_column(String(64), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+

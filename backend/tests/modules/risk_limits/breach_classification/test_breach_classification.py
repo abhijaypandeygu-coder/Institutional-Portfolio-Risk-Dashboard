@@ -246,3 +246,4 @@ async def test_breach_event_classification_and_reclassification():
         ov_data = overview_res.json()
         assert ov_data["total_active_classifications"] >= 1
         assert ov_data["total_upgraded_events"] >= 1
+

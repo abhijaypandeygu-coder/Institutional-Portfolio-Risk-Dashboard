@@ -206,3 +206,4 @@ class ClassificationAuditEventResponse(BaseModel):
     correlation_id: str
     timestamp: datetime
     model_config = ConfigDict(from_attributes=True)
+

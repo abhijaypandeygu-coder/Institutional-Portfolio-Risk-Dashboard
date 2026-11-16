@@ -116,3 +116,4 @@ def evaluate_severity_rule(
         return v < t_low or v > t_high
     else:
         raise ValueError(f"Unsupported rule operator: {rule_operator}")
+
