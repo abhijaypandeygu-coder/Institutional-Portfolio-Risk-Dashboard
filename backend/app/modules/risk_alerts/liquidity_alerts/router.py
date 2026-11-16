@@ -163,3 +163,4 @@ async def add_review_label(
     if not label:
         raise HTTPException(status_code=404, detail="Liquidity alert event not found")
     return {"status": "SUCCESS", "review_label": label.review_label}
+

@@ -113,6 +113,7 @@ async def init_db() -> None:
     import backend.app.modules.risk_alerts.models.risk_alerts_models  # noqa: F401
     import backend.app.modules.risk_alerts.market_alerts.models.market_alerts_models  # noqa: F401
     import backend.app.modules.risk_alerts.liquidity_alerts.models.liquidity_alerts_models  # noqa: F401
+    import backend.app.modules.risk_alerts.portfolio_alerts.models.portfolio_alerts_models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

@@ -243,3 +243,4 @@ class LiquidityAlertsRepository:
             "score_deterioration_count": score_count,
             "liquidation_risk_count": risk_count,
         }
+

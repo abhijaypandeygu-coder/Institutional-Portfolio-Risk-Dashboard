@@ -698,3 +698,4 @@ class LiquidityAlertsService:
             reviewed_at=datetime.utcnow(),
         )
         return await self.repo.add_review_label(label)
+

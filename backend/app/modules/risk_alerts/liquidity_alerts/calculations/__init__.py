@@ -19,3 +19,4 @@ __all__ = [
     "map_liquidity_side_for_position",
     "generate_liquidity_event_fingerprint",
 ]
+

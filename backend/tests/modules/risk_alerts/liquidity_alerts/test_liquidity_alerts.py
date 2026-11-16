@@ -289,3 +289,4 @@ async def test_score_and_liquidation_risk_alerts():
         # Verify overview metrics
         overview = await service.get_overview(market="INDIA")
         assert overview["active_liquidity_alerts_count"] >= 2
+

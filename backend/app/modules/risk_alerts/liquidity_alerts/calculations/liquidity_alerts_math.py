@@ -202,3 +202,4 @@ def generate_liquidity_event_fingerprint(
 ) -> str:
     raw = f"{alert_category}|{metric_type}|{market}|{exchange or ''}|{instrument_id}|{side or ''}|{window_timestamp_str}"
     return hashlib.md5(raw.encode("utf-8")).hexdigest()
+

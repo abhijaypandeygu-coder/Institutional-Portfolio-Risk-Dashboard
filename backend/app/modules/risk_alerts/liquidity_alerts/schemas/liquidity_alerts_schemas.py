@@ -201,3 +201,4 @@ class LiquidityReviewLabelCreate(BaseModel):
     review_label: str = Field(..., description="VALID_LIQUIDITY_DETERIORATION, FALSE_POSITIVE, DATA_QUALITY_ISSUE, DUPLICATE, INSUFFICIENT_EVIDENCE")
     review_comment: Optional[str] = None
     reviewed_by: str = Field(default="RISK_ANALYST")
+
