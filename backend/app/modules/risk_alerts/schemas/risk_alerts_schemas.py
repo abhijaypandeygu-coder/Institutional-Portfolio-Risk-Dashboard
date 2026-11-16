@@ -201,3 +201,4 @@ class AlertDashboardSummary(BaseModel):
     priority_breakdown: Dict[str, int]
     category_breakdown: Dict[str, int]
     unacknowledged_critical_count: int
+

@@ -211,3 +211,4 @@ async def test_dashboard_and_analytics():
         assert "total_active_alerts" in data
         assert "priority_breakdown" in data
         assert "category_breakdown" in data
+

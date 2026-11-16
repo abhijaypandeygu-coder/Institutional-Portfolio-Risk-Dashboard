@@ -128,3 +128,4 @@ async def resolve_alert(alert_id: str, payload: AlertResolveInput, db: AsyncSess
 async def reopen_alert(alert_id: str, payload: AlertReopenInput, db: AsyncSession = Depends(get_db)):
     svc = RiskAlertsService(db)
     return await svc.reopen_alert(alert_id, payload)
+
