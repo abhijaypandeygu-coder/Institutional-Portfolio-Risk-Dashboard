@@ -656,3 +656,4 @@ class PretradeRiskService:
             active_authorizations_count=stats["active_authorizations_count"],
             rejection_reasons_breakdown=stats["rejection_reasons_breakdown"],
         )
+

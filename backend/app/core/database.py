@@ -110,6 +110,7 @@ async def init_db() -> None:
     import backend.app.modules.risk_limits.breach_classification.models.breach_classification_models  # noqa: F401
     import backend.app.modules.risk_limits.risk_escalation.models.risk_escalation_models  # noqa: F401
     import backend.app.modules.risk_limits.pretrade_risk_checks.models.pretrade_risk_models  # noqa: F401
+    import backend.app.modules.risk_alerts.models.risk_alerts_models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

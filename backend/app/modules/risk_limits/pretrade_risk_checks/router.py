@@ -64,3 +64,4 @@ async def evaluate_order(payload: ProposedOrderInput, db: AsyncSession = Depends
 async def validate_authorization(authorization_id: str, db: AsyncSession = Depends(get_db)):
     svc = PretradeRiskService(db)
     return await svc.validate_authorization(authorization_id)
+

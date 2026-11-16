@@ -179,3 +179,4 @@ class PretradeRiskRepository:
             "active_authorizations_count": auth_count,
             "rejection_reasons_breakdown": reasons,
         }
+

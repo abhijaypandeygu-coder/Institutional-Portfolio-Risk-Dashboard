@@ -205,3 +205,4 @@ async def test_dashboard_and_analytics():
         assert "total_orders_evaluated" in data
         assert "pass_percentage" in data
         assert "rejection_reasons_breakdown" in data
+

@@ -185,6 +185,9 @@ from backend.app.modules.risk_limits.risk_escalation.router import (
 from backend.app.modules.risk_limits.pretrade_risk_checks.router import (
     router as pretrade_risk_checks_router,
 )
+from backend.app.modules.risk_alerts.router import (
+    router as risk_alerts_router,
+)
 
 
 @asynccontextmanager
@@ -305,6 +308,7 @@ app.include_router(breach_detection_router, tags=["M11.06 - Breach Detection"])
 app.include_router(breach_classification_router, tags=["M11.07 - Breach Classification"])
 app.include_router(risk_escalation_router, tags=["M11.08 - Risk Escalation"])
 app.include_router(pretrade_risk_checks_router, tags=["M11.09 - Pre-trade Risk Checks"])
+app.include_router(risk_alerts_router, tags=["M12 - Risk Alerts & Notification Engine"])
 
 
 @app.get("/health", tags=["System"])

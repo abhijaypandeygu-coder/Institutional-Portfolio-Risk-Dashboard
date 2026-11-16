@@ -198,3 +198,4 @@ def calculate_participation_rate(order_qty: Decimal, expected_volume: Decimal) -
         return Decimal("100.00")
     rate = (to_decimal(order_qty) / vol) * Decimal("100.00")
     return rate.quantize(Decimal("0.01"))
+

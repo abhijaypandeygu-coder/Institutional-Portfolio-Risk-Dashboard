@@ -109,3 +109,4 @@ class PretradeDashboardSummary(BaseModel):
     active_reservations_count: int
     active_authorizations_count: int
     rejection_reasons_breakdown: Dict[str, int]
+
