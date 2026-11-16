@@ -271,3 +271,4 @@ def generate_event_fingerprint(
     import hashlib
     raw = f"{event_type}|{market}|{exchange or ''}|{instrument_id or ''}|{direction or ''}|{window_timestamp_str}"
     return hashlib.md5(raw.encode("utf-8")).hexdigest()
+

@@ -258,3 +258,4 @@ class MarketAlertsRepository:
             "price_anomalies_count": price_count,
             "market_wide_events_count": mw_count,
         }
+

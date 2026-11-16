@@ -27,3 +27,4 @@ __all__ = [
     "MarketAlertReviewLabel",
     "MarketDetectionProcessingLog",
 ]
+

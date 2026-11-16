@@ -222,3 +222,4 @@ class MarketOverviewResponse(BaseModel):
     feed_coverage_ratio: Decimal
     data_quality_summary: Dict[str, int]
     timestamp: datetime
+
