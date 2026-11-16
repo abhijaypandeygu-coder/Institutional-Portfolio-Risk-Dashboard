@@ -167,6 +167,9 @@ from backend.app.modules.risk_limits.position_limits.router import (
 from backend.app.modules.risk_limits.sector_limits.router import (
     router as sector_limits_router,
 )
+from backend.app.modules.risk_limits.liquidity_limits.router import (
+    router as liquidity_limits_router,
+)
 
 
 @asynccontextmanager
@@ -281,6 +284,7 @@ app.include_router(loss_attribution_router, tags=["M10.09 - Stress Loss Attribut
 app.include_router(portfolio_risk_limits_router, tags=["M11.01 - Portfolio Risk Limits"])
 app.include_router(position_limits_router, tags=["M11.02 - Position Limits"])
 app.include_router(sector_limits_router, tags=["M11.03 - Sector Limits"])
+app.include_router(liquidity_limits_router, tags=["M11.04 - Liquidity Limits"])
 
 
 @app.get("/health", tags=["System"])
@@ -363,5 +367,6 @@ async def root_health_check():
             "M11.01 - Portfolio Risk Limits Engine",
             "M11.02 - Position Limits Engine",
             "M11.03 - Sector Limits Engine",
+            "M11.04 - Liquidity Limits Engine",
         ],
     }

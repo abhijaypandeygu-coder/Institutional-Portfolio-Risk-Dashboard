@@ -104,6 +104,7 @@ async def init_db() -> None:
     import backend.app.modules.risk_limits.portfolio_risk_limits.models  # noqa: F401
     import backend.app.modules.risk_limits.position_limits.models  # noqa: F401
     import backend.app.modules.risk_limits.sector_limits.models  # noqa: F401
+    import backend.app.modules.risk_limits.liquidity_limits.models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
