@@ -276,3 +276,4 @@ class RiskEscalationRepository:
             "total_escalation_events": total_esc_events,
             "total_closed_count": closed_c,
         }
+

@@ -96,3 +96,4 @@ def is_sla_breached(
     
     adjusted_deadline = deadline + timedelta(seconds=total_paused_seconds)
     return effective_now > adjusted_deadline
+

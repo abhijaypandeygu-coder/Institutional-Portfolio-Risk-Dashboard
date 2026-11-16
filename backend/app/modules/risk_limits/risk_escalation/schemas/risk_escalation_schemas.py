@@ -307,3 +307,4 @@ class EscalationDashboardSummary(BaseModel):
     sla_compliance_rate: Decimal
     reopening_rate: Decimal
     escalation_frequency: Decimal
+
