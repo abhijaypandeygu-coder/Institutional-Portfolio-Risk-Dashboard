@@ -71,3 +71,4 @@ Implemented via SQLAlchemy 2.0 async declarative models with exact `Numeric(18, 
 - **Downstream Modules:**
   - **M11.07 Pre-Trade Risk Evaluation:** Proposed order validation and post-trade capacity headroom.
   - **M11.08 Breach Management & Escalation:** Immutable breach events with severity and root-cause taxonomy.
+
