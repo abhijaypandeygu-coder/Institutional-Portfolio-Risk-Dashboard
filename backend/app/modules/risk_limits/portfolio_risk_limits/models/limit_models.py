@@ -184,3 +184,4 @@ class RiskLimitAuditLog(Base):
     actor_id: Mapped[str] = mapped_column(String(64), default="system", nullable=False)
     event_timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     details: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+

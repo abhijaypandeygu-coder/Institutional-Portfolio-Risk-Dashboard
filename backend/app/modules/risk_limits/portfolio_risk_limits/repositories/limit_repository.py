@@ -137,3 +137,4 @@ class RiskLimitRepository:
         self.session.add(event)
         await self.session.flush()
         return event
+

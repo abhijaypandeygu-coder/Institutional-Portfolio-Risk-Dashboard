@@ -129,3 +129,4 @@
     "narrative": "Portfolio 'PORT_API_902' evaluated against profile 'CONS_WEALTH_01'. Overall state: HARD_LIMIT_EXCEEDED."
   }
   ```
+

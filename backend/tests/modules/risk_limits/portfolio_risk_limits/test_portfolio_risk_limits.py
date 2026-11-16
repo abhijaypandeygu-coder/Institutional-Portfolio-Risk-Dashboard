@@ -232,15 +232,17 @@ async def test_portfolio_risk_limits_api_endpoints():
         assert health_data["module"] == "M11.01 - Portfolio Risk Limits"
         assert health_data["status"] == "healthy"
 
-        # Create Profile via API
+        # Create Profile via API with unique code
+        import uuid
+        u_code = f"CONS_WEALTH_{uuid.uuid4().hex[:6]}"
         create_payload = {
-            "profile_code": "CONS_WEALTH_01",
+            "profile_code": u_code,
             "profile_name": "Conservative Wealth Profile",
             "description": "Conservative profile with tight drawdown and VaR controls",
             "profile_category": "CONSERVATIVE",
             "initial_limits": [
                 {
-                    "limit_code": "VAR_NAV_CONS",
+                    "limit_code": f"VAR_NAV_{uuid.uuid4().hex[:6]}",
                     "limit_name": "99% 1D VaR",
                     "risk_category": "VAR",
                     "metric_identifier": "VAR_99_1D",
@@ -250,7 +252,7 @@ async def test_portfolio_risk_limits_api_endpoints():
                     "threshold_unit": "PERCENT_NAV",
                 },
                 {
-                    "limit_code": "VOL_CONS",
+                    "limit_code": f"VOL_{uuid.uuid4().hex[:6]}",
                     "limit_name": "Max Volatility",
                     "risk_category": "VOLATILITY",
                     "metric_identifier": "REALIZED_VOL",
@@ -265,10 +267,10 @@ async def test_portfolio_risk_limits_api_endpoints():
         assert res.status_code == 201
         profile_data = res.json()
         profile_id = profile_data["id"]
-        assert profile_data["profile_code"] == "CONS_WEALTH_01"
+        assert profile_data["profile_code"] == u_code
 
         # Query Profile by code
-        res_get = await client.get("/api/v1/risk-limits/profiles/CONS_WEALTH_01")
+        res_get = await client.get(f"/api/v1/risk-limits/profiles/{u_code}")
         assert res_get.status_code == 200
         assert res_get.json()["id"] == profile_id
 

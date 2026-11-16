@@ -271,3 +271,4 @@ class PortfolioRiskLimitService:
             "utilizations": evaluations,
             "narrative": f"Portfolio '{request.portfolio_id}' evaluated against profile '{profile.profile_code}'. Overall state: {worst_state}."
         }
+

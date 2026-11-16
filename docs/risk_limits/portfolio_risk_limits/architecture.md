@@ -61,3 +61,4 @@ Tables created in database schema:
 - `portfolio_limit_assignments`: Mapping between profiles and targets (portfolios/mandates) with precedence rules.
 - `risk_limit_utilization_snapshots`: Historical and latest audit snapshots capturing evaluation results, utilization percentages, headroom, and detailed breakdown.
 - `risk_limit_audit_logs`: Append-only audit trail logging state transitions, approvals, activations, and assignment changes.
+
