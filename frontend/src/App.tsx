@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { ExternalProvidersPage } from './modules/dashboard/ExternalProvidersPage';
 import { PortfolioOverviewPage } from './modules/dashboard/portfolio-overview/PortfolioOverviewPage';
 import { AlertsDashboardPage } from './modules/dashboard/alerts-dashboard/AlertsDashboardPage';
@@ -71,11 +72,13 @@ export const App: React.FC = () => {
 
       {/* Main Content Area */}
       <main style={{ flex: 1, padding: '24px', backgroundColor: '#0f172a' }}>
-        {activeTab === 'overview' && <PortfolioOverviewPage />}
-        {activeTab === 'alerts' && <AlertsDashboardPage />}
-        {activeTab === 'liquidity' && <LiquidityDashboardPage />}
-        {activeTab === 'stress' && <StressTestingDashboardPage />}
-        {activeTab === 'providers' && <ExternalProvidersPage />}
+        <ErrorBoundary fallbackTitle="Tab Rendering Error">
+          {activeTab === 'overview' && <PortfolioOverviewPage />}
+          {activeTab === 'alerts' && <AlertsDashboardPage />}
+          {activeTab === 'liquidity' && <LiquidityDashboardPage />}
+          {activeTab === 'stress' && <StressTestingDashboardPage />}
+          {activeTab === 'providers' && <ExternalProvidersPage />}
+        </ErrorBoundary>
       </main>
     </div>
   );

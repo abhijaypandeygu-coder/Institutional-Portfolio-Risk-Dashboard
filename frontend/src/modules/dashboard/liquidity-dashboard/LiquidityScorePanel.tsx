@@ -54,7 +54,7 @@ export const LiquidityScorePanel: React.FC<LiquidityScorePanelProps> = ({ score 
         </div>
 
         <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
-          Coverage: {(score.data_quality_coverage ? score.data_quality_coverage * 100 : 100).toFixed(0)}%
+          Coverage: {(score.data_quality_coverage ? Number(score.data_quality_coverage) * 100 : 100).toFixed(0)}%
         </div>
       </div>
 

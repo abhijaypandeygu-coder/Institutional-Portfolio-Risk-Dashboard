@@ -42,34 +42,34 @@ export const PortfolioLiquidityTable: React.FC<PortfolioLiquidityTableProps> = (
         <div className="bg-slate-950 p-3 rounded border border-slate-800">
           <span className="text-xs text-slate-400">Weighted Liquidity Score</span>
           <div className="text-2xl font-bold text-cyan-400 font-mono">
-            {portfolioData.weighted_composite_score.toFixed(1)} <span className="text-xs font-normal text-slate-500">/ 100</span>
+            {Number(portfolioData.weighted_composite_score).toFixed(1)} <span className="text-xs font-normal text-slate-500">/ 100</span>
           </div>
         </div>
 
         <div className="bg-slate-950 p-3 rounded border border-slate-800">
           <span className="text-xs text-slate-400">Weighted Spread</span>
           <div className="text-2xl font-bold text-emerald-400 font-mono">
-            {portfolioData.weighted_spread_bps.toFixed(2)} <span className="text-xs font-normal text-slate-500">bps</span>
+            {Number(portfolioData.weighted_spread_bps).toFixed(2)} <span className="text-xs font-normal text-slate-500">bps</span>
           </div>
         </div>
 
         <div className="bg-slate-950 p-3 rounded border border-slate-800">
           <span className="text-xs text-slate-400">Full Liquidation Cost</span>
           <div className="text-2xl font-bold text-rose-400 font-mono">
-            ${(portfolioData.total_full_liquidation_cost_usd / 1000).toFixed(1)}k
+            ${(Number(portfolioData.total_full_liquidation_cost_usd) / 1000).toFixed(1)}k
           </div>
           <span className="text-[11px] text-slate-500 font-mono">
-            {portfolioData.portfolio_liquidation_cost_bps.toFixed(1)} bps of NAV
+            {Number(portfolioData.portfolio_liquidation_cost_bps).toFixed(1)} bps of NAV
           </span>
         </div>
 
         <div className="bg-slate-950 p-3 rounded border border-slate-800">
           <span className="text-xs text-slate-400">Max Days to Liquidate</span>
           <div className="text-2xl font-bold text-amber-400 font-mono">
-            {portfolioData.max_days_to_liquidate.toFixed(1)} <span className="text-xs font-normal text-slate-500">days</span>
+            {Number(portfolioData.max_days_to_liquidate).toFixed(1)} <span className="text-xs font-normal text-slate-500">days</span>
           </div>
           <span className="text-[11px] text-slate-500 font-mono">
-            Low Liq Capital: {portfolioData.low_liquidity_capital_pct.toFixed(1)}%
+            Low Liq Capital: {Number(portfolioData.low_liquidity_capital_pct).toFixed(1)}%
           </span>
         </div>
       </div>

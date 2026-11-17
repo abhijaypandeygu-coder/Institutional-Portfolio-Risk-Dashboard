@@ -88,8 +88,10 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
             <div className="text-xs text-slate-500 py-3 text-center">No bids available</div>
           ) : (
             ladder.bids.map((b, idx) => {
-              const cumNotional = ladder.cumulative_bid_notional[idx] || b.notional;
+              const cumNotional = Number(ladder.cumulative_bid_notional[idx] || b.notional) || 0;
               const fillPct = Math.min(100, (cumNotional / maxNotional) * 100);
+              const bQty = Number(b.quantity) || 0;
+              const bPrice = Number(b.price) || 0;
 
               return (
                 <div
@@ -100,9 +102,9 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
                     className="absolute right-0 top-0 bottom-0 bg-emerald-500/15 pointer-events-none transition-all duration-300"
                     style={{ width: `${fillPct}%` }}
                   />
-                  <span className="text-slate-300 z-10">{b.quantity.toLocaleString()}</span>
+                  <span className="text-slate-300 z-10">{bQty.toLocaleString()}</span>
                   <span className="text-slate-400 text-[11px] z-10">${(cumNotional / 1000).toFixed(1)}k</span>
-                  <span className="text-emerald-400 font-bold z-10">${b.price.toFixed(2)}</span>
+                  <span className="text-emerald-400 font-bold z-10">${bPrice.toFixed(2)}</span>
                 </div>
               );
             })
@@ -121,8 +123,10 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
             <div className="text-xs text-slate-500 py-3 text-center">No asks available</div>
           ) : (
             ladder.asks.map((a, idx) => {
-              const cumNotional = ladder.cumulative_ask_notional[idx] || a.notional;
+              const cumNotional = Number(ladder.cumulative_ask_notional[idx] || a.notional) || 0;
               const fillPct = Math.min(100, (cumNotional / maxNotional) * 100);
+              const aQty = Number(a.quantity) || 0;
+              const aPrice = Number(a.price) || 0;
 
               return (
                 <div
@@ -133,9 +137,9 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
                     className="absolute left-0 top-0 bottom-0 bg-rose-500/15 pointer-events-none transition-all duration-300"
                     style={{ width: `${fillPct}%` }}
                   />
-                  <span className="text-rose-400 font-bold z-10">${a.price.toFixed(2)}</span>
+                  <span className="text-rose-400 font-bold z-10">${aPrice.toFixed(2)}</span>
                   <span className="text-slate-400 text-[11px] z-10">${(cumNotional / 1000).toFixed(1)}k</span>
-                  <span className="text-slate-300 z-10">{a.quantity.toLocaleString()}</span>
+                  <span className="text-slate-300 z-10">{aQty.toLocaleString()}</span>
                 </div>
               );
             })
