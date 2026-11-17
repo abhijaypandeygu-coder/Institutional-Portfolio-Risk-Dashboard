@@ -233,6 +233,9 @@ from backend.app.modules.dashboard_visualization.stress_dashboard.router import 
 from backend.app.modules.dashboard_visualization.alerts_dashboard.router import (
     router as alerts_dashboard_router,
 )
+from backend.app.modules.dashboard_visualization.historical_analytics.router import (
+    router as historical_analytics_router,
+)
 
 
 @asynccontextmanager
@@ -369,6 +372,7 @@ app.include_router(correlation_dashboard_router, prefix="/api/v1/dashboard", tag
 app.include_router(liquidity_dashboard_router, tags=["M13.06 - Liquidity Dashboard"])
 app.include_router(stress_dashboard_router, tags=["M13.07 - Stress Testing Dashboard"])
 app.include_router(alerts_dashboard_router, tags=["M13.08 - Alerts Dashboard"])
+app.include_router(historical_analytics_router, prefix="/api/v1/dashboard", tags=["M13.09 - Historical Analytics"])
 
 
 @app.get("/health", tags=["System"])

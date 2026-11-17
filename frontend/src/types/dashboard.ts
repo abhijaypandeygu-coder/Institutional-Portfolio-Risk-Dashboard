@@ -1490,3 +1490,238 @@ export interface AlertsSavedViewResponse {
   updated_at: string;
 }
 
+
+
+// ============================================================================
+// M13.09 — Historical Analytics Types
+// ============================================================================
+
+export type HistoricalMode = 'AS_KNOWN_AT_TIME' | 'LATEST_RESTATED';
+export type ConsistencyStatus = 'CONSISTENT' | 'RESTATED' | 'INCOMPLETE' | 'OUT_OF_SYNC';
+
+export interface HistoricalDataPoint {
+  observation_id: string;
+  portfolio_id: string;
+  metric_name: string;
+  effective_at: string;
+  known_at: string;
+  calculated_at?: string | null;
+  value: number | null;
+  currency?: string | null;
+  unit: string;
+  frequency: string;
+  source_module: string;
+  source_record_id: string;
+  quality_status: string;
+  is_restated: boolean;
+  version: number;
+}
+
+export interface HistoricalPortfolioValueResponse {
+  portfolio_id: string;
+  base_currency: string;
+  frequency: string;
+  historical_mode: HistoricalMode;
+  observations: HistoricalDataPoint[];
+  summary_kpis: {
+    observation_count: number;
+    starting_nav: number;
+    ending_nav: number;
+    peak_nav: number;
+    trough_nav: number;
+    total_return_pct: number;
+  };
+}
+
+export interface HistoricalPnLResponse {
+  portfolio_id: string;
+  pnl_type: 'DAILY' | 'CUMULATIVE' | 'REALIZED' | 'UNREALIZED';
+  currency: string;
+  frequency: string;
+  historical_mode: HistoricalMode;
+  observations: HistoricalDataPoint[];
+  summary_kpis: {
+    observation_count: number;
+    total_pnl: number;
+    max_pnl: number;
+    min_pnl: number;
+    currency: string;
+  };
+}
+
+export interface HistoricalRiskTrendResponse {
+  portfolio_id: string;
+  metric: string;
+  currency?: string | null;
+  unit: string;
+  frequency: string;
+  historical_mode: HistoricalMode;
+  observations: HistoricalDataPoint[];
+  summary_statistics: {
+    observation_count: number;
+    mean_value: number;
+    max_value: number;
+    min_value: number;
+    latest_value: number;
+  };
+}
+
+export interface HistoricalExposureResponse {
+  portfolio_id: string;
+  exposure_type: 'GROSS' | 'NET' | 'LONG' | 'SHORT';
+  currency: string;
+  frequency: string;
+  historical_mode: HistoricalMode;
+  observations: HistoricalDataPoint[];
+  summary_statistics: {
+    observation_count: number;
+    mean_exposure: number;
+    max_exposure: number;
+    min_exposure: number;
+    latest_exposure: number;
+  };
+}
+
+export interface EventOverlayItem {
+  event_id: string;
+  event_category: 'ALERT' | 'BREACH' | 'TRADE' | 'REBALANCE' | 'SCENARIO';
+  event_title: string;
+  event_description?: string | null;
+  portfolio_id: string;
+  instrument_id?: string | null;
+  occurrence_time: string;
+  detection_time?: string | null;
+  severity?: string | null;
+  priority_score?: number | null;
+  source_module: string;
+  source_record_id: string;
+  details?: Record<string, unknown> | null;
+}
+
+export interface HistoricalEventsResponse {
+  portfolio_id: string;
+  total_count: number;
+  events: EventOverlayItem[];
+}
+
+export interface PointInTimePositionHolding {
+  instrument_id: string;
+  account_id?: string | null;
+  quantity: number;
+  market_price: number;
+  market_value_base: number;
+  cost_basis_base?: number | null;
+  unrealized_pnl_base?: number | null;
+  currency: string;
+  weight_pct: number;
+}
+
+export interface PointInTimeCashBalance {
+  account_id?: string | null;
+  currency: string;
+  settled_cash: number;
+  available_cash: number;
+  available_cash_base: number;
+  weight_pct: number;
+}
+
+export interface PointInTimeRiskMetrics {
+  var_95_1d?: number | null;
+  var_99_1d?: number | null;
+  expected_shortfall?: number | null;
+  realized_volatility_annualized?: number | null;
+  max_drawdown_pct?: number | null;
+  gross_exposure_pct?: number | null;
+  net_exposure_pct?: number | null;
+  model_version?: string | null;
+  calculation_timestamp?: string | null;
+}
+
+export interface ProvenanceManifestResponse {
+  manifest_id: string;
+  portfolio_id: string;
+  selected_effective_at: string;
+  selected_knowledge_at: string;
+  historical_mode: HistoricalMode;
+  position_snapshot_id?: string | null;
+  valuation_record_id?: string | null;
+  risk_calculation_ids: string[];
+  market_data_watermark?: string | null;
+  reference_data_version?: string | null;
+  model_versions: Record<string, string>;
+  source_modules: string[];
+  consistency_status: ConsistencyStatus;
+  consistency_notes?: string | null;
+  created_at: string;
+}
+
+export interface PointInTimeStateResponse {
+  portfolio_id: string;
+  effective_at: string;
+  known_at: string;
+  historical_mode: HistoricalMode;
+  base_currency: string;
+  total_nav_base: number;
+  total_market_value_base: number;
+  total_cash_value_base: number;
+  total_unrealized_pnl_base: number;
+  positions: PointInTimePositionHolding[];
+  cash_balances: PointInTimeCashBalance[];
+  risk_metrics?: PointInTimeRiskMetrics | null;
+  recent_events: EventOverlayItem[];
+  manifest: ProvenanceManifestResponse;
+}
+
+export interface HistoricalVersionComparisonResponse {
+  portfolio_id: string;
+  effective_at: string;
+  as_of_t1_state: PointInTimeStateResponse;
+  as_of_t2_state: PointInTimeStateResponse;
+  nav_delta: number;
+  nav_delta_pct: number;
+  market_value_delta: number;
+  cash_delta: number;
+  position_diffs: Array<{
+    instrument_id: string;
+    t1_quantity: number;
+    t2_quantity: number;
+    quantity_delta: number;
+    t1_market_value: number;
+    t2_market_value: number;
+    market_value_delta: number;
+  }>;
+  explanation: string;
+}
+
+export interface HistoricalPreferenceResponse {
+  id: string;
+  user_id: string;
+  default_portfolio_id?: string | null;
+  default_lookback_days: number;
+  default_frequency: string;
+  default_historical_mode: HistoricalMode;
+  default_pnl_type: string;
+  show_event_overlays: boolean;
+  enabled_event_types: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HistoricalSavedViewResponse {
+  id: string;
+  user_id: string;
+  view_name: string;
+  description?: string | null;
+  portfolio_id?: string | null;
+  lookback_days: number;
+  start_time?: string | null;
+  end_time?: string | null;
+  frequency: string;
+  historical_mode: HistoricalMode;
+  pnl_type: string;
+  risk_metric: string;
+  enabled_event_types: string[];
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+}
