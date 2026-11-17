@@ -7,25 +7,51 @@ import { PortfolioSummaryTable } from './PortfolioSummaryTable';
 import { formatUtcTimestamp } from '../../../utils/financialFormatting';
 
 interface PortfolioOverviewPageProps {
-  portfolioId: string;
+  portfolioId?: string;
   apiBaseUrl?: string;
   onNavigateDetail?: (moduleCode: string) => void;
 }
 
 export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
-  portfolioId,
+  portfolioId: initialPortfolioId,
   apiBaseUrl = '/api/v1',
   onNavigateDetail,
 }) => {
+  const [activePortfolioId, setActivePortfolioId] = useState<string>(initialPortfolioId || '');
+  const [availablePortfolios, setAvailablePortfolios] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
   const [data, setData] = useState<PortfolioOverviewResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchOverview = async () => {
+  // 1. Fetch available portfolios on mount to resolve valid portfolio IDs dynamically
+  useEffect(() => {
+    const fetchPortfolios = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/portfolios?limit=20`);
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list) && list.length > 0) {
+            setAvailablePortfolios(list);
+            // If the initial ID is not provided or not in the list, default to the first valid one
+            const exists = list.some((p: any) => p.portfolio_id === initialPortfolioId);
+            if (!exists || !initialPortfolioId) {
+              setActivePortfolioId(list[0].portfolio_id);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load portfolio dropdown list', err);
+      }
+    };
+    fetchPortfolios();
+  }, [initialPortfolioId, apiBaseUrl]);
+
+  const fetchOverview = async (targetId: string) => {
+    if (!targetId) return;
     setIsLoading(true);
     setError(null);
     try {
-      const resp = await fetch(`${apiBaseUrl}/dashboard/portfolios/${portfolioId}/overview`);
+      const resp = await fetch(`${apiBaseUrl}/dashboard/portfolios/${targetId}/overview`);
       if (!resp.ok) {
         throw new Error(`Failed to load overview: HTTP ${resp.status}`);
       }
@@ -39,8 +65,10 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
   };
 
   useEffect(() => {
-    fetchOverview();
-  }, [portfolioId]);
+    if (activePortfolioId) {
+      fetchOverview(activePortfolioId);
+    }
+  }, [activePortfolioId]);
 
   if (isLoading && !data) {
     return (
@@ -56,12 +84,27 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
       <div className="p-6 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 m-6">
         <h3 className="font-semibold text-sm">Failed to Load Portfolio Overview</h3>
         <p className="text-xs mt-1">{error}</p>
-        <button
-          onClick={fetchOverview}
-          className="mt-3 px-3 py-1 bg-rose-600 text-white rounded text-xs hover:bg-rose-700"
-        >
-          Retry
-        </button>
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={() => fetchOverview(activePortfolioId)}
+            className="px-3 py-1 bg-rose-600 text-white rounded text-xs hover:bg-rose-700"
+          >
+            Retry
+          </button>
+          {availablePortfolios.length > 0 && (
+            <select
+              value={activePortfolioId}
+              onChange={(e) => setActivePortfolioId(e.target.value)}
+              className="text-xs border border-gray-300 rounded px-2 py-1 bg-white text-gray-800"
+            >
+              {availablePortfolios.map((p) => (
+                <option key={p.portfolio_id} value={p.portfolio_id}>
+                  {p.portfolio_name} ({p.portfolio_id})
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
       </div>
     );
   }
@@ -92,7 +135,20 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
           </p>
         </div>
 
-        <div className="text-right text-xs text-slate-500">
+        <div className="text-right text-xs text-slate-500 flex flex-col items-end gap-1">
+          {availablePortfolios.length > 0 && (
+            <select
+              value={activePortfolioId}
+              onChange={(e) => setActivePortfolioId(e.target.value)}
+              className="text-xs border border-gray-300 rounded px-2 py-1 bg-white text-gray-800"
+            >
+              {availablePortfolios.map((p) => (
+                <option key={p.portfolio_id} value={p.portfolio_id}>
+                  {p.portfolio_name} ({p.portfolio_id})
+                </option>
+              ))}
+            </select>
+          )}
           <div>Valuation As of: {formatUtcTimestamp(data.total_nav.as_of)}</div>
           <div className="text-[11px] text-slate-400">Generated: {formatUtcTimestamp(data.generated_at)}</div>
         </div>
@@ -101,7 +157,7 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
       {/* 2. Data Quality & Freshness Summary */}
       <DataFreshnessPanel
         freshness={data.freshness}
-        onRefresh={fetchOverview}
+        onRefresh={() => fetchOverview(activePortfolioId)}
         isLoading={isLoading}
       />
 
