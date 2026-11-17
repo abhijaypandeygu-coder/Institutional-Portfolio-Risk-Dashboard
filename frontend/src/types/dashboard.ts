@@ -326,3 +326,143 @@ export interface RiskHistoryResponse {
   underwater_points?: UnderwaterChartPoint[] | null;
   episodes?: DrawdownEpisodeSummary[] | null;
 }
+
+// ===========================================================================
+// M13.03 — Exposure Dashboard Contracts
+// ===========================================================================
+
+export type PositionSideFilter = 'ALL' | 'LONG' | 'SHORT';
+export type HierarchyLevel = 'PORTFOLIO' | 'SECTOR' | 'INDUSTRY' | 'INSTRUMENT';
+
+export interface SectorAllocationRow {
+  sector_id: string;
+  sector_name: string;
+  classification_scheme: string;
+  reporting_currency: string;
+  net_market_value: number;
+  long_market_value: number;
+  short_market_value: number;
+  gross_market_value: number;
+  nav_weight_pct?: number | null;
+  gross_weight_pct?: number | null;
+  instrument_count: number;
+  is_unclassified: boolean;
+  data_quality_status: string;
+}
+
+export interface SectorAllocationSummary {
+  portfolio_id: string;
+  as_of: string;
+  reporting_currency: string;
+  total_sectors_count: number;
+  total_long_exposure: number;
+  total_short_exposure: number;
+  total_net_exposure: number;
+  total_gross_exposure: number;
+  unclassified_exposure?: number | null;
+  sectors: SectorAllocationRow[];
+}
+
+export interface RankedHoldingItem {
+  rank: number;
+  instrument_id: string;
+  symbol: string;
+  instrument_name: string;
+  exchange_code: string;
+  position_side: 'LONG' | 'SHORT';
+  quantity: number;
+  mark_price: number;
+  price_currency: string;
+  market_value: number;
+  absolute_market_value: number;
+  nav_weight_pct?: number | null;
+  gross_weight_pct?: number | null;
+  sector_name?: string | null;
+  industry_name?: string | null;
+  valuation_timestamp: string;
+  valuation_status: string;
+}
+
+export interface InstrumentAllocationSummary {
+  portfolio_id: string;
+  as_of: string;
+  reporting_currency: string;
+  total_instruments_count: number;
+  long_instruments_count: number;
+  short_instruments_count: number;
+  total_long_market_value: number;
+  total_short_market_value: number;
+  total_net_market_value: number;
+  total_gross_market_value: number;
+  top_long_holdings: RankedHoldingItem[];
+  top_short_holdings: RankedHoldingItem[];
+  all_ranked_holdings: RankedHoldingItem[];
+}
+
+export interface CashBalanceDetail {
+  account_id: string;
+  currency: string;
+  settled_balance: number;
+  available_balance: number;
+  restricted_balance: number;
+  base_equivalent: number;
+  fx_rate_to_base: number;
+}
+
+export interface PortfolioAllocationSummary {
+  portfolio_id: string;
+  as_of: string;
+  reporting_currency: string;
+  total_nav: number;
+  total_long_position_value: number;
+  total_short_position_value: number;
+  net_position_value: number;
+  gross_position_exposure: number;
+  total_cash_value: number;
+  available_cash_value: number;
+  restricted_cash_value: number;
+  invested_nav_weight_pct: number;
+  cash_nav_weight_pct: number;
+  gross_exposure_to_nav_ratio: number;
+  reconciliation_residual: number;
+  reconciliation_status: string;
+  cash_balances: CashBalanceDetail[];
+}
+
+export interface HierarchyBreadcrumb {
+  level: HierarchyLevel;
+  id: string;
+  name: string;
+}
+
+export interface ExposureDrillDownResponse {
+  portfolio_id: string;
+  as_of: string;
+  current_level: HierarchyLevel;
+  breadcrumbs: HierarchyBreadcrumb[];
+  reporting_currency: string;
+  level_name: string;
+  market_value: number;
+  nav_weight_pct?: number | null;
+  long_exposure: number;
+  short_exposure: number;
+  net_exposure: number;
+  gross_exposure: number;
+  sub_items: Record<string, unknown>[];
+  holdings: RankedHoldingItem[];
+}
+
+export interface ConsolidatedExposureDashboardResponse {
+  portfolio_id: string;
+  portfolio_name: string;
+  base_currency: string;
+  as_of: string;
+  generated_at: string;
+  allocation_summary: PortfolioAllocationSummary;
+  sector_summary: SectorAllocationSummary;
+  instrument_summary: InstrumentAllocationSummary;
+  overall_quality_status: string;
+  valuation_timestamp: string;
+  snapshot_id?: string | null;
+  data_quality_notes: string[];
+}

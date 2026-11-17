@@ -215,6 +215,9 @@ from backend.app.modules.dashboard_visualization.portfolio_overview.router impor
 from backend.app.modules.dashboard_visualization.risk_overview.router import (
     router as risk_overview_router,
 )
+from backend.app.modules.dashboard_visualization.exposure_dashboard.router import (
+    router as exposure_dashboard_router,
+)
 
 
 @asynccontextmanager
@@ -345,6 +348,7 @@ app.include_router(notification_channels_router, prefix="/api/v1", tags=["M12.07
 app.include_router(alert_history_router, prefix="/api/v1", tags=["M12.08 - Alert History Engine"])
 app.include_router(portfolio_overview_router, prefix="/api/v1", tags=["M13.01 - Portfolio Overview Dashboard"])
 app.include_router(risk_overview_router, prefix="/api/v1/dashboard/portfolios", tags=["M13.02 - Risk Overview Dashboard"])
+app.include_router(exposure_dashboard_router, prefix="/api/v1/dashboard/portfolios", tags=["M13.03 - Exposure Dashboard"])
 
 
 @app.get("/health", tags=["System"])
