@@ -296,6 +296,9 @@ from backend.app.modules.infrastructure_platform.logging.router import (
 from backend.app.modules.infrastructure_platform.testing_infrastructure.router import (
     router as testing_infrastructure_router,
 )
+from backend.app.modules.infrastructure_platform.deployment.router import (
+    router as deployment_router,
+)
 from backend.app.modules.infrastructure_platform.logging.handlers.log_manager import (
     setup_application_logging,
 )
@@ -337,6 +340,7 @@ app.add_middleware(StructuredRequestLoggingMiddleware)
 setup_exception_handlers(app)
 
 # Register API Routers
+app.include_router(deployment_router)
 app.include_router(testing_infrastructure_router)
 app.include_router(logging_router)
 app.include_router(monitoring_router)

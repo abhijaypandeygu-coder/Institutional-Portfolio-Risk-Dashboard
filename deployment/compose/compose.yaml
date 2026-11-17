@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: hft_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hft_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hft_secure_dev_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-portfolio_risk}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hft_user} -d ${POSTGRES_DB:-portfolio_risk}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/backend.Dockerfile
+    container_name: hft_backend_api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - ENVIRONMENT=production_local
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8000
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-hft_user}:${POSTGRES_PASSWORD:-hft_secure_dev_2026}@postgres:5432/${POSTGRES_DB:-portfolio_risk}
+      - SECRET_KEY=${SECRET_KEY:-local_production_key_2026}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/frontend.Dockerfile
+    container_name: hft_frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: hft_postgres_persistent_volume
