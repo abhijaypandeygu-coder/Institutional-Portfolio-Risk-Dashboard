@@ -27,7 +27,9 @@ class ProviderAdapterRegistry:
     def get_or_create_adapter(cls, feed_id: str, provider_type: str = "SIMULATOR") -> BaseProviderAdapter:
         key = f"{feed_id}_{provider_type.upper()}"
         if key not in cls._instances:
-            adapter_cls = cls._adapter_classes.get(provider_type.upper(), SimulatedMarketDataAdapter)
+            adapter_cls = cls._adapter_classes.get(provider_type.upper())
+            if adapter_cls is None:
+                raise ValueError(f"Unsupported streaming provider: {provider_type}. Use the external-data gateway for REST providers.")
             cls._instances[key] = adapter_cls(feed_id=feed_id, provider_id=provider_type)
         return cls._instances[key]
 

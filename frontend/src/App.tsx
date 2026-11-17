@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import { ExternalProvidersPage } from './modules/dashboard/ExternalProvidersPage';
 import { PortfolioOverviewPage } from './modules/dashboard/portfolio-overview/PortfolioOverviewPage';
 import { AlertsDashboardPage } from './modules/dashboard/alerts-dashboard/AlertsDashboardPage';
 import { LiquidityDashboardPage } from './modules/dashboard/liquidity-dashboard/LiquidityDashboardPage';
 import { StressTestingDashboardPage } from './modules/dashboard/stress-dashboard/StressTestingDashboardPage';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'alerts' | 'liquidity' | 'stress'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'alerts' | 'liquidity' | 'stress' | 'providers'>('overview');
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -45,6 +46,7 @@ export const App: React.FC = () => {
             { id: 'alerts', label: 'Risk Alerts' },
             { id: 'liquidity', label: 'Liquidity Analytics' },
             { id: 'stress', label: 'Stress Testing' },
+            { id: 'providers', label: 'Data Providers' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -73,6 +75,7 @@ export const App: React.FC = () => {
         {activeTab === 'alerts' && <AlertsDashboardPage />}
         {activeTab === 'liquidity' && <LiquidityDashboardPage />}
         {activeTab === 'stress' && <StressTestingDashboardPage />}
+        {activeTab === 'providers' && <ExternalProvidersPage />}
       </main>
     </div>
   );

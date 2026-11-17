@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     MARKET_DATA_SIMULATOR_ENABLED: bool = Field(default=True, description="Enable simulated real-time provider")
     MARKET_DATA_DEFAULT_PROVIDER: str = Field(default="alpha_vantage", description="Default market data provider")
 
+    SEC_USER_AGENT: Optional[str] = None
+    FRED_API_KEY: Optional[str] = None
+    FMP_API_KEY: Optional[str] = None
+    UPSTOX_ACCESS_TOKEN: Optional[str] = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

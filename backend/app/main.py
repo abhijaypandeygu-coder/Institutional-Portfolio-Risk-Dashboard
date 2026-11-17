@@ -336,6 +336,9 @@ app.add_middleware(
 )
 
 # M15.01 Request Tracing and Security Headers
+from backend.app.modules.external_data.router import router as external_data_router
+app.include_router(external_data_router)
+
 app.add_middleware(RequestTracingMiddleware)
 app.add_middleware(StructuredRequestLoggingMiddleware)
 
