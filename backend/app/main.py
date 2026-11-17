@@ -209,6 +209,9 @@ from backend.app.modules.risk_alerts.notification_channels.router import (
 from backend.app.modules.risk_alerts.alert_history.router import (
     router as alert_history_router,
 )
+from backend.app.modules.dashboard_visualization.portfolio_overview.router import (
+    router as portfolio_overview_router,
+)
 
 
 @asynccontextmanager
@@ -337,6 +340,7 @@ app.include_router(alert_prioritization_router, prefix="/api/v1", tags=["M12.05 
 app.include_router(alert_management_router, prefix="/api/v1", tags=["M12.06 - Alert Management Engine"])
 app.include_router(notification_channels_router, prefix="/api/v1", tags=["M12.07 - Notification Channels Engine"])
 app.include_router(alert_history_router, prefix="/api/v1", tags=["M12.08 - Alert History Engine"])
+app.include_router(portfolio_overview_router, prefix="/api/v1", tags=["M13.01 - Portfolio Overview Dashboard"])
 
 
 @app.get("/health", tags=["System"])
