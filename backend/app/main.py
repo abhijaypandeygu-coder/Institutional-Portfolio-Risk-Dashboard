@@ -275,6 +275,9 @@ from backend.app.modules.infrastructure_platform.backend_api.router import (
 from backend.app.modules.infrastructure_platform.realtime_api.router import (
     router as realtime_api_router,
 )
+from backend.app.modules.infrastructure_platform.database_infrastructure.router import (
+    router as database_infrastructure_router,
+)
 
 
 @asynccontextmanager
@@ -310,6 +313,7 @@ setup_exception_handlers(app)
 # Register API Routers
 app.include_router(backend_api_core_router)
 app.include_router(realtime_api_router)
+app.include_router(database_infrastructure_router)
 app.include_router(feed_registry_router, prefix="/api/v1")
 app.include_router(market_data_router, prefix="/api/v1")
 app.include_router(missing_data_router, prefix="/api/v1")
