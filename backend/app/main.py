@@ -242,6 +242,9 @@ from backend.app.modules.dashboard_visualization.custom_views.router import (
 from backend.app.modules.reporting_attribution_audit.daily_risk_reports.router import (
     router as daily_risk_reports_router,
 )
+from backend.app.modules.reporting_attribution_audit.portfolio_performance.router import (
+    router as portfolio_performance_router,
+)
 
 
 @asynccontextmanager
@@ -381,6 +384,7 @@ app.include_router(alerts_dashboard_router, tags=["M13.08 - Alerts Dashboard"])
 app.include_router(historical_analytics_router, prefix="/api/v1/dashboard", tags=["M13.09 - Historical Analytics"])
 app.include_router(custom_views_router, prefix="/api/v1/dashboard", tags=["M13.10 - Custom Views"])
 app.include_router(daily_risk_reports_router, prefix="/api/v1", tags=["M14.01 - Daily Risk Reports"])
+app.include_router(portfolio_performance_router, prefix="/api/v1", tags=["M14.02 - Portfolio Performance Reports"])
 
 
 @app.get("/health", tags=["System"])
