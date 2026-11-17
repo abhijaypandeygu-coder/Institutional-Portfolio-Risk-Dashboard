@@ -290,11 +290,21 @@ from backend.app.modules.infrastructure_platform.encryption.router import (
 from backend.app.modules.infrastructure_platform.system_monitoring.router import (
     router as monitoring_router,
 )
+from backend.app.modules.infrastructure_platform.logging.router import (
+    router as logging_router,
+)
+from backend.app.modules.infrastructure_platform.logging.handlers.log_manager import (
+    setup_application_logging,
+)
+from backend.app.modules.infrastructure_platform.logging.middleware.request_logging_middleware import (
+    StructuredRequestLoggingMiddleware,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: ensure database schema and tables are initialized
+    # Startup: initialize logging & database schema
+    setup_application_logging()
     await init_db()
     yield
     # Shutdown logic (e.g. clean up pools, notify services)
@@ -318,11 +328,13 @@ app.add_middleware(
 
 # M15.01 Request Tracing and Security Headers
 app.add_middleware(RequestTracingMiddleware)
+app.add_middleware(StructuredRequestLoggingMiddleware)
 
 # M15.01 Standard Institutional Exception Handling
 setup_exception_handlers(app)
 
 # Register API Routers
+app.include_router(logging_router)
 app.include_router(monitoring_router)
 app.include_router(auth_router)
 app.include_router(authz_router)
