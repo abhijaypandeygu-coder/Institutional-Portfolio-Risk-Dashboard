@@ -75,7 +75,12 @@ export const ScenarioComparisonPanel: React.FC<ScenarioComparisonPanelProps> = (
           </thead>
           <tbody className="divide-y divide-slate-800/60 font-mono">
             {scenarios.map((scen) => {
-              const isLoss = scen.stressed_pnl < 0;
+              const pnl = Number(scen.stressed_pnl) || 0;
+              const isLoss = pnl < 0;
+              const baselineNav = Number(scen.baseline_nav) || 0;
+              const stressedNav = Number(scen.stressed_nav) || 0;
+              const retPct = Number(scen.return_percentage) || 0;
+
               return (
                 <tr
                   key={scen.calculation_id}
@@ -93,10 +98,10 @@ export const ScenarioComparisonPanel: React.FC<ScenarioComparisonPanelProps> = (
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-right text-slate-400">
-                    ${scen.baseline_nav.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    ${baselineNav.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </td>
                   <td className="py-2.5 px-3 text-right text-slate-300">
-                    ${scen.stressed_nav.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    ${stressedNav.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </td>
                   <td
                     className={`py-2.5 px-3 text-right font-bold ${
@@ -104,17 +109,17 @@ export const ScenarioComparisonPanel: React.FC<ScenarioComparisonPanelProps> = (
                     }`}
                   >
                     {isLoss ? '-' : '+'}$
-                    {Math.abs(scen.stressed_pnl).toLocaleString(undefined, {
+                    {Math.abs(pnl).toLocaleString(undefined, {
                       maximumFractionDigits: 0,
                     })}
                   </td>
                   <td
                     className={`py-2.5 px-3 text-right ${
-                      scen.return_percentage < 0 ? 'text-rose-400' : 'text-emerald-400'
+                      retPct < 0 ? 'text-rose-400' : 'text-emerald-400'
                     }`}
                   >
-                    {scen.return_percentage >= 0 ? '+' : ''}
-                    {scen.return_percentage.toFixed(2)}%
+                    {retPct >= 0 ? '+' : ''}
+                    {retPct.toFixed(2)}%
                   </td>
                   <td className="py-2.5 px-3 font-sans">
                     {scen.is_compatible ? (

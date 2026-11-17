@@ -20,9 +20,17 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
     );
   }
 
+  const totalBidNotional = Number(ladder.total_bid_notional) || 0;
+  const totalAskNotional = Number(ladder.total_ask_notional) || 0;
+  const totalBidQty = Number(ladder.total_bid_quantity) || 0;
+  const totalAskQty = Number(ladder.total_ask_quantity) || 0;
+  const depthImb = ladder.depth_imbalance !== null && ladder.depth_imbalance !== undefined
+    ? Number(ladder.depth_imbalance)
+    : null;
+
   const maxNotional = Math.max(
-    ladder.total_bid_notional || 1,
-    ladder.total_ask_notional || 1
+    totalBidNotional || 1,
+    totalAskNotional || 1
   );
 
   const getImbalanceBadge = () => {
@@ -139,18 +147,16 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
       <div className="bg-slate-950 p-3 rounded border border-slate-800/80 flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs">
           <span className="text-slate-400">
-            Total Bids: <strong className="text-emerald-400 font-mono">${(ladder.total_bid_notional / 1000).toFixed(1)}k</strong>
+            Total Bids: <strong className="text-emerald-400 font-mono">${(totalBidNotional / 1000).toFixed(1)}k</strong>
           </span>
           <span className="text-slate-300 font-medium">
             Imbalance:{' '}
             <strong className="font-mono text-cyan-400">
-              {ladder.depth_imbalance !== null && ladder.depth_imbalance !== undefined
-                ? `${(ladder.depth_imbalance * 100).toFixed(1)}%`
-                : '0.0%'}
+              {depthImb !== null ? `${(depthImb * 100).toFixed(1)}%` : '0.0%'}
             </strong>
           </span>
           <span className="text-slate-400">
-            Total Asks: <strong className="text-rose-400 font-mono">${(ladder.total_ask_notional / 1000).toFixed(1)}k</strong>
+            Total Asks: <strong className="text-rose-400 font-mono">${(totalAskNotional / 1000).toFixed(1)}k</strong>
           </span>
         </div>
 
@@ -160,8 +166,8 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
             className="bg-emerald-500 h-full transition-all duration-300"
             style={{
               width: `${
-                ladder.total_bid_quantity + ladder.total_ask_quantity > 0
-                  ? (ladder.total_bid_quantity / (ladder.total_bid_quantity + ladder.total_ask_quantity)) * 100
+                totalBidQty + totalAskQty > 0
+                  ? (totalBidQty / (totalBidQty + totalAskQty)) * 100
                   : 50
               }%`,
             }}
@@ -170,8 +176,8 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
             className="bg-rose-500 h-full transition-all duration-300"
             style={{
               width: `${
-                ladder.total_bid_quantity + ladder.total_ask_quantity > 0
-                  ? (ladder.total_ask_quantity / (ladder.total_bid_quantity + ladder.total_ask_quantity)) * 100
+                totalBidQty + totalAskQty > 0
+                  ? (totalAskQty / (totalBidQty + totalAskQty)) * 100
                   : 50
               }%`,
             }}

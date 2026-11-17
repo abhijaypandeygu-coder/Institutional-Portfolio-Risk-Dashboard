@@ -35,7 +35,12 @@ export const ScenarioResultsPanel: React.FC<ScenarioResultsPanelProps> = ({
   }
 
   const { summary, definition, positions } = data;
-  const isLoss = summary.stressed_pnl < 0;
+  const stressedPnl = Number(summary.stressed_pnl) || 0;
+  const isLoss = stressedPnl < 0;
+  const baselineNav = Number(summary.baseline_nav) || 0;
+  const stressedNav = Number(summary.stressed_nav) || 0;
+  const returnPct = Number(summary.return_percentage) || 0;
+  const coveragePct = Number(summary.coverage_percentage) || 0;
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 space-y-6">
@@ -78,7 +83,7 @@ export const ScenarioResultsPanel: React.FC<ScenarioResultsPanelProps> = ({
         <div className="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
           <div className="text-xs font-medium text-slate-400">Baseline Portfolio Value</div>
           <div className="text-lg font-bold text-white mt-1">
-            ${summary.baseline_nav.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            ${baselineNav.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </div>
           <div className="text-xs text-slate-500 mt-0.5">Pre-shock portfolio valuation</div>
         </div>
@@ -86,7 +91,7 @@ export const ScenarioResultsPanel: React.FC<ScenarioResultsPanelProps> = ({
         <div className="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
           <div className="text-xs font-medium text-slate-400">Stressed Portfolio Value</div>
           <div className="text-lg font-bold text-white mt-1">
-            ${summary.stressed_nav.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            ${stressedNav.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </div>
           <div className="text-xs text-slate-500 mt-0.5">Post-shock terminal valuation</div>
         </div>
@@ -103,20 +108,20 @@ export const ScenarioResultsPanel: React.FC<ScenarioResultsPanelProps> = ({
             }`}
           >
             {isLoss ? '-' : '+'}$
-            {Math.abs(summary.stressed_pnl).toLocaleString(undefined, {
+            {Math.abs(stressedPnl).toLocaleString(undefined, {
               minimumFractionDigits: 2,
             })}
           </div>
           <div className="text-xs text-slate-400 mt-0.5">
-            Return: {summary.return_percentage >= 0 ? '+' : ''}
-            {summary.return_percentage.toFixed(2)}%
+            Return: {returnPct >= 0 ? '+' : ''}
+            {returnPct.toFixed(2)}%
           </div>
         </div>
 
         <div className="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
           <div className="text-xs font-medium text-slate-400">Shock Coverage & Scope</div>
           <div className="text-lg font-bold text-slate-200 mt-1">
-            {summary.coverage_percentage.toFixed(1)}%
+            {coveragePct.toFixed(1)}%
           </div>
           <div className="text-xs text-slate-500 mt-0.5">
             {summary.eligible_holdings} eligible positions analyzed
@@ -168,7 +173,16 @@ export const ScenarioResultsPanel: React.FC<ScenarioResultsPanelProps> = ({
                 </tr>
               ) : (
                 positions.map((pos) => {
-                  const pnlLoss = pos.stressed_pnl < 0;
+                  const pnl = Number(pos.stressed_pnl) || 0;
+                  const pnlLoss = pnl < 0;
+                  const baselinePrice = Number(pos.baseline_price) || 0;
+                  const stressedPrice = Number(pos.stressed_price) || 0;
+                  const baselineMv = Number(pos.baseline_market_value) || 0;
+                  const stressedMv = Number(pos.stressed_market_value) || 0;
+                  const pctChange = Number(pos.percentage_change) || 0;
+                  const lossContrib = Number(pos.contribution_to_loss_pct) || 0;
+                  const qty = Number(pos.quantity) || 0;
+
                   return (
                     <tr
                       key={pos.instrument_id}
@@ -189,21 +203,21 @@ export const ScenarioResultsPanel: React.FC<ScenarioResultsPanelProps> = ({
                         </span>
                       </td>
                       <td className="py-2 px-3 text-right text-slate-300">
-                        {pos.quantity.toLocaleString()}
+                        {qty.toLocaleString()}
                       </td>
                       <td className="py-2 px-3 text-right text-slate-400">
-                        ${pos.baseline_price.toFixed(2)}
+                        ${baselinePrice.toFixed(2)}
                       </td>
                       <td className="py-2 px-3 text-right text-slate-300">
-                        ${pos.stressed_price.toFixed(2)}
+                        ${stressedPrice.toFixed(2)}
                       </td>
                       <td className="py-2 px-3 text-right text-slate-400">
-                        ${pos.baseline_market_value.toLocaleString(undefined, {
+                        ${baselineMv.toLocaleString(undefined, {
                           maximumFractionDigits: 0,
                         })}
                       </td>
                       <td className="py-2 px-3 text-right text-slate-300">
-                        ${pos.stressed_market_value.toLocaleString(undefined, {
+                        ${stressedMv.toLocaleString(undefined, {
                           maximumFractionDigits: 0,
                         })}
                       </td>
@@ -213,21 +227,21 @@ export const ScenarioResultsPanel: React.FC<ScenarioResultsPanelProps> = ({
                         }`}
                       >
                         {pnlLoss ? '-' : '+'}$
-                        {Math.abs(pos.stressed_pnl).toLocaleString(undefined, {
+                        {Math.abs(pnl).toLocaleString(undefined, {
                           maximumFractionDigits: 0,
                         })}
                       </td>
                       <td
                         className={`py-2 px-3 text-right ${
-                          pos.percentage_change < 0 ? 'text-rose-400' : 'text-emerald-400'
+                          pctChange < 0 ? 'text-rose-400' : 'text-emerald-400'
                         }`}
                       >
-                        {pos.percentage_change >= 0 ? '+' : ''}
-                        {pos.percentage_change.toFixed(2)}%
+                        {pctChange >= 0 ? '+' : ''}
+                        {pctChange.toFixed(2)}%
                       </td>
                       <td className="py-2 px-3 text-right text-slate-400 font-semibold">
-                        {pos.contribution_to_loss_pct > 0
-                          ? `${pos.contribution_to_loss_pct.toFixed(1)}%`
+                        {lossContrib > 0
+                          ? `${lossContrib.toFixed(1)}%`
                           : '-'}
                       </td>
                     </tr>

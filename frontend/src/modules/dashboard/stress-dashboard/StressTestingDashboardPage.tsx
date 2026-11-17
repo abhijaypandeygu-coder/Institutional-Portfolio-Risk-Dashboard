@@ -111,7 +111,7 @@ export const StressTestingDashboardPage: React.FC = () => {
       // 3. Fetch Monte Carlo if category is MONTE_CARLO
       const mcPromise =
         scen.category === 'MONTE_CARLO'
-          ? fetch(`/api/v1/dashboard/stress/monte-carlo/${calcId}`)
+          ? fetch(`/api/v1/dashboard/stress/results/${calcId}/distribution`)
           : Promise.resolve(null);
       // 4. Fetch Annotations
       const annoPromise = fetch(`/api/v1/dashboard/stress/annotations?scenario_id=${scen.scenario_id}`);

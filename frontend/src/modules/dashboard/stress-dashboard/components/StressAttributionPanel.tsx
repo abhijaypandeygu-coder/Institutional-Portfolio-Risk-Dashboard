@@ -43,6 +43,12 @@ export const StressAttributionPanel: React.FC<StressAttributionPanelProps> = ({
     reconciliation_status,
   } = attribution;
 
+  const totalLoss = Number(total_stressed_pnl) || 0;
+  const explainedLoss = Number(explained_pnl) || 0;
+  const residual = Number(residual_amount) || 0;
+  const hhi = Number(loss_hhi) || 0;
+  const effCount = Number(effective_contributor_count) || 0;
+
   const currentContributors =
     viewDimension === 'POSITION'
       ? position_contributors
@@ -69,8 +75,8 @@ export const StressAttributionPanel: React.FC<StressAttributionPanelProps> = ({
           </div>
           <p className="text-xs text-slate-400 mt-1">
             Scenario: <span className="text-slate-200 font-medium">{scenario_name}</span> | Effective Contributors:{' '}
-            <span className="font-mono text-slate-200 font-semibold">{effective_contributor_count.toFixed(1)}</span> · Loss HHI:{' '}
-            <span className="font-mono text-slate-200 font-semibold">{loss_hhi.toFixed(2)}</span>
+            <span className="font-mono text-slate-200 font-semibold">{effCount.toFixed(1)}</span> · Loss HHI:{' '}
+            <span className="font-mono text-slate-200 font-semibold">{hhi.toFixed(2)}</span>
           </p>
         </div>
 
@@ -101,7 +107,7 @@ export const StressAttributionPanel: React.FC<StressAttributionPanelProps> = ({
         <div className="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
           <div className="text-xs font-medium text-slate-400">Authoritative Scenario Loss</div>
           <div className="text-lg font-bold text-rose-400 font-mono mt-1">
-            ${Math.abs(total_stressed_pnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            ${Math.abs(totalLoss).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
           <div className="text-xs text-slate-500 mt-0.5">M10 total stressed P&L</div>
         </div>
@@ -109,14 +115,14 @@ export const StressAttributionPanel: React.FC<StressAttributionPanelProps> = ({
         <div className="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
           <div className="text-xs font-medium text-slate-400">Sum of Explained Drivers</div>
           <div className="text-lg font-bold text-slate-200 font-mono mt-1">
-            ${Math.abs(explained_pnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            ${Math.abs(explainedLoss).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
           <div className="text-xs text-slate-500 mt-0.5">Direct factor / position decomposition</div>
         </div>
 
         <div
           className={`p-4 rounded-lg border ${
-            Math.abs(residual_amount) > 1.0
+            Math.abs(residual) > 1.0
               ? 'bg-amber-950/20 border-amber-800/60'
               : 'bg-emerald-950/20 border-emerald-900/50'
           }`}
@@ -124,10 +130,10 @@ export const StressAttributionPanel: React.FC<StressAttributionPanelProps> = ({
           <div className="text-xs font-medium text-slate-400">Residual / Cross-Terms</div>
           <div
             className={`text-lg font-bold font-mono mt-1 ${
-              Math.abs(residual_amount) > 1.0 ? 'text-amber-400' : 'text-emerald-400'
+              Math.abs(residual) > 1.0 ? 'text-amber-400' : 'text-emerald-400'
             }`}
           >
-            ${residual_amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            ${residual.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </div>
           <div className="text-xs text-slate-500 mt-0.5">
             {is_reconciled ? 'Clean exact arithmetic reconciliation' : 'Nonlinear cross-term variance'}
@@ -171,8 +177,12 @@ export const StressAttributionPanel: React.FC<StressAttributionPanelProps> = ({
               </tr>
             ) : (
               currentContributors.map((item, idx) => {
-                const isLoss = item.stressed_pnl < 0;
-                const barWidth = Math.min(Math.abs(item.contribution_percentage), 100);
+                const stressedPnl = Number(item.stressed_pnl) || 0;
+                const isLoss = stressedPnl < 0;
+                const contribPct = Number(item.contribution_percentage) || 0;
+                const barWidth = Math.min(Math.abs(contribPct), 100);
+                const exposure = Number(item.baseline_exposure) || 0;
+                const lossAmt = Number(item.contribution_to_loss) || 0;
 
                 return (
                   <tr
@@ -183,7 +193,7 @@ export const StressAttributionPanel: React.FC<StressAttributionPanelProps> = ({
                       {item.dimension_name}
                     </td>
                     <td className="py-2.5 px-3 text-right text-slate-400">
-                      ${item.baseline_exposure.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      ${exposure.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </td>
                     <td
                       className={`py-2.5 px-3 text-right font-bold ${
@@ -191,17 +201,17 @@ export const StressAttributionPanel: React.FC<StressAttributionPanelProps> = ({
                       }`}
                     >
                       {isLoss ? '-' : '+'}$
-                      {Math.abs(item.stressed_pnl).toLocaleString(undefined, {
+                      {Math.abs(stressedPnl).toLocaleString(undefined, {
                         maximumFractionDigits: 0,
                       })}
                     </td>
                     <td className="py-2.5 px-3 text-right text-slate-200 font-semibold">
-                      ${Math.abs(item.contribution_to_loss).toLocaleString(undefined, {
+                      ${Math.abs(lossAmt).toLocaleString(undefined, {
                         maximumFractionDigits: 0,
                       })}
                     </td>
                     <td className="py-2.5 px-3 text-right font-bold text-rose-400">
-                      {item.contribution_percentage.toFixed(2)}%
+                      {contribPct.toFixed(2)}%
                     </td>
                     <td className="py-2.5 px-3">
                       <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
