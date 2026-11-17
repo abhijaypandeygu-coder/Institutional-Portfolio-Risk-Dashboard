@@ -1065,19 +1065,235 @@ export interface LiquiditySavedViewResponse {
   updated_at: string;
 }
 
-export interface LiquidityInvestigationResponse {
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================================================
+// M13.07 — Stress Testing Dashboard TypeScript Contracts
+// ============================================================================
+
+export type StressScenarioCategory =
+  | 'HISTORICAL'
+  | 'HYPOTHETICAL'
+  | 'CRASH'
+  | 'SECTOR'
+  | 'CORRELATION'
+  | 'LIQUIDITY'
+  | 'MONTE_CARLO';
+
+export interface ScenarioMetadataItem {
+  scenario_id: string;
+  scenario_code: string;
+  scenario_name: string;
+  category: StressScenarioCategory;
+  description?: string | null;
+  horizon_days?: number | null;
+  affected_markets?: string | null;
+  status: string;
+  version: string;
+  created_at: string;
+  latest_calculation_id?: string | null;
+  latest_calculation_status?: string | null;
+}
+
+export interface ScenarioDefinitionDetail {
+  scenario_id: string;
+  scenario_code: string;
+  scenario_name: string;
+  category: StressScenarioCategory;
+  description?: string | null;
+  event_start_date?: string | null;
+  event_end_date?: string | null;
+  affected_markets?: string | null;
+  primary_reference_index?: string | null;
+  shock_variables: Record<string, unknown>;
+  volatility_assumptions: Record<string, unknown>;
+  correlation_assumptions: Record<string, unknown>;
+  liquidity_assumptions: Record<string, unknown>;
+  model_configuration: Record<string, unknown>;
+  version: string;
+  created_by?: string | null;
+  created_at: string;
+}
+
+export interface PositionStressResult {
+  instrument_id: string;
+  symbol: string;
+  exchange?: string | null;
+  position_side: string;
+  quantity: number;
+  baseline_price: number;
+  stressed_price: number;
+  baseline_market_value: number;
+  stressed_market_value: number;
+  stressed_pnl: number;
+  percentage_change: number;
+  contribution_to_loss_pct: number;
+  sector: string;
+  industry?: string | null;
+  quality_status: string;
+}
+
+export interface ScenarioResultSummary {
+  scenario_id: string;
+  scenario_name: string;
+  category: StressScenarioCategory;
+  calculation_id: string;
+  portfolio_id: string;
+  portfolio_snapshot_id?: string | null;
+  calculation_timestamp: string;
+  calculation_status: string;
+  base_currency: string;
+  baseline_nav: number;
+  stressed_nav: number;
+  stressed_pnl: number;
+  return_percentage: number;
+  eligible_holdings: number;
+  coverage_percentage: number;
+  quality_status: string;
+  model_version?: string | null;
+}
+
+export interface ScenarioDetailResultResponse {
+  summary: ScenarioResultSummary;
+  definition: ScenarioDefinitionDetail;
+  positions: PositionStressResult[];
+}
+
+export interface HistogramBin {
+  bin_index: number;
+  bin_start: number;
+  bin_end: number;
+  frequency: number;
+  cumulative_frequency: number;
+  density: number;
+  is_tail_bin: boolean;
+}
+
+export interface MonteCarloDistributionResponse {
+  simulation_id: string;
+  portfolio_id: string;
+  scenario_id: string;
+  scenario_name: string;
+  n_paths: number;
+  horizon_days: number;
+  baseline_nav: number;
+  mean_terminal_value: number;
+  mean_pnl: number;
+  median_pnl: number;
+  std_pnl: number;
+  skewness: number;
+  excess_kurtosis: number;
+  probability_of_loss: number;
+  min_pnl: number;
+  max_pnl: number;
+  quantiles: Record<string, number>;
+  var_95_loss: number;
+  cvar_95_loss: number;
+  var_99_loss: number;
+  cvar_99_loss: number;
+  generator_algorithm: string;
+  matrix_was_repaired: boolean;
+  random_seed: number;
+  histogram_bins: HistogramBin[];
+  quality_status: string;
+}
+
+export interface ScenarioComparisonItem {
+  scenario_id: string;
+  scenario_name: string;
+  category: StressScenarioCategory;
+  calculation_id: string;
+  baseline_nav: number;
+  stressed_nav: number;
+  stressed_pnl: number;
+  return_percentage: number;
+  loss_rank: number;
+  status: string;
+  assumptions_summary: Record<string, unknown>;
+  is_compatible: boolean;
+  compatibility_warning?: string | null;
+}
+
+export interface ScenarioComparisonResponse {
+  portfolio_id: string;
+  as_of_date: string;
+  base_currency: string;
+  scenarios: ScenarioComparisonItem[];
+  worst_scenario_name?: string | null;
+  best_scenario_name?: string | null;
+  max_loss_pnl?: number | null;
+  max_loss_percentage?: number | null;
+}
+
+export interface ContributorItem {
+  dimension_name: string;
+  dimension_type: 'POSITION' | 'SECTOR' | 'INDUSTRY' | 'FACTOR';
+  baseline_exposure: number;
+  stressed_pnl: number;
+  contribution_to_loss: number;
+  contribution_percentage: number;
+}
+
+export interface StressAttributionResponse {
+  attribution_id: string;
+  calculation_id: string;
+  portfolio_id: string;
+  scenario_name: string;
+  scenario_type: string;
+  total_stressed_pnl: number;
+  explained_pnl: number;
+  residual_amount: number;
+  is_reconciled: boolean;
+  loss_hhi: number;
+  effective_contributor_count: number;
+  position_contributors: ContributorItem[];
+  sector_contributors: ContributorItem[];
+  factor_contributors: ContributorItem[];
+  reconciliation_status: string;
+  quality_status: string;
+}
+
+export interface StressPreferenceResponse {
+  id: string;
+  user_id: string;
+  dashboard_name: string;
+  default_portfolio_id?: string | null;
+  default_scenario_category: string;
+  preferred_currency_display: string;
+  default_comparison_limit: number;
+  default_quantile_selection: string[];
+  display_configuration?: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StressSavedViewResponse {
+  id: string;
+  user_id: string;
+  view_name: string;
+  description?: string | null;
+  portfolio_id?: string | null;
+  selected_scenario_ids: string[];
+  selected_calculation_ids: string[];
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StressAnnotationResponse {
   id: string;
   user_id: string;
   portfolio_id?: string | null;
-  instrument_id: string;
-  investigation_type: string;
+  scenario_id: string;
+  calculation_id?: string | null;
+  annotation_type: string;
   severity: string;
   status: string;
   title: string;
   notes: string;
   metrics_snapshot?: Record<string, unknown> | null;
-  resolved_at?: string | null;
-  resolved_by?: string | null;
   created_at: string;
   updated_at: string;
 }

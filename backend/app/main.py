@@ -227,6 +227,9 @@ from backend.app.modules.dashboard_visualization.correlation_dashboard.router im
 from backend.app.modules.dashboard_visualization.liquidity_dashboard.router import (
     router as liquidity_dashboard_router,
 )
+from backend.app.modules.dashboard_visualization.stress_dashboard.router import (
+    router as stress_dashboard_router,
+)
 
 
 @asynccontextmanager
@@ -361,6 +364,7 @@ app.include_router(exposure_dashboard_router, prefix="/api/v1/dashboard/portfoli
 app.include_router(risk_heatmaps_router, prefix="/api/v1/dashboard/portfolios", tags=["M13.04 - Risk Heatmaps"])
 app.include_router(correlation_dashboard_router, prefix="/api/v1/dashboard", tags=["M13.05 - Correlation Dashboard"])
 app.include_router(liquidity_dashboard_router, tags=["M13.06 - Liquidity Dashboard"])
+app.include_router(stress_dashboard_router, tags=["M13.07 - Stress Testing Dashboard"])
 
 
 @app.get("/health", tags=["System"])
