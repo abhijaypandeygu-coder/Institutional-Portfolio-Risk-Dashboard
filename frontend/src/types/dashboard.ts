@@ -1725,3 +1725,130 @@ export interface HistoricalSavedViewResponse {
   created_at: string;
   updated_at: string;
 }
+
+
+// ============================================================================
+// M13.10 — Custom Views Types
+// ============================================================================
+
+export type ViewVisibility = 'PERSONAL' | 'GROUP';
+export type ViewPermissionLevel = 'VIEW' | 'EDIT' | 'DUPLICATE' | 'MANAGE';
+export type TimeRangeMode = 'RELATIVE' | 'ABSOLUTE';
+
+export interface WidgetDimensionBounds {
+  min_width: number;
+  max_width: number;
+  default_width: number;
+  min_height: number;
+  max_height: number;
+  default_height: number;
+}
+
+export interface WidgetDefinition {
+  widget_id: string;
+  name: string;
+  owning_module: string;
+  category: string;
+  description: string;
+  supported_metrics: string[];
+  supported_visualization_types: string[];
+  default_visualization_type: string;
+  dimension_bounds: WidgetDimensionBounds;
+  default_configuration: Record<string, unknown>;
+  allow_multiple_instances: boolean;
+  required_permissions: string[];
+  version: string;
+}
+
+export interface WidgetPosition {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface WidgetInstanceConfig {
+  instance_id: string;
+  widget_id: string;
+  widget_version: string;
+  title_override?: string | null;
+  position: WidgetPosition;
+  is_visible: boolean;
+  visualization_type?: string | null;
+  settings: Record<string, unknown>;
+}
+
+export interface LayoutConfig {
+  layout_version: string;
+  grid_columns: number;
+  widgets: WidgetInstanceConfig[];
+}
+
+export interface FilterConfig {
+  portfolio_ids: string[];
+  instrument_ids: string[];
+  sector_filters: string[];
+  selected_metrics: string[];
+  custom_filters: Record<string, unknown>;
+}
+
+export interface TimeRangeConfig {
+  mode: TimeRangeMode;
+  relative_preset?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  sampling_frequency: string;
+  timezone: string;
+}
+
+export interface CustomViewResponse {
+  view_id: string;
+  owner_user_id: string;
+  name: string;
+  description?: string | null;
+  visibility: ViewVisibility;
+  owner_group_id?: string | null;
+  layout_config: LayoutConfig;
+  filter_config: FilterConfig;
+  time_range_config: TimeRangeConfig;
+  version: number;
+  is_archived: boolean;
+  is_default: boolean;
+  effective_permissions: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CustomViewListResponse {
+  total_count: number;
+  views: CustomViewResponse[];
+}
+
+export interface ViewVersionSummary {
+  version_id: string;
+  view_id: string;
+  version_number: int;
+  changed_by_user_id: string;
+  change_summary?: string | null;
+  created_at: string;
+}
+
+export interface ViewShareResponse {
+  share_id: string;
+  view_id: string;
+  principal_type: string;
+  principal_id: string;
+  permission: ViewPermissionLevel;
+  granted_by_user_id: string;
+  created_at: string;
+}
+
+export interface UserViewPreferenceResponse {
+  user_id: string;
+  default_view_id?: string | null;
+  preferred_timezone: string;
+  density_mode: string;
+  auto_refresh_sec: number;
+  theme_preference: string;
+  updated_at: string;
+}
