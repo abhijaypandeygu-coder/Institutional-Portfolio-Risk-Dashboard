@@ -263,6 +263,15 @@ from backend.app.modules.reporting_attribution_audit.audit_trail.router import (
 from backend.app.modules.reporting_attribution_audit.report_archive.router import (
     router as report_archive_router,
 )
+from backend.app.modules.infrastructure_platform.backend_api.middleware import (
+    RequestTracingMiddleware,
+)
+from backend.app.modules.infrastructure_platform.backend_api.exception_handlers import (
+    setup_exception_handlers,
+)
+from backend.app.modules.infrastructure_platform.backend_api.router import (
+    router as backend_api_core_router,
+)
 
 
 @asynccontextmanager
@@ -289,7 +298,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# M15.01 Request Tracing and Security Headers
+app.add_middleware(RequestTracingMiddleware)
+
+# M15.01 Standard Institutional Exception Handling
+setup_exception_handlers(app)
+
 # Register API Routers
+app.include_router(backend_api_core_router)
 app.include_router(feed_registry_router, prefix="/api/v1")
 app.include_router(market_data_router, prefix="/api/v1")
 app.include_router(missing_data_router, prefix="/api/v1")
