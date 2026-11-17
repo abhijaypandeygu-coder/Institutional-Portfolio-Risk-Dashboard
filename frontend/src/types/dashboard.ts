@@ -466,3 +466,152 @@ export interface ConsolidatedExposureDashboardResponse {
   snapshot_id?: string | null;
   data_quality_notes: string[];
 }
+
+// ===========================================================================
+// M13.04 — Risk Heatmaps Types
+// ===========================================================================
+
+export type HeatmapMetricCategory = 'EXPOSURE' | 'PERFORMANCE' | 'RISK' | 'LIQUIDITY' | 'SCENARIO';
+
+export type HeatmapMetricDirection = 
+  | 'HIGHER_IS_RISKIER'
+  | 'LOWER_IS_RISKIER'
+  | 'POSITIVE_IS_FAVORABLE'
+  | 'NEGATIVE_IS_ADVERSE'
+  | 'NEUTRAL_CENTERED'
+  | 'MAGNITUDE_ONLY';
+
+export type HeatmapScaleType = 'SEQUENTIAL' | 'DIVERGING' | 'QUANTILE' | 'THRESHOLD';
+
+export type HeatmapPaletteType = 'RED_GREEN' | 'BLUES' | 'REDS' | 'COOL_WARM' | 'VIRIDIS' | 'SPECTRAL';
+
+export type HeatmapGrouping = 'NONE' | 'SECTOR' | 'INDUSTRY' | 'SIDE';
+
+export type HeatmapPositionSide = 'ALL' | 'LONG' | 'SHORT';
+
+export interface HeatmapMetricDefinition {
+  metric_id: string;
+  display_name: string;
+  category: HeatmapMetricCategory;
+  unit: string;
+  semantic_direction: HeatmapMetricDirection;
+  default_scale_type: HeatmapScaleType;
+  default_palette: HeatmapPaletteType;
+  source_module: string;
+  description: string;
+  is_additive: boolean;
+  supports_sector_view: boolean;
+  supports_security_view: boolean;
+}
+
+export interface HeatmapMetricRegistryResponse {
+  metrics: HeatmapMetricDefinition[];
+  total_metrics: number;
+  as_of: string;
+}
+
+export interface ColorScaleConfig {
+  scale_type: HeatmapScaleType;
+  palette: HeatmapPaletteType;
+  min_value?: number | null;
+  max_value?: number | null;
+  midpoint?: number | null;
+  quantile_breaks?: number[] | null;
+  threshold_steps?: Record<string, unknown>[] | null;
+  clipped_outliers_count: number;
+  is_inverted: boolean;
+}
+
+export interface HeatmapCell {
+  entity_id: string;
+  label: string;
+  sub_label?: string | null;
+  area_metric_id: string;
+  area_value: number;
+  area_weight_pct?: number | null;
+  color_metric_id: string;
+  color_metric_value?: number | null;
+  formatted_value: string;
+  normalized_score?: number | null;
+  color_hex?: string | null;
+  long_exposure: number;
+  short_exposure: number;
+  net_exposure: number;
+  gross_exposure: number;
+  instrument_count: number;
+  data_quality_status: string;
+  is_outlier_clipped: boolean;
+  provenance_source: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface SectorHeatmapResponse {
+  portfolio_id: string;
+  as_of_date: string;
+  generated_at: string;
+  reporting_currency: string;
+  color_metric: HeatmapMetricDefinition;
+  area_metric_id: string;
+  color_scale: ColorScaleConfig;
+  cells: HeatmapCell[];
+  total_area_value: number;
+  unclassified_cell?: HeatmapCell | null;
+  data_quality_summary: Record<string, number>;
+}
+
+export interface SecurityGroupNode {
+  group_id: string;
+  group_name: string;
+  group_area_value: number;
+  group_area_pct: number;
+  cells: HeatmapCell[];
+}
+
+export interface SecurityHeatmapResponse {
+  portfolio_id: string;
+  as_of_date: string;
+  generated_at: string;
+  reporting_currency: string;
+  grouping: HeatmapGrouping;
+  side_filter: HeatmapPositionSide;
+  color_metric: HeatmapMetricDefinition;
+  area_metric_id: string;
+  color_scale: ColorScaleConfig;
+  cells: HeatmapCell[];
+  groups?: SecurityGroupNode[] | null;
+  total_securities: number;
+  total_area_value: number;
+  data_quality_summary: Record<string, number>;
+}
+
+export interface DrilldownHoldingRow {
+  instrument_id: string;
+  symbol: string;
+  instrument_name: string;
+  sector_name?: string | null;
+  industry_name?: string | null;
+  side: string;
+  quantity: number;
+  market_price: number;
+  market_value: number;
+  weight_pct: number;
+  color_metric_value?: number | null;
+  formatted_color_metric: string;
+  data_quality_status: string;
+}
+
+export interface HeatmapDrilldownResponse {
+  portfolio_id: string;
+  entity_id: string;
+  entity_type: string;
+  entity_name: string;
+  as_of_date: string;
+  generated_at: string;
+  reporting_currency: string;
+  color_metric: HeatmapMetricDefinition;
+  area_metric_id: string;
+  summary: Record<string, unknown>;
+  holdings: DrilldownHoldingRow[];
+  total_holdings: number;
+  provenance_details: Record<string, unknown>;
+}
