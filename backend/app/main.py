@@ -260,6 +260,9 @@ from backend.app.modules.reporting_attribution_audit.export_engine.router import
 from backend.app.modules.reporting_attribution_audit.audit_trail.router import (
     router as audit_trail_router,
 )
+from backend.app.modules.reporting_attribution_audit.report_archive.router import (
+    router as report_archive_router,
+)
 
 
 @asynccontextmanager
@@ -405,6 +408,7 @@ app.include_router(stress_reports_router, prefix="/api/v1/reports/stress", tags=
 app.include_router(liquidity_reports_router, prefix="/api/v1/reports/liquidity", tags=["M14.05 - Liquidity Reports"])
 app.include_router(export_engine_router, prefix="/api/v1", tags=["M14.06 - Export Engine"])
 app.include_router(audit_trail_router, prefix="/api/v1", tags=["M14.07 - Audit Trail"])
+app.include_router(report_archive_router, tags=["M14.08 - Historical Report Archive"])
 
 
 @app.get("/health", tags=["System"])
