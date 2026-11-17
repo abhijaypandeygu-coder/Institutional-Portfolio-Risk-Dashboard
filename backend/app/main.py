@@ -254,6 +254,9 @@ from backend.app.modules.reporting_attribution_audit.stress_testing.router impor
 from backend.app.modules.reporting_attribution_audit.liquidity.router import (
     router as liquidity_reports_router,
 )
+from backend.app.modules.reporting_attribution_audit.export_engine.router import (
+    router as export_engine_router,
+)
 
 
 @asynccontextmanager
@@ -397,6 +400,7 @@ app.include_router(portfolio_performance_router, prefix="/api/v1", tags=["M14.02
 app.include_router(risk_attribution_router, prefix="/api/v1/reports/risk-attribution", tags=["M14.03 - Risk Attribution Reports"])
 app.include_router(stress_reports_router, prefix="/api/v1/reports/stress", tags=["M14.04 - Stress Testing Reports"])
 app.include_router(liquidity_reports_router, prefix="/api/v1/reports/liquidity", tags=["M14.05 - Liquidity Reports"])
+app.include_router(export_engine_router, prefix="/api/v1", tags=["M14.06 - Export Engine"])
 
 
 @app.get("/health", tags=["System"])
