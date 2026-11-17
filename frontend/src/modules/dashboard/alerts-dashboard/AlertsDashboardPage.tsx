@@ -18,11 +18,30 @@ import { AlertDetailDrawer } from './components/AlertDetailDrawer';
 export const AlertsDashboardPage: React.FC = () => {
   // Filters & Controls
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>('');
+  const [availablePortfolios, setAvailablePortfolios] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
   const [severityFilter, setSeverityFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'all' | 'breaches' | 'alerts'>('all');
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [refreshInterval, setRefreshInterval] = useState<number>(10); // seconds
+
+  // Fetch available portfolios dynamically
+  useEffect(() => {
+    const fetchPortfolios = async () => {
+      try {
+        const res = await fetch('/api/v1/portfolios?limit=50');
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list)) {
+            setAvailablePortfolios(list);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load portfolios for alerts dashboard:', err);
+      }
+    };
+    fetchPortfolios();
+  }, []);
 
   // Data States
   const [breachSummary, setBreachSummary] = useState<ActiveBreachSummaryResponse | null>(null);
@@ -55,7 +74,8 @@ export const AlertsDashboardPage: React.FC = () => {
       if (severityFilter) breachListParams.append('severity', severityFilter);
       const bListRes = await fetch(`/api/v1/dashboard/alerts/breaches?${breachListParams.toString()}`);
       if (bListRes.ok) {
-        setBreaches(await bListRes.json());
+        const bData = await bListRes.json();
+        setBreaches(Array.isArray(bData) ? bData : (bData.items || []));
       }
 
       // 2. Alert Summary & Feed
@@ -72,7 +92,8 @@ export const AlertsDashboardPage: React.FC = () => {
       if (statusFilter) alertFeedParams.append('status', statusFilter);
       const aFeedRes = await fetch(`/api/v1/dashboard/alerts/feed?${alertFeedParams.toString()}`);
       if (aFeedRes.ok) {
-        setAlertFeed(await aFeedRes.json());
+        const aData = await aFeedRes.json();
+        setAlertFeed(Array.isArray(aData) ? aData : (aData.items || []));
       }
     } catch (err) {
       console.error('Error fetching alerts dashboard data:', err);
@@ -238,9 +259,11 @@ export const AlertsDashboardPage: React.FC = () => {
             className="px-3 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 font-mono focus:outline-none focus:border-indigo-500"
           >
             <option value="">All Portfolios</option>
-            <option value="PORT-US-001">PORT-US-001 (US Momentum)</option>
-            <option value="PORT-IN-001">PORT-IN-001 (India Core Alpha)</option>
-            <option value="PORT_TEST_1">PORT_TEST_1</option>
+            {availablePortfolios.map((p) => (
+              <option key={p.portfolio_id} value={p.portfolio_id}>
+                {p.portfolio_name ? `${p.portfolio_id} (${p.portfolio_name})` : p.portfolio_id}
+              </option>
+            ))}
           </select>
 
           {/* Severity filter */}
@@ -376,8 +399,9 @@ export const AlertsDashboardPage: React.FC = () => {
             breaches={breaches}
             loading={loading}
             onSelectBreach={(b) => {
+              const utilText = b.utilization_pct !== undefined ? `${b.utilization_pct.toFixed(1)}%` : (b.utilization ? `${Number(b.utilization).toFixed(1)}%` : '—');
               setBannerMessage({
-                text: `Selected Breach: ${b.rule_name} (${b.breach_id}) — Utilization: ${b.utilization_pct.toFixed(1)}%`,
+                text: `Selected Breach: ${b.rule_name || b.risk_limit_id || b.breach_id} (${b.breach_id}) — Utilization: ${utilText}`,
                 type: 'info',
               });
             }}

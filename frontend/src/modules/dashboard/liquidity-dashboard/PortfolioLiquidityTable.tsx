@@ -95,6 +95,14 @@ export const PortfolioLiquidityTable: React.FC<PortfolioLiquidityTableProps> = (
             <tbody className="divide-y divide-slate-800/60 font-mono">
               {portfolioData.holdings.map((h: HoldingLiquiditySummary) => {
                 const isSelected = h.instrument_id === selectedInstrumentId;
+                const shares = Number(h.position_shares);
+                const weight = Number(h.weight_pct);
+                const spread = h.spread_bps !== null && h.spread_bps !== undefined ? Number(h.spread_bps) : null;
+                const compScore = h.composite_score !== null && h.composite_score !== undefined ? Number(h.composite_score) : null;
+                const depthImb = h.depth_imbalance !== null && h.depth_imbalance !== undefined ? Number(h.depth_imbalance) : null;
+                const liqCost = h.full_liquidation_cost_bps !== null && h.full_liquidation_cost_bps !== undefined ? Number(h.full_liquidation_cost_bps) : null;
+                const liqDays = h.full_liquidation_days !== null && h.full_liquidation_days !== undefined ? Number(h.full_liquidation_days) : null;
+
                 return (
                   <tr
                     key={h.instrument_id}
@@ -110,34 +118,30 @@ export const PortfolioLiquidityTable: React.FC<PortfolioLiquidityTableProps> = (
                       <span className={h.position_direction === 'LONG' ? 'text-emerald-400' : 'text-rose-400'}>
                         {h.position_direction}
                       </span>{' '}
-                      ({h.position_shares.toLocaleString()})
+                      ({shares.toLocaleString()})
                     </td>
-                    <td className="py-2.5 px-3 text-slate-300">{h.weight_pct.toFixed(2)}%</td>
+                    <td className="py-2.5 px-3 text-slate-300">{weight.toFixed(2)}%</td>
                     <td className="py-2.5 px-3 text-cyan-400">
-                      {h.spread_bps !== null && h.spread_bps !== undefined ? `${h.spread_bps.toFixed(2)}` : '—'}
+                      {spread !== null ? `${spread.toFixed(2)}` : '—'}
                     </td>
                     <td className="py-2.5 px-3 text-slate-200">
-                      {h.composite_score !== null && h.composite_score !== undefined ? h.composite_score.toFixed(1) : '—'}
+                      {compScore !== null ? compScore.toFixed(1) : '—'}
                     </td>
                     <td className="py-2.5 px-3">{getBucketBadge(h.liquidity_bucket)}</td>
                     <td className="py-2.5 px-3">
-                      {h.depth_imbalance !== null && h.depth_imbalance !== undefined ? (
-                        <span className={h.depth_imbalance > 0 ? 'text-emerald-400' : 'text-rose-400'}>
-                          {(h.depth_imbalance * 100).toFixed(1)}%
+                      {depthImb !== null ? (
+                        <span className={depthImb > 0 ? 'text-emerald-400' : 'text-rose-400'}>
+                          {(depthImb * 100).toFixed(1)}%
                         </span>
                       ) : (
                         '—'
                       )}
                     </td>
                     <td className="py-2.5 px-3 text-rose-400 font-semibold">
-                      {h.full_liquidation_cost_bps !== null && h.full_liquidation_cost_bps !== undefined
-                        ? `${h.full_liquidation_cost_bps.toFixed(1)} bps`
-                        : '—'}
+                      {liqCost !== null ? `${liqCost.toFixed(1)} bps` : '—'}
                     </td>
                     <td className="py-2.5 px-3 text-slate-300">
-                      {h.full_liquidation_days !== null && h.full_liquidation_days !== undefined
-                        ? `${h.full_liquidation_days.toFixed(1)}d`
-                        : '—'}
+                      {liqDays !== null ? `${liqDays.toFixed(1)}d` : '—'}
                     </td>
                   </tr>
                 );

@@ -65,13 +65,13 @@ export const LiquidationPanel: React.FC<LiquidationPanelProps> = ({
         <div>
           <span className="text-slate-400">Current Position: </span>
           <strong className="text-slate-200 font-mono">
-            {liquidationProfile.current_position_shares.toLocaleString()} shares
+            {Number(liquidationProfile.current_position_shares).toLocaleString()} shares
           </strong>
         </div>
         <div>
           <span className="text-slate-400">Notional Exposure: </span>
           <strong className="text-slate-200 font-mono">
-            ${(liquidationProfile.current_position_notional / 1000).toFixed(1)}k
+            ${(Number(liquidationProfile.current_position_notional) / 1000).toFixed(1)}k
           </strong>
         </div>
         <div className="text-slate-500 text-[11px]">
@@ -96,44 +96,57 @@ export const LiquidationPanel: React.FC<LiquidationPanelProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60 font-mono">
-            {liquidationProfile.scenarios.map((scen) => (
-              <tr
-                key={scen.target_percentage}
-                className={`hover:bg-slate-800/40 transition-colors ${
-                  scen.target_percentage === 1.0 ? 'bg-slate-950/80 font-bold' : ''
-                }`}
-              >
-                <td className="py-2.5 px-3 text-slate-200 font-semibold">
-                  {(scen.target_percentage * 100).toFixed(0)}%
-                </td>
-                <td className="py-2.5 px-3 text-slate-300">
-                  {scen.shares_to_liquidate.toLocaleString()}
-                </td>
-                <td className="py-2.5 px-3 text-slate-300">
-                  ${(scen.notional_value / 1000).toFixed(1)}k
-                </td>
-                <td className="py-2.5 px-3 text-slate-400">
-                  {scen.spread_cost_bps.toFixed(2)}
-                </td>
-                <td className="py-2.5 px-3 text-amber-400">
-                  {scen.market_impact_cost_bps.toFixed(2)}
-                </td>
-                <td className="py-2.5 px-3 text-purple-400">
-                  {scen.slippage_cost_bps.toFixed(2)}
-                </td>
-                <td className="py-2.5 px-3 text-cyan-400 font-bold">
-                  {scen.total_cost_bps.toFixed(2)} bps
-                </td>
-                <td className="py-2.5 px-3 text-rose-400 font-bold">
-                  ${scen.total_cost_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </td>
-                <td className="py-2.5 px-3 text-slate-300">
-                  {scen.estimated_trading_days < 1
-                    ? `${scen.estimated_duration_minutes.toFixed(0)} mins`
-                    : `${scen.estimated_trading_days.toFixed(1)} days`}
-                </td>
-              </tr>
-            ))}
+            {liquidationProfile.scenarios.map((scen) => {
+              const targetPct = Number(scen.target_percentage);
+              const shares = Number(scen.shares_to_liquidate);
+              const notional = Number(scen.notional_value);
+              const spreadBps = Number(scen.spread_cost_bps);
+              const impactBps = Number(scen.market_impact_cost_bps);
+              const slipBps = Number(scen.slippage_cost_bps);
+              const totalBps = Number(scen.total_cost_bps);
+              const totalUsd = Number(scen.total_cost_usd);
+              const estMins = Number(scen.estimated_duration_minutes);
+              const estDays = Number(scen.estimated_trading_days);
+
+              return (
+                <tr
+                  key={scen.target_percentage}
+                  className={`hover:bg-slate-800/40 transition-colors ${
+                    targetPct === 1.0 ? 'bg-slate-950/80 font-bold' : ''
+                  }`}
+                >
+                  <td className="py-2.5 px-3 text-slate-200 font-semibold">
+                    {(targetPct * 100).toFixed(0)}%
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-300">
+                    {shares.toLocaleString()}
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-300">
+                    ${(notional / 1000).toFixed(1)}k
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-400">
+                    {spreadBps.toFixed(2)}
+                  </td>
+                  <td className="py-2.5 px-3 text-amber-400">
+                    {impactBps.toFixed(2)}
+                  </td>
+                  <td className="py-2.5 px-3 text-purple-400">
+                    {slipBps.toFixed(2)}
+                  </td>
+                  <td className="py-2.5 px-3 text-cyan-400 font-bold">
+                    {totalBps.toFixed(2)} bps
+                  </td>
+                  <td className="py-2.5 px-3 text-rose-400 font-bold">
+                    ${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-300">
+                    {estDays < 1
+                      ? `${estMins.toFixed(0)} mins`
+                      : `${estDays.toFixed(1)} days`}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

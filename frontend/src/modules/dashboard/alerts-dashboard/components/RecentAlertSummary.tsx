@@ -17,18 +17,15 @@ export const RecentAlertSummary: React.FC<RecentAlertSummaryProps> = ({ summary,
     );
   }
 
-  const s = summary || {
-    total_alerts_24h: 0,
-    unacknowledged_alerts: 0,
-    high_priority_alerts: 0,
-    under_investigation: 0,
-    as_of: new Date().toISOString(),
-  };
+  const totalAlerts = summary?.counts?.total_alerts ?? summary?.total_alerts_24h ?? 0;
+  const unacknowledged = summary?.counts?.unacknowledged ?? summary?.unacknowledged_alerts ?? 0;
+  const highPriority = summary?.counts?.high_priority ?? summary?.high_priority_alerts ?? 0;
+  const underInvestigation = summary?.counts?.under_investigation ?? summary?.under_investigation ?? 0;
 
   const cards = [
     {
       label: 'Alerts (Last 24h)',
-      value: s.total_alerts_24h,
+      value: totalAlerts,
       color: 'text-slate-100',
       bgColor: 'bg-slate-900/80',
       border: 'border-slate-800',
@@ -36,23 +33,23 @@ export const RecentAlertSummary: React.FC<RecentAlertSummaryProps> = ({ summary,
     },
     {
       label: 'Unacknowledged',
-      value: s.unacknowledged_alerts,
-      color: s.unacknowledged_alerts > 0 ? 'text-amber-400 font-bold' : 'text-slate-300',
-      bgColor: s.unacknowledged_alerts > 0 ? 'bg-amber-950/30' : 'bg-slate-900/80',
-      border: s.unacknowledged_alerts > 0 ? 'border-amber-800/60' : 'border-slate-800',
+      value: unacknowledged,
+      color: unacknowledged > 0 ? 'text-amber-400 font-bold' : 'text-slate-300',
+      bgColor: unacknowledged > 0 ? 'bg-amber-950/30' : 'bg-slate-900/80',
+      border: unacknowledged > 0 ? 'border-amber-800/60' : 'border-slate-800',
       icon: '📬',
     },
     {
       label: 'High Priority (P≥75)',
-      value: s.high_priority_alerts,
-      color: s.high_priority_alerts > 0 ? 'text-rose-400 font-bold' : 'text-slate-300',
-      bgColor: s.high_priority_alerts > 0 ? 'bg-rose-950/30' : 'bg-slate-900/80',
-      border: s.high_priority_alerts > 0 ? 'border-rose-800/60' : 'border-slate-800',
+      value: highPriority,
+      color: highPriority > 0 ? 'text-rose-400 font-bold' : 'text-slate-300',
+      bgColor: highPriority > 0 ? 'bg-rose-950/30' : 'bg-slate-900/80',
+      border: highPriority > 0 ? 'border-rose-800/60' : 'border-slate-800',
       icon: '🔥',
     },
     {
       label: 'Under Investigation',
-      value: s.under_investigation,
+      value: underInvestigation,
       color: 'text-indigo-400 font-semibold',
       bgColor: 'bg-slate-900/80',
       border: 'border-slate-800',

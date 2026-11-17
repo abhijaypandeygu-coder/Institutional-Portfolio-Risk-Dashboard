@@ -1302,44 +1302,97 @@ export type BreachSeverity = 'WARNING' | 'CRITICAL' | 'EMERGENCY';
 export type BreachScope = 'PORTFOLIO' | 'BENCHMARK' | 'SECURITY' | 'COUNTERPARTY' | 'GLOBAL';
 export type SLAState = 'IN_SLA' | 'NEAR_EXPIRY' | 'EXPIRED' | 'UNSPECIFIED';
 
+export interface ActiveBreachSummaryCounts {
+  total_active: number;
+  emergency: number;
+  critical: number;
+  warning: number;
+  unacknowledged: number;
+  acknowledged: number;
+  awaiting_remediation: number;
+  overdue_escalation: number;
+}
+
 export interface ActiveBreachSummaryResponse {
-  total_active_breaches: number;
-  emergency_breaches: number;
-  critical_breaches: number;
-  warning_breaches: number;
-  unacknowledged_breaches: number;
-  escalated_breaches: number;
-  overdue_sla_breaches: number;
-  as_of: string;
+  scope?: {
+    portfolio_ids: string[];
+    time_range_preset?: string | null;
+    as_of: string;
+    freshness_status: QualityStatus;
+  };
+  counts?: ActiveBreachSummaryCounts;
+  upstream_m11_status?: string;
+  // Backward compatibility convenience accessors
+  total_active_breaches?: number;
+  emergency_breaches?: number;
+  critical_breaches?: number;
+  warning_breaches?: number;
+  unacknowledged_breaches?: number;
+  escalated_breaches?: number;
+  overdue_sla_breaches?: number;
+  as_of?: string;
 }
 
 export interface ActiveBreachItem {
   breach_id: string;
-  episode_id?: string | null;
-  rule_id: string;
-  rule_name: string;
-  rule_category: string;
+  workflow_id?: string | null;
+  workflow_reference?: string | null;
   portfolio_id: string;
   portfolio_name?: string | null;
+  target_entity_type?: string;
+  target_entity_id?: string;
+  risk_limit_id?: string;
+  breach_type?: string;
+  rule_id?: string;
+  rule_name?: string;
+  rule_category?: string;
   instrument_id?: string | null;
   instrument_name?: string | null;
   severity: BreachSeverity;
   status: string;
-  scope: BreachScope;
-  metric_name: string;
-  current_metric_value: number;
-  limit_threshold_value: number;
-  unit: string;
-  utilization_pct: number;
+  scope?: BreachScope;
+  risk_metric?: string;
+  metric_name?: string;
+  current_value?: string | number;
+  current_metric_value?: number;
+  limit_value?: string | number;
+  limit_threshold_value?: number;
+  warning_value?: string | number | null;
+  utilization?: string | number | null;
+  utilization_pct?: number;
+  metric_unit?: string;
+  unit?: string;
   detected_at: string;
   duration_minutes: number;
-  is_acknowledged: boolean;
+  duration_display?: string;
+  acknowledgement_status?: string;
+  is_acknowledged?: boolean;
   acknowledged_by?: string | null;
   acknowledged_at?: string | null;
   assigned_to?: string | null;
-  escalation_level: number;
-  sla_state: SLAState;
+  assigned_team?: string | null;
+  current_escalation_level?: string;
+  escalation_level?: number;
+  sla_status?: string;
+  sla_state?: SLAState;
   sla_expires_at?: string | null;
+  is_overdue?: boolean;
+  related_alert_count?: number;
+  last_updated?: string;
+}
+
+export interface ActiveBreachListResponse {
+  scope: {
+    portfolio_ids: string[];
+    time_range_preset?: string | null;
+    as_of: string;
+    freshness_status: QualityStatus;
+  };
+  total: number;
+  page: number;
+  page_size: number;
+  items: ActiveBreachItem[];
+  upstream_status: string;
 }
 
 export interface BreachDetailResponse {
@@ -1376,50 +1429,100 @@ export interface BreachDetailResponse {
 export type AlertSeverity = 'INFO' | 'WARNING' | 'CRITICAL' | 'EMERGENCY';
 export type AlertStatus = 'TRIGGERED' | 'ACKNOWLEDGED' | 'INVESTIGATING' | 'ESCALATED' | 'RESOLVED' | 'CLOSED' | 'EXPIRED' | 'SUPPRESSED';
 
-export interface RecentAlertSummaryResponse {
-  total_alerts_24h: number;
-  unacknowledged_alerts: number;
-  high_priority_alerts: number;
+export interface RecentAlertSummaryCounts {
+  total_alerts: number;
+  new_alerts: number;
+  unacknowledged: number;
+  high_priority: number;
+  emergency_priority: number;
   under_investigation: number;
-  as_of: string;
+  resolved: number;
+  reopened: number;
+}
+
+export interface RecentAlertSummaryResponse {
+  scope?: {
+    portfolio_ids: string[];
+    time_range_preset?: string;
+    as_of: string;
+    freshness_status: QualityStatus;
+  };
+  counts?: RecentAlertSummaryCounts;
+  upstream_m12_status?: string;
+  // Backward compatibility convenience accessors
+  total_alerts_24h?: number;
+  unacknowledged_alerts?: number;
+  high_priority_alerts?: number;
+  under_investigation?: number;
+  as_of?: string;
 }
 
 export interface AlertFeedItem {
   alert_id: string;
   title: string;
+  category?: string;
   portfolio_id?: string | null;
+  portfolio_name?: string | null;
   instrument_id?: string | null;
+  symbol?: string | null;
   alert_type: string;
-  severity: AlertSeverity;
-  status: AlertStatus;
-  priority_score: number;
+  severity: AlertSeverity | string;
+  priority?: string;
+  status: AlertStatus | string;
+  priority_score?: number | null;
+  short_description?: string;
   trigger_value?: number | null;
   threshold_value?: number | null;
   metric_name?: string | null;
   unit?: string | null;
   triggered_at: string;
   assigned_to?: string | null;
-  is_acknowledged: boolean;
-  has_linked_breach: boolean;
+  is_acknowledged?: boolean;
+  acknowledged_by?: string | null;
+  acknowledged_at?: string | null;
+  has_linked_breach?: boolean;
   linked_breach_id?: string | null;
+  related_breach_id?: string | null;
+  source_module?: string;
+  occurrence_count?: number;
+  last_updated?: string;
+}
+
+export interface RecentAlertListResponse {
+  scope: {
+    portfolio_ids: string[];
+    time_range_preset?: string;
+    as_of: string;
+    freshness_status: QualityStatus;
+  };
+  total: number;
+  page: number;
+  page_size: number;
+  items: AlertFeedItem[];
+  upstream_status: string;
 }
 
 export interface AlertDetailResponse {
-  alert_id: string;
-  title: string;
+  alert?: AlertFeedItem;
+  alert_id?: string;
+  title?: string;
   portfolio_id?: string | null;
   instrument_id?: string | null;
-  alert_type: string;
-  severity: AlertSeverity;
-  status: AlertStatus;
-  priority_score: number;
-  trigger_condition: string;
+  alert_type?: string;
+  severity?: AlertSeverity | string;
+  status?: AlertStatus | string;
+  priority_score?: number | null;
+  trigger_condition?: string;
   trigger_value?: number | null;
   threshold_value?: number | null;
+  observed_value?: number | null;
   metric_name?: string | null;
+  source_metric?: string | null;
   unit?: string | null;
-  triggered_at: string;
-  is_acknowledged: boolean;
+  metric_unit?: string | null;
+  currency?: string | null;
+  triggered_at?: string;
+  is_acknowledged?: boolean;
   acknowledged_by?: string | null;
   acknowledged_at?: string | null;
   assigned_to?: string | null;
@@ -1427,20 +1530,24 @@ export interface AlertDetailResponse {
   resolution_notes?: string | null;
   resolved_at?: string | null;
   evidence_payload: Record<string, unknown>;
-  has_linked_breach: boolean;
+  has_linked_breach?: boolean;
   linked_breach_id?: string | null;
   breach_warning_notice?: string | null;
+  workflow_state?: string | null;
+  permitted_actions?: string[];
 }
 
 export interface AlertTimelineEvent {
   event_id: string;
-  alert_id: string;
+  alert_id?: string;
   event_type: string;
   from_status?: string | null;
   to_status?: string | null;
-  actor_id: string;
+  actor_id?: string;
+  occurred_at?: string;
+  timestamp?: string;
+  summary?: string;
   notes?: string | null;
-  timestamp: string;
   metadata?: Record<string, unknown>;
 }
 

@@ -17,21 +17,18 @@ export const ActiveBreachSummary: React.FC<ActiveBreachSummaryProps> = ({ summar
     );
   }
 
-  const s = summary || {
-    total_active_breaches: 0,
-    emergency_breaches: 0,
-    critical_breaches: 0,
-    warning_breaches: 0,
-    unacknowledged_breaches: 0,
-    escalated_breaches: 0,
-    overdue_sla_breaches: 0,
-    as_of: new Date().toISOString(),
-  };
+  const totalActive = summary?.counts?.total_active ?? summary?.total_active_breaches ?? 0;
+  const emergency = summary?.counts?.emergency ?? summary?.emergency_breaches ?? 0;
+  const critical = summary?.counts?.critical ?? summary?.critical_breaches ?? 0;
+  const warning = summary?.counts?.warning ?? summary?.warning_breaches ?? 0;
+  const unacknowledged = summary?.counts?.unacknowledged ?? summary?.unacknowledged_breaches ?? 0;
+  const escalated = summary?.counts?.awaiting_remediation ?? summary?.escalated_breaches ?? 0;
+  const overdueSla = summary?.counts?.overdue_escalation ?? summary?.overdue_sla_breaches ?? 0;
 
   const cards = [
     {
       label: 'Total Active',
-      value: s.total_active_breaches,
+      value: totalActive,
       color: 'text-slate-100',
       bgColor: 'bg-slate-900/80',
       border: 'border-slate-800',
@@ -39,23 +36,23 @@ export const ActiveBreachSummary: React.FC<ActiveBreachSummaryProps> = ({ summar
     },
     {
       label: 'Emergency (L3)',
-      value: s.emergency_breaches,
+      value: emergency,
       color: 'text-red-400 font-bold',
-      bgColor: s.emergency_breaches > 0 ? 'bg-red-950/40' : 'bg-slate-900/80',
-      border: s.emergency_breaches > 0 ? 'border-red-800' : 'border-slate-800',
+      bgColor: emergency > 0 ? 'bg-red-950/40' : 'bg-slate-900/80',
+      border: emergency > 0 ? 'border-red-800' : 'border-slate-800',
       icon: '🚨',
     },
     {
       label: 'Critical (L2)',
-      value: s.critical_breaches,
+      value: critical,
       color: 'text-orange-400 font-bold',
-      bgColor: s.critical_breaches > 0 ? 'bg-orange-950/40' : 'bg-slate-900/80',
-      border: s.critical_breaches > 0 ? 'border-orange-800' : 'border-slate-800',
+      bgColor: critical > 0 ? 'bg-orange-950/40' : 'bg-slate-900/80',
+      border: critical > 0 ? 'border-orange-800' : 'border-slate-800',
       icon: '⚠️',
     },
     {
       label: 'Warning (L1)',
-      value: s.warning_breaches,
+      value: warning,
       color: 'text-yellow-400 font-semibold',
       bgColor: 'bg-slate-900/80',
       border: 'border-slate-800',
@@ -63,15 +60,15 @@ export const ActiveBreachSummary: React.FC<ActiveBreachSummaryProps> = ({ summar
     },
     {
       label: 'Unacknowledged',
-      value: s.unacknowledged_breaches,
-      color: s.unacknowledged_breaches > 0 ? 'text-amber-400 font-bold' : 'text-slate-200',
-      bgColor: s.unacknowledged_breaches > 0 ? 'bg-amber-950/30' : 'bg-slate-900/80',
-      border: s.unacknowledged_breaches > 0 ? 'border-amber-800/60' : 'border-slate-800',
+      value: unacknowledged,
+      color: unacknowledged > 0 ? 'text-amber-400 font-bold' : 'text-slate-200',
+      bgColor: unacknowledged > 0 ? 'bg-amber-950/30' : 'bg-slate-900/80',
+      border: unacknowledged > 0 ? 'border-amber-800/60' : 'border-slate-800',
       icon: '📬',
     },
     {
-      label: 'Escalated',
-      value: s.escalated_breaches,
+      label: 'Awaiting Remediation',
+      value: escalated,
       color: 'text-purple-400 font-semibold',
       bgColor: 'bg-slate-900/80',
       border: 'border-slate-800',
@@ -79,10 +76,10 @@ export const ActiveBreachSummary: React.FC<ActiveBreachSummaryProps> = ({ summar
     },
     {
       label: 'Overdue SLA',
-      value: s.overdue_sla_breaches,
-      color: s.overdue_sla_breaches > 0 ? 'text-rose-400 font-bold' : 'text-slate-400',
-      bgColor: s.overdue_sla_breaches > 0 ? 'bg-rose-950/40 animate-pulse' : 'bg-slate-900/80',
-      border: s.overdue_sla_breaches > 0 ? 'border-rose-700' : 'border-slate-800',
+      value: overdueSla,
+      color: overdueSla > 0 ? 'text-rose-400 font-bold' : 'text-slate-400',
+      bgColor: overdueSla > 0 ? 'bg-rose-950/40 animate-pulse' : 'bg-slate-900/80',
+      border: overdueSla > 0 ? 'border-rose-700' : 'border-slate-800',
       icon: '⏱️',
     },
   ];

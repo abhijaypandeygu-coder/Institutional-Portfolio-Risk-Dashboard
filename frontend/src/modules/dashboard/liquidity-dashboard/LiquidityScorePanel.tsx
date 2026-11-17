@@ -63,17 +63,17 @@ export const LiquidityScorePanel: React.FC<LiquidityScorePanelProps> = ({ score 
         <div className="flex flex-col">
           <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Institutional Score</span>
           <span className="text-3xl font-extrabold text-cyan-400 font-mono">
-            {score.composite_score.toFixed(1)} <span className="text-sm font-normal text-slate-500">/ 100</span>
+            {Number(score.composite_score).toFixed(1)} <span className="text-sm font-normal text-slate-500">/ 100</span>
           </span>
         </div>
 
         <div className="flex flex-col text-right">
           <span className="text-xs text-slate-400">20d Traded Volume / ADV</span>
           <span className="text-base font-bold text-slate-200 font-mono">
-            {score.adv_shares_20d ? `${(score.adv_shares_20d / 1000).toFixed(1)}k shares` : '—'}
+            {score.adv_shares_20d ? `${(Number(score.adv_shares_20d) / 1000).toFixed(1)}k shares` : '—'}
           </span>
           <span className="text-[11px] text-slate-500 font-mono">
-            ADTV: {score.adtv_usd_20d ? `$${(score.adtv_usd_20d / 1000000).toFixed(2)}M` : '—'}
+            ADTV: {score.adtv_usd_20d ? `$${(Number(score.adtv_usd_20d) / 1000000).toFixed(2)}M` : '—'}
           </span>
         </div>
       </div>
@@ -86,15 +86,15 @@ export const LiquidityScorePanel: React.FC<LiquidityScorePanelProps> = ({ score 
             <div className="flex items-center justify-between">
               <span className="capitalize text-slate-300 font-medium">{comp.name.replace('_', ' ')}</span>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-slate-500 font-mono">Weight: {(comp.weight * 100).toFixed(0)}%</span>
-                <span className="font-mono font-bold text-slate-200">{comp.score.toFixed(1)}</span>
+                <span className="text-[11px] text-slate-500 font-mono">Weight: {(Number(comp.weight) * 100).toFixed(0)}%</span>
+                <span className="font-mono font-bold text-slate-200">{Number(comp.score).toFixed(1)}</span>
               </div>
             </div>
 
             <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
               <div
                 className={`h-full ${getComponentColor(comp.status)} transition-all duration-300`}
-                style={{ width: `${Math.min(100, Math.max(0, comp.score))}%` }}
+                style={{ width: `${Math.min(100, Math.max(0, Number(comp.score)))}%` }}
               />
             </div>
           </div>

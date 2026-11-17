@@ -124,6 +124,7 @@ async def get_recent_alerts_summary(
 
 
 @router.get("", response_model=RecentAlertListResponse)
+@router.get("/feed", response_model=RecentAlertListResponse)
 async def list_recent_alerts(
     portfolio_id: Optional[str] = Query(None, description="Portfolio filter"),
     severity: Optional[str] = Query(None, description="Alert priority or severity"),

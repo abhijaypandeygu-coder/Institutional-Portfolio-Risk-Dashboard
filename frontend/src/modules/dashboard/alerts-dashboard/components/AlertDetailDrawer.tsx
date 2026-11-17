@@ -29,17 +29,40 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
 
   if (!alert) return null;
 
+  // Normalize alert fields whether nested under alert.alert or flat
+  const a: any = alert.alert || alert;
+  const alertId = a.alert_id || alert.alert_id || '';
+  const title = a.title || alert.title || '';
+  const alertType = a.alert_type || alert.alert_type || 'ALERT';
+  const priorityScore = a.priority_score ?? alert.priority_score ?? null;
+  const severity = a.severity || alert.severity || 'INFO';
+  const status = a.status || alert.status || 'OPEN';
+  const portfolioId = a.portfolio_id || alert.portfolio_id || '';
+  const instrumentId = a.instrument_id || alert.instrument_id || '';
+  const triggeredAt = a.triggered_at || alert.triggered_at || new Date().toISOString();
+  const assignedTo = a.assigned_to || alert.assigned_to || null;
+  const triggerCondition = alert.trigger_condition || a.short_description || 'Condition threshold evaluated';
+  const metricName = alert.metric_name || alert.source_metric || a.metric_name || null;
+  const triggerVal = alert.trigger_value ?? alert.observed_value ?? a.trigger_value ?? null;
+  const thresholdVal = alert.threshold_value ?? a.threshold_value ?? null;
+  const unit = alert.unit || alert.metric_unit || a.unit || '';
+  const evidence = alert.evidence_payload || {};
+  const resolutionNotes = alert.resolution_notes || null;
+  const hasLinkedBreach = alert.has_linked_breach || a.has_linked_breach || Boolean(a.related_breach_id);
+  const linkedBreachId = alert.linked_breach_id || a.linked_breach_id || a.related_breach_id || null;
+  const breachWarningNotice = alert.breach_warning_notice || (hasLinkedBreach ? `Associated limit breach event ${linkedBreachId}` : null);
+
   const handleAction = async (payload: { notes?: string; rationale?: string; assigned_to?: string }) => {
     setModalLoading(true);
     try {
       if (activeModal === 'ack') {
-        await onAcknowledge(alert.alert_id, payload.notes);
+        await onAcknowledge(alertId, payload.notes);
       } else if (activeModal === 'assign' && payload.assigned_to) {
-        await onAssign(alert.alert_id, payload.assigned_to, payload.notes);
+        await onAssign(alertId, payload.assigned_to, payload.notes);
       } else if (activeModal === 'close' && payload.rationale) {
-        await onCloseAlert(alert.alert_id, payload.rationale, payload.notes);
+        await onCloseAlert(alertId, payload.rationale, payload.notes);
       } else if (activeModal === 'reopen') {
-        await onReopen(alert.alert_id, payload.notes);
+        await onReopen(alertId, payload.notes);
       }
       setActiveModal(null);
     } finally {
@@ -54,11 +77,13 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
-              {alert.alert_type}
+              {alertType}
             </span>
-            <span className="text-xs font-mono text-slate-400">P:{alert.priority_score.toFixed(0)}</span>
+            {priorityScore !== null && priorityScore !== undefined && (
+              <span className="text-xs font-mono text-slate-400">P:{Number(priorityScore).toFixed(0)}</span>
+            )}
           </div>
-          <h2 className="text-sm font-bold text-slate-100 mt-1">{alert.title}</h2>
+          <h2 className="text-sm font-bold text-slate-100 mt-1">{title}</h2>
         </div>
         <button
           type="button"
@@ -70,12 +95,12 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
       </div>
 
       {/* Linked Breach Callout if present */}
-      {alert.has_linked_breach && alert.breach_warning_notice && (
+      {hasLinkedBreach && breachWarningNotice && (
         <div className="p-3 bg-amber-950/70 border-b border-amber-800 text-amber-200 text-xs">
           <div className="font-bold flex items-center gap-1">
-            <span>⚠️</span> RISK LIMIT BREACH LINKED ({alert.linked_breach_id})
+            <span>⚠️</span> RISK LIMIT BREACH LINKED ({linkedBreachId})
           </div>
-          <div className="mt-1">{alert.breach_warning_notice}</div>
+          <div className="mt-1">{breachWarningNotice}</div>
         </div>
       )}
 
@@ -85,27 +110,27 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
         <div className="grid grid-cols-2 gap-3 bg-slate-950/60 p-3 rounded border border-slate-800 font-mono">
           <div>
             <span className="text-slate-500 block text-[10px]">SEVERITY</span>
-            <span className="font-semibold text-slate-200">{alert.severity}</span>
+            <span className="font-semibold text-slate-200">{severity}</span>
           </div>
           <div>
             <span className="text-slate-500 block text-[10px]">STATUS</span>
-            <span className="font-semibold text-slate-200">{alert.status}</span>
+            <span className="font-semibold text-slate-200">{status}</span>
           </div>
           <div>
             <span className="text-slate-500 block text-[10px]">PORTFOLIO</span>
-            <span className="text-slate-200">{alert.portfolio_id || 'N/A'}</span>
+            <span className="text-slate-200">{portfolioId || 'N/A'}</span>
           </div>
           <div>
             <span className="text-slate-500 block text-[10px]">INSTRUMENT</span>
-            <span className="text-slate-200">{alert.instrument_id || 'N/A'}</span>
+            <span className="text-slate-200">{instrumentId || 'N/A'}</span>
           </div>
           <div>
             <span className="text-slate-500 block text-[10px]">TRIGGERED AT</span>
-            <span className="text-slate-200">{new Date(alert.triggered_at).toLocaleString()}</span>
+            <span className="text-slate-200">{new Date(triggeredAt).toLocaleString()}</span>
           </div>
           <div>
             <span className="text-slate-500 block text-[10px]">ASSIGNED TO</span>
-            <span className="text-slate-200">{alert.assigned_to || 'Unassigned'}</span>
+            <span className="text-slate-200">{assignedTo || 'Unassigned'}</span>
           </div>
         </div>
 
@@ -116,28 +141,28 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
           </h4>
           <div className="p-3 bg-slate-950 rounded border border-slate-800 font-mono space-y-1">
             <div>
-              <span className="text-slate-500">Condition:</span> {alert.trigger_condition}
+              <span className="text-slate-500">Condition:</span> {triggerCondition}
             </div>
-            {alert.metric_name && (
+            {metricName && (
               <div>
-                <span className="text-slate-500">Metric:</span> {alert.metric_name}
+                <span className="text-slate-500">Metric:</span> {metricName}
               </div>
             )}
-            {alert.trigger_value !== null && alert.trigger_value !== undefined && (
+            {triggerVal !== null && triggerVal !== undefined && (
               <div>
                 <span className="text-slate-500">Trigger Value:</span>{' '}
                 <span className="text-amber-300">
-                  {alert.trigger_value.toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
-                  {alert.unit || ''}
+                  {Number(triggerVal).toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
+                  {unit}
                 </span>
               </div>
             )}
-            {alert.threshold_value !== null && alert.threshold_value !== undefined && (
+            {thresholdVal !== null && thresholdVal !== undefined && (
               <div>
                 <span className="text-slate-500">Threshold:</span>{' '}
                 <span className="text-slate-300">
-                  {alert.threshold_value.toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
-                  {alert.unit || ''}
+                  {Number(thresholdVal).toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
+                  {unit}
                 </span>
               </div>
             )}
@@ -145,19 +170,19 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
         </div>
 
         {/* Evidence Payload */}
-        {Object.keys(alert.evidence_payload || {}).length > 0 && (
+        {Object.keys(evidence).length > 0 && (
           <div>
             <h4 className="text-slate-400 font-semibold mb-1 uppercase tracking-wider text-[11px]">
               Snapshot Evidence Data
             </h4>
             <pre className="p-3 bg-slate-950 rounded border border-slate-800 text-[11px] font-mono text-slate-300 overflow-x-auto max-h-48">
-              {JSON.stringify(alert.evidence_payload, null, 2)}
+              {JSON.stringify(evidence, null, 2)}
             </pre>
           </div>
         )}
 
         {/* Resolution Notes if closed */}
-        {alert.resolution_notes && (
+        {resolutionNotes && (
           <div>
             <h4 className="text-slate-400 font-semibold mb-1 uppercase tracking-wider text-[11px]">
               Resolution Rationale

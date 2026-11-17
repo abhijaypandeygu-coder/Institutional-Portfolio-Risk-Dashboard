@@ -104,67 +104,80 @@ export const ActiveBreachTable: React.FC<ActiveBreachTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/80 text-slate-300">
-            {breaches.map((b) => (
-              <tr
-                key={b.breach_id}
-                className="hover:bg-slate-800/50 transition cursor-pointer"
-                onClick={() => onSelectBreach(b)}
-              >
-                <td className="py-2.5 px-3 whitespace-nowrap">{getSeverityBadge(b.severity)}</td>
-                <td className="py-2.5 px-3 font-medium text-slate-100">
-                  <div>{b.rule_name}</div>
-                  <div className="text-[10px] text-slate-500">{b.rule_category}</div>
-                </td>
-                <td className="py-2.5 px-3">
-                  <div className="font-mono text-slate-200">{b.portfolio_name || b.portfolio_id}</div>
-                  {b.instrument_id && (
-                    <div className="text-[10px] text-slate-400 font-mono">{b.instrument_id}</div>
-                  )}
-                </td>
-                <td className="py-2.5 px-3 text-right font-mono text-slate-100">
-                  {b.current_metric_value.toLocaleString(undefined, { maximumFractionDigits: 2 })} {b.unit}
-                </td>
-                <td className="py-2.5 px-3 text-right font-mono text-slate-400">
-                  {b.limit_threshold_value.toLocaleString(undefined, { maximumFractionDigits: 2 })} {b.unit}
-                </td>
-                <td className="py-2.5 px-3 text-right font-mono font-semibold">
-                  <span
-                    className={
-                      b.utilization_pct >= 100
-                        ? 'text-red-400'
-                        : b.utilization_pct >= 85
-                        ? 'text-yellow-400'
-                        : 'text-slate-300'
-                    }
-                  >
-                    {b.utilization_pct.toFixed(1)}%
-                  </span>
-                </td>
-                <td className="py-2.5 px-3 font-mono text-slate-400 whitespace-nowrap">
-                  {formatDuration(b.duration_minutes)}
-                </td>
-                <td className="py-2.5 px-3 whitespace-nowrap">{getSLABadge(b.sla_state)}</td>
-                <td className="py-2.5 px-3 font-mono text-slate-400">L{b.escalation_level}</td>
-                <td
-                  className="py-2.5 px-3 text-right whitespace-nowrap"
-                  onClick={(e) => e.stopPropagation()}
+            {breaches.map((b) => {
+              const ruleName = b.rule_name || b.risk_limit_id || b.risk_metric || 'Limit Breach';
+              const ruleCategory = b.rule_category || b.breach_type || 'RISK';
+              const metricVal = b.current_metric_value ?? (b.current_value !== undefined ? parseFloat(String(b.current_value)) : 0);
+              const limitVal = b.limit_threshold_value ?? (b.limit_value !== undefined ? parseFloat(String(b.limit_value)) : 0);
+              const unit = b.unit || b.metric_unit || '';
+              const utilPct = b.utilization_pct ?? (b.utilization !== undefined && b.utilization !== null ? parseFloat(String(b.utilization)) : (limitVal ? (metricVal / limitVal) * 100 : 0));
+              const isAck = b.is_acknowledged || b.acknowledgement_status === 'ACKNOWLEDGED';
+              const slaBadge = b.sla_state ? getSLABadge(b.sla_state) : (
+                <span className="text-emerald-400 text-xs font-mono">{b.sla_status || 'ON_TRACK'}</span>
+              );
+
+              return (
+                <tr
+                  key={b.breach_id}
+                  className="hover:bg-slate-800/50 transition cursor-pointer"
+                  onClick={() => onSelectBreach(b)}
                 >
-                  {!b.is_acknowledged ? (
-                    <button
-                      type="button"
-                      onClick={() => onAcknowledgeBreach(b.breach_id)}
-                      className="px-2 py-1 bg-amber-900/60 hover:bg-amber-800 text-amber-200 rounded text-[11px] font-semibold border border-amber-700/60 transition"
+                  <td className="py-2.5 px-3 whitespace-nowrap">{getSeverityBadge(b.severity)}</td>
+                  <td className="py-2.5 px-3 font-medium text-slate-100">
+                    <div>{ruleName}</div>
+                    <div className="text-[10px] text-slate-500">{ruleCategory}</div>
+                  </td>
+                  <td className="py-2.5 px-3">
+                    <div className="font-mono text-slate-200">{b.portfolio_name || b.portfolio_id}</div>
+                    {b.instrument_id && (
+                      <div className="text-[10px] text-slate-400 font-mono">{b.instrument_id}</div>
+                    )}
+                  </td>
+                  <td className="py-2.5 px-3 text-right font-mono text-slate-100">
+                    {isNaN(metricVal) ? '—' : metricVal.toLocaleString(undefined, { maximumFractionDigits: 2 })} {unit}
+                  </td>
+                  <td className="py-2.5 px-3 text-right font-mono text-slate-400">
+                    {isNaN(limitVal) ? '—' : limitVal.toLocaleString(undefined, { maximumFractionDigits: 2 })} {unit}
+                  </td>
+                  <td className="py-2.5 px-3 text-right font-mono font-semibold">
+                    <span
+                      className={
+                        utilPct >= 100
+                          ? 'text-red-400'
+                          : utilPct >= 85
+                          ? 'text-yellow-400'
+                          : 'text-slate-300'
+                      }
                     >
-                      Acknowledge
-                    </button>
-                  ) : (
-                    <span className="text-[10px] text-emerald-400 font-mono">
-                      Ack'd ({b.acknowledged_by || 'Risk'})
+                      {isNaN(utilPct) ? '—' : `${utilPct.toFixed(1)}%`}
                     </span>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="py-2.5 px-3 font-mono text-slate-400 whitespace-nowrap">
+                    {b.duration_display || formatDuration(b.duration_minutes)}
+                  </td>
+                  <td className="py-2.5 px-3 whitespace-nowrap">{slaBadge}</td>
+                  <td className="py-2.5 px-3 font-mono text-slate-400">{b.current_escalation_level || `L${b.escalation_level || 1}`}</td>
+                  <td
+                    className="py-2.5 px-3 text-right whitespace-nowrap"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {!isAck ? (
+                      <button
+                        type="button"
+                        onClick={() => onAcknowledgeBreach(b.breach_id)}
+                        className="px-2 py-1 bg-amber-900/60 hover:bg-amber-800 text-amber-200 rounded text-[11px] font-semibold border border-amber-700/60 transition"
+                      >
+                        Acknowledge
+                      </button>
+                    ) : (
+                      <span className="text-[10px] text-emerald-400 font-mono">
+                        Ack'd ({b.acknowledged_by || 'Risk'})
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

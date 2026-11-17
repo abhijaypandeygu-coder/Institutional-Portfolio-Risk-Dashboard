@@ -54,7 +54,7 @@ export const AlertHistoryTimeline: React.FC<AlertHistoryTimelineProps> = ({ even
                 )}
               </span>
               <span className="text-[10px] text-slate-500 font-mono">
-                {new Date(ev.timestamp).toLocaleString()}
+                {ev.occurred_at || ev.timestamp ? new Date(ev.occurred_at || ev.timestamp!).toLocaleString() : '—'}
               </span>
             </div>
             <div className="text-[11px] text-slate-400 mt-0.5">

@@ -20,11 +20,35 @@ interface LiquidityDashboardPageProps {
 }
 
 export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
-  portfolioId = 'PORT_DEFAULT',
+  portfolioId,
   defaultInstrumentId,
 }) => {
-  const [currentPortfolioId, setCurrentPortfolioId] = useState<string>(portfolioId);
+  const [currentPortfolioId, setCurrentPortfolioId] = useState<string>(portfolioId || '');
+  const [availablePortfolios, setAvailablePortfolios] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
   const [selectedInstrumentId, setSelectedInstrumentId] = useState<string | null>(defaultInstrumentId || null);
+
+  // Fetch available portfolios dynamically
+  useEffect(() => {
+    const fetchPortfolios = async () => {
+      try {
+        const resp = await axios.get<Array<{ portfolio_id: string; portfolio_name: string }>>('/api/v1/portfolios?limit=50');
+        if (Array.isArray(resp.data) && resp.data.length > 0) {
+          setAvailablePortfolios(resp.data);
+          if (!currentPortfolioId) {
+            setCurrentPortfolioId(resp.data[0].portfolio_id);
+          }
+        } else if (!currentPortfolioId) {
+          setCurrentPortfolioId('PORT_DEFAULT');
+        }
+      } catch (e) {
+        console.error('Failed to load portfolio dropdown list:', e);
+        if (!currentPortfolioId) {
+          setCurrentPortfolioId('PORT_DEFAULT');
+        }
+      }
+    };
+    fetchPortfolios();
+  }, []);
   
   // Dashboard state
   const [portfolioData, setPortfolioData] = useState<PortfolioLiquidityDashboardResponse | null>(null);
@@ -106,13 +130,27 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          <input
-            type="text"
-            value={currentPortfolioId}
-            onChange={(e) => setCurrentPortfolioId(e.target.value)}
-            placeholder="Portfolio ID"
-            className="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
-          />
+          {availablePortfolios.length > 0 ? (
+            <select
+              value={currentPortfolioId}
+              onChange={(e) => setCurrentPortfolioId(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+            >
+              {availablePortfolios.map((p) => (
+                <option key={p.portfolio_id} value={p.portfolio_id}>
+                  {p.portfolio_name ? `${p.portfolio_id} (${p.portfolio_name})` : p.portfolio_id}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={currentPortfolioId}
+              onChange={(e) => setCurrentPortfolioId(e.target.value)}
+              placeholder="Portfolio ID"
+              className="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+            />
+          )}
           <button
             onClick={fetchPortfolioLiquidity}
             className="bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs px-4 py-1.5 rounded transition-colors shadow-sm"

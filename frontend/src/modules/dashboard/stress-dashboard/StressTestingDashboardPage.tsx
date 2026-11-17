@@ -15,11 +15,38 @@ import { ScenarioComparisonPanel } from './components/ScenarioComparisonPanel';
 import { StressAttributionPanel } from './components/StressAttributionPanel';
 
 export const StressTestingDashboardPage: React.FC = () => {
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>('PORT_CORE_MACRO');
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>('');
+  const [availablePortfolios, setAvailablePortfolios] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
   const [scenarios, setScenarios] = useState<ScenarioMetadataItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
   const [selectedCalculationId, setSelectedCalculationId] = useState<string | null>(null);
+
+  // Fetch available portfolios dynamically
+  useEffect(() => {
+    const fetchPortfolios = async () => {
+      try {
+        const res = await fetch('/api/v1/portfolios?limit=50');
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list) && list.length > 0) {
+            setAvailablePortfolios(list);
+            if (!selectedPortfolioId) {
+              setSelectedPortfolioId(list[0].portfolio_id);
+            }
+          } else if (!selectedPortfolioId) {
+            setSelectedPortfolioId('PORT_DEFAULT');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load portfolio list for stress dashboard:', err);
+        if (!selectedPortfolioId) {
+          setSelectedPortfolioId('PORT_DEFAULT');
+        }
+      }
+    };
+    fetchPortfolios();
+  }, []);
 
   // Active Tab View
   const [activeTab, setActiveTab] = useState<'RESULTS' | 'DISTRIBUTION' | 'COMPARISON' | 'ATTRIBUTION'>(
@@ -136,11 +163,10 @@ export const StressTestingDashboardPage: React.FC = () => {
 
     setLoadingDetail(true);
     try {
-      const res = await fetch('/api/v1/dashboard/stress/compare', {
+      const res = await fetch(`/api/v1/dashboard/stress/compare?portfolio_id=${encodeURIComponent(selectedPortfolioId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          portfolio_id: selectedPortfolioId,
           calculation_ids: calcIds,
         }),
       });
@@ -206,6 +232,19 @@ export const StressTestingDashboardPage: React.FC = () => {
 
         {/* Global Action Bar */}
         <div className="flex items-center gap-3">
+          {availablePortfolios.length > 0 && (
+            <select
+              value={selectedPortfolioId}
+              onChange={(e) => setSelectedPortfolioId(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+            >
+              {availablePortfolios.map((p) => (
+                <option key={p.portfolio_id} value={p.portfolio_id}>
+                  {p.portfolio_name ? `${p.portfolio_id} (${p.portfolio_name})` : p.portfolio_id}
+                </option>
+              ))}
+            </select>
+          )}
           <button
             onClick={handleRunComparison}
             className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition shadow-sm"

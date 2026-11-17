@@ -16,28 +16,34 @@ export const RecentAlertFeed: React.FC<RecentAlertFeedProps> = ({
   onSelectAlert,
   onQuickAcknowledge,
 }) => {
-  const getSeverityBadge = (severity: AlertSeverity) => {
+  const getSeverityBadge = (severity: AlertSeverity | string) => {
     switch (severity) {
       case 'EMERGENCY':
         return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-950 text-red-300 border border-red-700">EMG</span>;
       case 'CRITICAL':
         return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-orange-950 text-orange-300 border border-orange-700">CRIT</span>;
+      case 'HIGH':
+        return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-orange-900/60 text-orange-300 border border-orange-700/60">HIGH</span>;
       case 'WARNING':
+      case 'MEDIUM':
         return <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-yellow-950/80 text-yellow-300 border border-yellow-700/80">WARN</span>;
+      case 'LOW':
       case 'INFO':
       default:
-        return <span className="px-1.5 py-0.5 text-[10px] rounded bg-slate-800 text-slate-300">INFO</span>;
+        return <span className="px-1.5 py-0.5 text-[10px] rounded bg-slate-800 text-slate-300">{severity || 'INFO'}</span>;
     }
   };
 
-  const getStatusBadge = (status: AlertStatus) => {
+  const getStatusBadge = (status: AlertStatus | string) => {
     switch (status) {
+      case 'OPEN':
       case 'TRIGGERED':
-        return <span className="text-[10px] font-mono text-amber-400 bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-800/60">TRIGGERED</span>;
+        return <span className="text-[10px] font-mono text-amber-400 bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-800/60">OPEN</span>;
       case 'ACKNOWLEDGED':
         return <span className="text-[10px] font-mono text-blue-400 bg-blue-950/40 px-1.5 py-0.5 rounded border border-blue-800/60">ACKNOWLEDGED</span>;
+      case 'ASSIGNED':
       case 'INVESTIGATING':
-        return <span className="text-[10px] font-mono text-purple-400 bg-purple-950/40 px-1.5 py-0.5 rounded border border-purple-800/60">INVESTIGATING</span>;
+        return <span className="text-[10px] font-mono text-purple-400 bg-purple-950/40 px-1.5 py-0.5 rounded border border-purple-800/60">{status}</span>;
       case 'ESCALATED':
         return <span className="text-[10px] font-mono text-rose-400 bg-rose-950/40 px-1.5 py-0.5 rounded border border-rose-800/60">ESCALATED</span>;
       case 'RESOLVED':
@@ -93,9 +99,11 @@ export const RecentAlertFeed: React.FC<RecentAlertFeedProps> = ({
                 <div className="flex items-center gap-2">
                   {getSeverityBadge(a.severity)}
                   {getStatusBadge(a.status)}
-                  <span className="text-xs font-mono font-semibold text-slate-400">
-                    P:{a.priority_score.toFixed(0)}
-                  </span>
+                  {a.priority_score !== undefined && a.priority_score !== null && (
+                    <span className="text-xs font-mono font-semibold text-slate-400">
+                      P:{Number(a.priority_score).toFixed(0)}
+                    </span>
+                  )}
                   {a.has_linked_breach && (
                     <span className="text-[10px] px-1 py-0.2 bg-red-900/40 text-red-300 border border-red-700/60 rounded">
                       M11 BREACH
