@@ -287,6 +287,9 @@ from backend.app.modules.infrastructure_platform.authorization.router import (
 from backend.app.modules.infrastructure_platform.encryption.router import (
     router as encryption_router,
 )
+from backend.app.modules.infrastructure_platform.system_monitoring.router import (
+    router as monitoring_router,
+)
 
 
 @asynccontextmanager
@@ -320,6 +323,7 @@ app.add_middleware(RequestTracingMiddleware)
 setup_exception_handlers(app)
 
 # Register API Routers
+app.include_router(monitoring_router)
 app.include_router(auth_router)
 app.include_router(authz_router)
 app.include_router(encryption_router)
