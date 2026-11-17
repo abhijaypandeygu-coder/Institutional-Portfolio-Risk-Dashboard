@@ -1,7 +1,7 @@
 import React from 'react';
-import { StandardMetricValue } from '../../types/dashboard.ts';
-import { DataQualityBadge } from '../shared/DataQualityBadge.tsx';
-import { formatUtcTimestamp } from '../../utils/financialFormatting.ts';
+import { StandardMetricValue } from '../../../types/dashboard';
+import { DataQualityBadge } from '../shared/DataQualityBadge';
+import { formatUtcTimestamp } from '../../../utils/financialFormatting';
 
 interface PortfolioSummaryTableProps {
   rows: StandardMetricValue[];

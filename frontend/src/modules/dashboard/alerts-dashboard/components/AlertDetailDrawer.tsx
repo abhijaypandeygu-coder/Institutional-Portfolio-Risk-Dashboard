@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertDetailResponse, AlertTimelineEvent } from '../../../types/dashboard';
+import { AlertDetailResponse, AlertTimelineEvent } from '../../../../types/dashboard';
 import { AlertHistoryTimeline } from './AlertHistoryTimeline';
 import { AlertActionModal } from './AlertActionModals';
 

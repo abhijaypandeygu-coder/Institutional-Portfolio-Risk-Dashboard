@@ -1,5 +1,5 @@
 import React from "react";
-import { ReportLimitStatusData } from "../../../types/dailyReport";
+import { ReportLimitStatusData } from "../../../../types/dailyReport";
 
 interface DailyReportControlStatusProps {
   limitStatus?: ReportLimitStatusData;

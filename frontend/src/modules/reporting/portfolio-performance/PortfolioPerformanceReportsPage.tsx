@@ -6,7 +6,7 @@ import {
   PerformanceIntegrityVerificationResponse,
   ReportingPeriodType,
   ReturnMethodology,
-} from "../../types/performanceReport";
+} from "../../../types/performanceReport";
 import { PerformanceReportOverview } from "./components/PerformanceReportOverview";
 import { PerformanceMetricsCards } from "./components/PerformanceMetricsCards";
 import { ReturnSeriesTable } from "./components/ReturnSeriesTable";

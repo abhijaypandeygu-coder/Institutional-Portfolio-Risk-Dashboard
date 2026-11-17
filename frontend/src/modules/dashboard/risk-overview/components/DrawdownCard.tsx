@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { DrawdownMetricCardData } from '../../../types/dashboard';
-import { formatPercentage, formatCurrency } from '../../../utils/financialFormatting';
+import { DrawdownMetricCardData } from '../../../../types/dashboard';
+import { formatPercentage, formatCurrency } from '../../../../utils/financialFormatting';
 
 interface DrawdownCardProps {
   data: DrawdownMetricCardData;

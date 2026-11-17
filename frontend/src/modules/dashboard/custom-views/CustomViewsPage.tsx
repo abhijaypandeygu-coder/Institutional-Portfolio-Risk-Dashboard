@@ -7,7 +7,7 @@ import {
   ViewVisibility,
   ViewShareResponse,
   ViewPermissionLevel,
-} from '../../../../types/dashboard';
+} from '../../../types/dashboard';
 import { WidgetCatalogue } from './components/WidgetCatalogue';
 import { WidgetConfigurationPanel } from './components/WidgetConfigurationPanel';
 import { ViewSharingDialog } from './components/ViewSharingDialog';

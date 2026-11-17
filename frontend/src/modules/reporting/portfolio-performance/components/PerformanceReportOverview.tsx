@@ -4,7 +4,7 @@ import {
   PerformanceDataStatus,
   ReportingPeriodType,
   ReturnMethodology,
-} from "../../../types/performanceReport";
+} from "../../../../types/performanceReport";
 
 interface PerformanceOverviewProps {
   report: CanonicalPerformanceReport | null;

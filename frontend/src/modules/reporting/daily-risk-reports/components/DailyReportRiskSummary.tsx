@@ -1,5 +1,5 @@
 import React from "react";
-import { ReportRiskMetricsData } from "../../../types/dailyReport";
+import { ReportRiskMetricsData } from "../../../../types/dailyReport";
 
 interface DailyReportRiskSummaryProps {
   metrics?: ReportRiskMetricsData;

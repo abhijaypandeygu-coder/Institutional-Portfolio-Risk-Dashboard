@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActiveBreachItem, BreachSeverity, SLAState } from '../../../types/dashboard';
+import { ActiveBreachItem, BreachSeverity, SLAState } from '../../../../types/dashboard';
 
 interface ActiveBreachTableProps {
   breaches: ActiveBreachItem[];

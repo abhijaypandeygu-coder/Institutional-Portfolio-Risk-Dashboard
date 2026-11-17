@@ -1,5 +1,5 @@
 import React from 'react';
-import { DataQualitySummary } from '../../../types/dashboard';
+import { DataQualitySummary } from '../../../../types/dashboard';
 
 interface RiskDataStatusProps {
   summary: DataQualitySummary;

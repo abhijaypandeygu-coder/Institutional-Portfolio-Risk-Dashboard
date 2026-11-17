@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertFeedItem, AlertSeverity, AlertStatus } from '../../../types/dashboard';
+import { AlertFeedItem, AlertSeverity, AlertStatus } from '../../../../types/dashboard';
 
 interface RecentAlertFeedProps {
   alerts: AlertFeedItem[];

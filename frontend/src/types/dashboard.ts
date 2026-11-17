@@ -1065,10 +1065,6 @@ export interface LiquiditySavedViewResponse {
   updated_at: string;
 }
 
-  created_at: string;
-  updated_at: string;
-}
-
 // ============================================================================
 // M13.07 — Stress Testing Dashboard TypeScript Contracts
 // ============================================================================
@@ -1827,7 +1823,7 @@ export interface CustomViewListResponse {
 export interface ViewVersionSummary {
   version_id: string;
   view_id: string;
-  version_number: int;
+  version_number: number;
   changed_by_user_id: string;
   change_summary?: string | null;
   created_at: string;

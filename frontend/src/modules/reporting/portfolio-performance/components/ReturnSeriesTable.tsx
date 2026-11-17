@@ -2,7 +2,7 @@ import React from "react";
 import {
   ReturnObservationSchema,
   BenchmarkObservationSchema,
-} from "../../../types/performanceReport";
+} from "../../../../types/performanceReport";
 
 interface ReturnSeriesTableProps {
   returns: ReturnObservationSchema[];

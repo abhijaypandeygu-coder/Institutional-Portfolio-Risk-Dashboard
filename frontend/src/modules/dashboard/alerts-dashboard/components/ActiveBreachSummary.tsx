@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActiveBreachSummaryResponse } from '../../../types/dashboard';
+import { ActiveBreachSummaryResponse } from '../../../../types/dashboard';
 
 interface ActiveBreachSummaryProps {
   summary: ActiveBreachSummaryResponse | null;

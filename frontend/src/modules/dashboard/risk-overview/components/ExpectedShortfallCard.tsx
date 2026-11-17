@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ExpectedShortfallMetricCardData } from '../../../types/dashboard';
-import { formatCurrency, formatPercentage } from '../../../utils/financialFormatting';
+import { ExpectedShortfallMetricCardData } from '../../../../types/dashboard';
+import { formatCurrency, formatPercentage } from '../../../../utils/financialFormatting';
 
 interface ExpectedShortfallCardProps {
   data: ExpectedShortfallMetricCardData;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MonteCarloDistributionResponse } from '../../../types/dashboard';
+import { MonteCarloDistributionResponse } from '../../../../types/dashboard';
 
 interface MonteCarloDistributionPanelProps {
   distribution: MonteCarloDistributionResponse | null;

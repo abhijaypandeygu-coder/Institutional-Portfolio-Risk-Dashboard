@@ -4,7 +4,7 @@ import {
   CanonicalDailyRiskReport,
   DailyReportRunResponse,
   DailyReportIntegrityVerificationResponse,
-} from "../../types/dailyReport";
+} from "../../../types/dailyReport";
 import { DailyReportOverview } from "./components/DailyReportOverview";
 import { DailyReportPortfolioSummary } from "./components/DailyReportPortfolioSummary";
 import { DailyReportRiskSummary } from "./components/DailyReportRiskSummary";

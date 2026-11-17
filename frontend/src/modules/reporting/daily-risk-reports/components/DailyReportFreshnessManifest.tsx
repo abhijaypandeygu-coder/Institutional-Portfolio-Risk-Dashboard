@@ -1,5 +1,5 @@
 import React from "react";
-import { ReportAsOfMetadata } from "../../../types/dailyReport";
+import { ReportAsOfMetadata } from "../../../../types/dailyReport";
 
 interface DailyReportFreshnessManifestProps {
   metadata?: ReportAsOfMetadata;

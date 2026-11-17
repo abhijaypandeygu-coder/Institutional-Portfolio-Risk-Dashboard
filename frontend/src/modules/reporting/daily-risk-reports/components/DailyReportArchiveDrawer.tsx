@@ -3,7 +3,7 @@ import {
   DailyReportRunResponse,
   DailyReportArtifactResponse,
   DailyReportIntegrityVerificationResponse,
-} from "../../../types/dailyReport";
+} from "../../../../types/dailyReport";
 
 interface DailyReportArchiveDrawerProps {
   runs: DailyReportRunResponse[];

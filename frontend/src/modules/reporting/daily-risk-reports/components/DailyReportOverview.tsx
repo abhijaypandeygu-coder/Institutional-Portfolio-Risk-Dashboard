@@ -3,7 +3,7 @@ import {
   CanonicalDailyRiskReport,
   OverallControlStatus,
   OverallFreshnessStatus,
-} from "../../../types/dailyReport";
+} from "../../../../types/dailyReport";
 
 interface DailyReportOverviewProps {
   report: CanonicalDailyRiskReport | null;

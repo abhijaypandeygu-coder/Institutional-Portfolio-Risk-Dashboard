@@ -1,6 +1,6 @@
 import React from 'react';
-import { SectorAllocationSummary } from '../../../types/dashboard';
-import { formatCurrency, formatPercentage } from '../../../utils/financialFormatting';
+import { SectorAllocationSummary } from '../../../../types/dashboard';
+import { formatCurrency, formatPercentage } from '../../../../utils/financialFormatting';
 
 interface SectorAllocationTableProps {
   summary: SectorAllocationSummary;

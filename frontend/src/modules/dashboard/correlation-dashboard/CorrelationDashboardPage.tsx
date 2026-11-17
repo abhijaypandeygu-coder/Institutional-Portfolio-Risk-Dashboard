@@ -101,7 +101,7 @@ export const CorrelationDashboardPage: React.FC<CorrelationDashboardPageProps> =
           {
             portfolio_id: portfolioId,
             current_lookback_days: lookbackDays,
-            comparison_lookback_days: Math.max(15, lookbackDays // 2),
+            comparison_lookback_days: Math.max(15, Math.floor(lookbackDays / 2)),
             estimator: estimator,
           }
         );

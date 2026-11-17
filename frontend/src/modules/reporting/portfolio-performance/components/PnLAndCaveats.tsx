@@ -2,7 +2,7 @@ import React from "react";
 import {
   PnLBreakdownSchema,
   PerformanceCaveatSchema,
-} from "../../../types/performanceReport";
+} from "../../../../types/performanceReport";
 
 interface PnLAndCaveatsProps {
   pnl?: PnLBreakdownSchema;

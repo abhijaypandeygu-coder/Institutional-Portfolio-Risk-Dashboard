@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { PortfolioOverviewResponse } from '../../types/dashboard.ts';
-import { MetricCard } from '../shared/MetricCard.tsx';
-import { DataFreshnessPanel } from './DataFreshnessPanel.tsx';
-import { ExposureOverviewSection } from './ExposureOverviewSection.tsx';
-import { PortfolioSummaryTable } from './PortfolioSummaryTable.tsx';
-import { formatUtcTimestamp } from '../../utils/financialFormatting.ts';
+import { PortfolioOverviewResponse } from '../../../types/dashboard';
+import { MetricCard } from '../shared/MetricCard';
+import { DataFreshnessPanel } from './DataFreshnessPanel';
+import { ExposureOverviewSection } from './ExposureOverviewSection';
+import { PortfolioSummaryTable } from './PortfolioSummaryTable';
+import { formatUtcTimestamp } from '../../../utils/financialFormatting';
 
 interface PortfolioOverviewPageProps {
   portfolioId: string;

@@ -6,7 +6,7 @@ import {
   ColorScaleConfig,
   HeatmapPositionSide,
   HeatmapGrouping
-} from '../../../types/dashboard';
+} from '../../../../types/dashboard';
 
 interface ColorScaleControlsProps {
   metrics: HeatmapMetricDefinition[];

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScenarioDetailResultResponse } from '../../../types/dashboard';
+import { ScenarioDetailResultResponse } from '../../../../types/dashboard';
 
 interface ScenarioResultsPanelProps {
   data: ScenarioDetailResultResponse | null;

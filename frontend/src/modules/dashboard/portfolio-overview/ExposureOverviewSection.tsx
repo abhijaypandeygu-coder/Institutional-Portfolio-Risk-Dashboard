@@ -1,6 +1,6 @@
 import React from 'react';
-import { ExposureSummaryDetail } from '../../types/dashboard.ts';
-import { MetricCard } from '../shared/MetricCard.tsx';
+import { ExposureSummaryDetail } from '../../../types/dashboard';
+import { MetricCard } from '../shared/MetricCard';
 
 interface ExposureOverviewSectionProps {
   exposure: ExposureSummaryDetail;

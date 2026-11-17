@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScenarioComparisonResponse } from '../../../types/dashboard';
+import { ScenarioComparisonResponse } from '../../../../types/dashboard';
 
 interface ScenarioComparisonPanelProps {
   comparison: ScenarioComparisonResponse | null;

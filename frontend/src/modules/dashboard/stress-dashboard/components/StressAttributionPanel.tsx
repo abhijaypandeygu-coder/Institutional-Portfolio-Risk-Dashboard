@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StressAttributionResponse } from '../../../types/dashboard';
+import { StressAttributionResponse } from '../../../../types/dashboard';
 
 interface StressAttributionPanelProps {
   attribution: StressAttributionResponse | null;

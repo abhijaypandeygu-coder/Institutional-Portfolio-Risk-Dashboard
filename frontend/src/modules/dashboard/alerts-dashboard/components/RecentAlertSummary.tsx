@@ -1,5 +1,5 @@
 import React from 'react';
-import { RecentAlertSummaryResponse } from '../../../types/dashboard';
+import { RecentAlertSummaryResponse } from '../../../../types/dashboard';
 
 interface RecentAlertSummaryProps {
   summary: RecentAlertSummaryResponse | null;

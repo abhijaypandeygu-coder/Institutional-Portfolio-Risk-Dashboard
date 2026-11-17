@@ -1,4 +1,6 @@
-"""TypeScript types and contracts for M14.05 Liquidity Reports."""
+/**
+ * TypeScript types and contracts for M14.05 Liquidity Reports.
+ */
 
 export type LiquidityReportStatus = 'DRAFT' | 'GENERATING' | 'GENERATED' | 'FAILED' | 'ARCHIVED';
 

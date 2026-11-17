@@ -1,5 +1,5 @@
 import React from 'react';
-import { SectorHeatmapResponse, HeatmapCell } from '../../../types/dashboard';
+import { SectorHeatmapResponse, HeatmapCell } from '../../../../types/dashboard';
 
 interface SectorHeatmapViewProps {
   data: SectorHeatmapResponse;

@@ -3,7 +3,7 @@ import {
   PerformanceSummarySchema,
   PnLBreakdownSchema,
   CashFlowSummarySchema,
-} from "../../../types/performanceReport";
+} from "../../../../types/performanceReport";
 
 interface PerformanceMetricsCardsProps {
   summary?: PerformanceSummarySchema;

@@ -1,7 +1,7 @@
 import React from 'react';
-import { DataFreshnessSummary } from '../../types/dashboard.ts';
-import { DataQualityBadge } from '../shared/DataQualityBadge.tsx';
-import { formatUtcTimestamp } from '../../utils/financialFormatting.ts';
+import { DataFreshnessSummary } from '../../../types/dashboard';
+import { DataQualityBadge } from '../shared/DataQualityBadge';
+import { formatUtcTimestamp } from '../../../utils/financialFormatting';
 
 interface DataFreshnessPanelProps {
   freshness: DataFreshnessSummary;

@@ -1,6 +1,6 @@
 import React from 'react';
-import { QualityStatus } from '../../types/dashboard.ts';
-import { getQualityBadgeColor } from '../../utils/financialFormatting.ts';
+import { QualityStatus } from '../../../types/dashboard';
+import { getQualityBadgeColor } from '../../../utils/financialFormatting';
 
 interface DataQualityBadgeProps {
   status: QualityStatus | string;

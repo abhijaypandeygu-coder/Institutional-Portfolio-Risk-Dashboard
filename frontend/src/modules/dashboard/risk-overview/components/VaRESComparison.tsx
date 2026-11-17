@@ -1,6 +1,6 @@
 import React from 'react';
-import { VaRESComparisonItem } from '../../../types/dashboard';
-import { formatCurrency, formatPercentage } from '../../../utils/financialFormatting';
+import { VaRESComparisonItem } from '../../../../types/dashboard';
+import { formatCurrency, formatPercentage } from '../../../../utils/financialFormatting';
 
 interface VaRESComparisonProps {
   comparison?: VaRESComparisonItem | null;

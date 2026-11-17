@@ -1,6 +1,6 @@
 import React from 'react';
-import { PortfolioAllocationSummary } from '../../../types/dashboard';
-import { formatCurrency, formatPercentage } from '../../../utils/financialFormatting';
+import { PortfolioAllocationSummary } from '../../../../types/dashboard';
+import { formatCurrency, formatPercentage } from '../../../../utils/financialFormatting';
 
 interface PortfolioAllocationCardProps {
   summary: PortfolioAllocationSummary;

@@ -1,5 +1,5 @@
 import React from "react";
-import { ReportPortfolioSummaryData } from "../../../types/dailyReport";
+import { ReportPortfolioSummaryData } from "../../../../types/dailyReport";
 
 interface DailyReportPortfolioSummaryProps {
   summary?: ReportPortfolioSummaryData;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { HeatmapDrilldownResponse } from '../../../types/dashboard';
+import { HeatmapDrilldownResponse } from '../../../../types/dashboard';
 
 interface HeatmapDetailDrawerProps {
   drilldown: HeatmapDrilldownResponse | null;

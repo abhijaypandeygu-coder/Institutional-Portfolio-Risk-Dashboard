@@ -1,5 +1,5 @@
 import React from 'react';
-import { SecurityHeatmapResponse, HeatmapCell } from '../../../types/dashboard';
+import { SecurityHeatmapResponse, HeatmapCell } from '../../../../types/dashboard';
 
 interface SecurityHeatmapViewProps {
   data: SecurityHeatmapResponse;

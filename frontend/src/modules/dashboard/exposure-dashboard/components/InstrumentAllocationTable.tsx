@@ -1,6 +1,6 @@
 import React from 'react';
-import { RankedHoldingItem } from '../../../types/dashboard';
-import { formatCurrency, formatPercentage } from '../../../utils/financialFormatting';
+import { RankedHoldingItem } from '../../../../types/dashboard';
+import { formatCurrency, formatPercentage } from '../../../../utils/financialFormatting';
 
 interface InstrumentAllocationTableProps {
   holdings: RankedHoldingItem[];

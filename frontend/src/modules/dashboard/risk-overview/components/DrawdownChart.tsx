@@ -1,6 +1,6 @@
 import React from 'react';
-import { UnderwaterChartPoint } from '../../../types/dashboard';
-import { formatPercentage, formatCurrency } from '../../../utils/financialFormatting';
+import { UnderwaterChartPoint } from '../../../../types/dashboard';
+import { formatPercentage, formatCurrency } from '../../../../utils/financialFormatting';
 
 interface DrawdownChartProps {
   points?: UnderwaterChartPoint[] | null;

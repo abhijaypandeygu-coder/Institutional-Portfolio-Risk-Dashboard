@@ -114,7 +114,7 @@ export interface LimitImplication {
   utilization_percentage: number;
   evaluation_status: LimitEvaluationStatus;
   difference_from_threshold: number;
-  is_projected_exceedance: bool;
+  is_projected_exceedance: boolean;
   evaluation_timestamp: string;
 }
 

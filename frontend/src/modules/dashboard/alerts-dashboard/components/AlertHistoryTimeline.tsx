@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTimelineEvent } from '../../../types/dashboard';
+import { AlertTimelineEvent } from '../../../../types/dashboard';
 
 interface AlertHistoryTimelineProps {
   events: AlertTimelineEvent[];

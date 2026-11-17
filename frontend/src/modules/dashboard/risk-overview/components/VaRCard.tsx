@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { VaRMetricCardData } from '../../../types/dashboard';
-import { formatCurrency, formatPercentage } from '../../../utils/financialFormatting';
+import { VaRMetricCardData } from '../../../../types/dashboard';
+import { formatCurrency, formatPercentage } from '../../../../utils/financialFormatting';
 
 interface VaRCardProps {
   data: VaRMetricCardData;

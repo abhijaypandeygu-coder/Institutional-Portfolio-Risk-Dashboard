@@ -3,7 +3,7 @@ import {
   PerformanceReportRunResponse,
   PerformanceArtifactSchema,
   PerformanceIntegrityVerificationResponse,
-} from "../../../types/performanceReport";
+} from "../../../../types/performanceReport";
 
 interface PerformanceArchiveDrawerProps {
   runs: PerformanceReportRunResponse[];

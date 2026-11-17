@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { VolatilityMetricCardData } from '../../../types/dashboard';
-import { formatPercentage } from '../../../utils/financialFormatting';
+import { VolatilityMetricCardData } from '../../../../types/dashboard';
+import { formatPercentage } from '../../../../utils/financialFormatting';
 
 interface VolatilityCardProps {
   data: VolatilityMetricCardData;
