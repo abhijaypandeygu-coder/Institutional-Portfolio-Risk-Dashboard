@@ -118,6 +118,8 @@ async def init_db() -> None:
     import backend.app.modules.risk_alerts.alert_management.models.alert_management_models  # noqa: F401
     import backend.app.modules.risk_alerts.notification_channels.models.notification_channels_models  # noqa: F401
     import backend.app.modules.risk_alerts.alert_history.models.alert_history_models  # noqa: F401
+    import backend.app.modules.dashboard_visualization.alerts_dashboard.models.alerts_dashboard_models  # noqa: F401
+    import backend.app.modules.dashboard_visualization.stress_dashboard.models.stress_dashboard_models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

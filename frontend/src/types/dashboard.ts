@@ -1297,3 +1297,196 @@ export interface StressAnnotationResponse {
   created_at: string;
   updated_at: string;
 }
+
+// ==========================================
+// M13.08 Alerts Dashboard Contracts
+// ==========================================
+
+export type BreachSeverity = 'WARNING' | 'CRITICAL' | 'EMERGENCY';
+export type BreachScope = 'PORTFOLIO' | 'BENCHMARK' | 'SECURITY' | 'COUNTERPARTY' | 'GLOBAL';
+export type SLAState = 'IN_SLA' | 'NEAR_EXPIRY' | 'EXPIRED' | 'UNSPECIFIED';
+
+export interface ActiveBreachSummaryResponse {
+  total_active_breaches: number;
+  emergency_breaches: number;
+  critical_breaches: number;
+  warning_breaches: number;
+  unacknowledged_breaches: number;
+  escalated_breaches: number;
+  overdue_sla_breaches: number;
+  as_of: string;
+}
+
+export interface ActiveBreachItem {
+  breach_id: string;
+  episode_id?: string | null;
+  rule_id: string;
+  rule_name: string;
+  rule_category: string;
+  portfolio_id: string;
+  portfolio_name?: string | null;
+  instrument_id?: string | null;
+  instrument_name?: string | null;
+  severity: BreachSeverity;
+  status: string;
+  scope: BreachScope;
+  metric_name: string;
+  current_metric_value: number;
+  limit_threshold_value: number;
+  unit: string;
+  utilization_pct: number;
+  detected_at: string;
+  duration_minutes: number;
+  is_acknowledged: boolean;
+  acknowledged_by?: string | null;
+  acknowledged_at?: string | null;
+  assigned_to?: string | null;
+  escalation_level: number;
+  sla_state: SLAState;
+  sla_expires_at?: string | null;
+}
+
+export interface BreachDetailResponse {
+  breach_id: string;
+  episode_id?: string | null;
+  rule_id: string;
+  rule_name: string;
+  rule_category: string;
+  portfolio_id: string;
+  instrument_id?: string | null;
+  severity: BreachSeverity;
+  status: string;
+  scope: BreachScope;
+  current_metric_value: number;
+  limit_threshold_value: number;
+  unit: string;
+  utilization_pct: number;
+  detected_at: string;
+  duration_minutes: number;
+  is_acknowledged: boolean;
+  acknowledged_by?: string | null;
+  acknowledged_at?: string | null;
+  assigned_to?: string | null;
+  escalation_level: number;
+  sla_state: SLAState;
+  sla_expires_at?: string | null;
+  breach_reason?: string | null;
+  resolution_rationale?: string | null;
+  curative_actions: Array<Record<string, unknown>>;
+  evidence_snapshot: Record<string, unknown>;
+  associated_alerts: Array<Record<string, unknown>>;
+}
+
+export type AlertSeverity = 'INFO' | 'WARNING' | 'CRITICAL' | 'EMERGENCY';
+export type AlertStatus = 'TRIGGERED' | 'ACKNOWLEDGED' | 'INVESTIGATING' | 'ESCALATED' | 'RESOLVED' | 'CLOSED' | 'EXPIRED' | 'SUPPRESSED';
+
+export interface RecentAlertSummaryResponse {
+  total_alerts_24h: number;
+  unacknowledged_alerts: number;
+  high_priority_alerts: number;
+  under_investigation: number;
+  as_of: string;
+}
+
+export interface AlertFeedItem {
+  alert_id: string;
+  title: string;
+  portfolio_id?: string | null;
+  instrument_id?: string | null;
+  alert_type: string;
+  severity: AlertSeverity;
+  status: AlertStatus;
+  priority_score: number;
+  trigger_value?: number | null;
+  threshold_value?: number | null;
+  metric_name?: string | null;
+  unit?: string | null;
+  triggered_at: string;
+  assigned_to?: string | null;
+  is_acknowledged: boolean;
+  has_linked_breach: boolean;
+  linked_breach_id?: string | null;
+}
+
+export interface AlertDetailResponse {
+  alert_id: string;
+  title: string;
+  portfolio_id?: string | null;
+  instrument_id?: string | null;
+  alert_type: string;
+  severity: AlertSeverity;
+  status: AlertStatus;
+  priority_score: number;
+  trigger_condition: string;
+  trigger_value?: number | null;
+  threshold_value?: number | null;
+  metric_name?: string | null;
+  unit?: string | null;
+  triggered_at: string;
+  is_acknowledged: boolean;
+  acknowledged_by?: string | null;
+  acknowledged_at?: string | null;
+  assigned_to?: string | null;
+  assigned_at?: string | null;
+  resolution_notes?: string | null;
+  resolved_at?: string | null;
+  evidence_payload: Record<string, unknown>;
+  has_linked_breach: boolean;
+  linked_breach_id?: string | null;
+  breach_warning_notice?: string | null;
+}
+
+export interface AlertTimelineEvent {
+  event_id: string;
+  alert_id: string;
+  event_type: string;
+  from_status?: string | null;
+  to_status?: string | null;
+  actor_id: string;
+  notes?: string | null;
+  timestamp: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface AlertHistoryResponse {
+  alert_id: string;
+  events: AlertTimelineEvent[];
+}
+
+export interface ActionExecutionResult {
+  success: boolean;
+  message: string;
+  alert_id?: string | null;
+  breach_id?: string | null;
+  new_status?: string | null;
+  warning_note?: string | null;
+}
+
+export interface AlertsPreferenceResponse {
+  id: string;
+  user_id: string;
+  dashboard_name: string;
+  default_portfolio_id?: string | null;
+  sound_notifications_enabled: boolean;
+  auto_refresh_interval_sec: number;
+  min_severity_filter: string;
+  pinned_alert_types: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AlertsSavedViewResponse {
+  id: string;
+  user_id: string;
+  view_name: string;
+  description?: string | null;
+  portfolio_id?: string | null;
+  severity_filter?: string | null;
+  status_filter?: string | null;
+  alert_type_filter?: string | null;
+  search_query?: string | null;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
