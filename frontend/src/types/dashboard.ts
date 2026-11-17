@@ -881,3 +881,203 @@ export interface CorrelationInvestigationResponse {
   created_at: string;
   updated_at: string;
 }
+
+// ===========================================================================
+// M13.06 — Liquidity Dashboard Contracts
+// ===========================================================================
+
+export interface CurrentQuoteItem {
+  instrument_id: string;
+  symbol: string;
+  best_bid?: number | null;
+  best_ask?: number | null;
+  mid_price?: number | null;
+  spread_abs?: number | null;
+  spread_rel?: number | null;
+  spread_bps?: number | null;
+  spread_in_ticks?: number | null;
+  tick_size?: number | null;
+  quote_condition: 'NORMAL' | 'WIDE' | 'LOCKED' | 'CROSSED' | 'ONE_SIDED' | 'STALE' | 'UNAVAILABLE';
+  bid_timestamp?: string | null;
+  ask_timestamp?: string | null;
+  observation_timestamp?: string | null;
+  venue?: string | null;
+}
+
+export interface HistoricalSpreadPoint {
+  timestamp: string;
+  spread_bps?: number | null;
+  spread_abs?: number | null;
+  relative_spread?: number | null;
+  is_anomaly: boolean;
+}
+
+export interface InstrumentSpreadDetail {
+  instrument_id: string;
+  symbol: string;
+  current_quote: CurrentQuoteItem;
+  avg_spread_bps_30d?: number | null;
+  min_spread_bps_30d?: number | null;
+  max_spread_bps_30d?: number | null;
+  spread_percentile?: number | null;
+  historical_series: HistoricalSpreadPoint[];
+}
+
+export interface DepthLevelItem {
+  level_index: number;
+  price: number;
+  quantity: number;
+  notional: number;
+  distance_bps: number;
+  order_count?: number | null;
+}
+
+export interface OrderBookDepthLadder {
+  instrument_id: string;
+  symbol: string;
+  snapshot_timestamp: string;
+  bids: DepthLevelItem[];
+  asks: DepthLevelItem[];
+  total_bid_quantity: number;
+  total_ask_quantity: number;
+  total_bid_notional: number;
+  total_ask_notional: number;
+  cumulative_bid_notional: number[];
+  cumulative_ask_notional: number[];
+  depth_imbalance?: number | null;
+  imbalance_status: 'BID_HEAVY' | 'ASK_HEAVY' | 'NEUTRAL' | 'BALANCED';
+  is_stale: boolean;
+}
+
+export interface ScoreComponentBreakdown {
+  name: string;
+  score: number;
+  weight: number;
+  weighted_score: number;
+  raw_metric_value?: number | null;
+  raw_metric_unit?: string | null;
+  status: 'HEALTHY' | 'ADEQUATE' | 'WARNING' | 'CRITICAL';
+}
+
+export interface InstrumentLiquidityScore {
+  instrument_id: string;
+  symbol: string;
+  composite_score: number;
+  liquidity_bucket: 'TIER_1_HIGH' | 'TIER_2_MODERATE' | 'TIER_3_LOW' | 'TIER_4_ILLIQUID';
+  rank?: number | null;
+  components: ScoreComponentBreakdown[];
+  adv_shares_20d?: number | null;
+  adtv_usd_20d?: number | null;
+  turnover_ratio?: number | null;
+  data_quality_coverage?: number | null;
+  calculated_at: string;
+}
+
+export interface TargetLiquidationScenario {
+  target_percentage: number;
+  shares_to_liquidate: number;
+  notional_value: number;
+  liquidation_direction: 'SELL' | 'BUY';
+  order_type_assumed: string;
+  participation_rate: number;
+  spread_cost_bps: number;
+  market_impact_cost_bps: number;
+  slippage_cost_bps: number;
+  total_cost_bps: number;
+  total_cost_usd: number;
+  estimated_duration_minutes: number;
+  estimated_trading_days: number;
+  capacity_exhaustion_pct: number;
+  risk_haircut_bps?: number | null;
+}
+
+export interface InstrumentLiquidationProfile {
+  instrument_id: string;
+  symbol: string;
+  current_position_shares: number;
+  current_position_notional: number;
+  position_direction: 'LONG' | 'SHORT' | 'FLAT';
+  liquidation_direction: 'SELL' | 'BUY' | 'NONE';
+  base_participation_rate: number;
+  scenarios: TargetLiquidationScenario[];
+}
+
+export interface HoldingLiquiditySummary {
+  instrument_id: string;
+  symbol: string;
+  sector?: string | null;
+  position_shares: number;
+  position_notional: number;
+  weight_pct: number;
+  position_direction: 'LONG' | 'SHORT' | 'FLAT';
+  spread_bps?: number | null;
+  quote_condition: string;
+  composite_score?: number | null;
+  liquidity_bucket: string;
+  depth_imbalance?: number | null;
+  full_liquidation_cost_bps?: number | null;
+  full_liquidation_cost_usd?: number | null;
+  full_liquidation_days?: number | null;
+}
+
+export interface PortfolioLiquidityDashboardResponse {
+  portfolio_id: string;
+  as_of_date: string;
+  total_nav: number;
+  holdings_count: number;
+  weighted_composite_score: number;
+  weighted_spread_bps: number;
+  total_full_liquidation_cost_usd: number;
+  portfolio_liquidation_cost_bps: number;
+  max_days_to_liquidate: number;
+  low_liquidity_capital_pct: number;
+  locked_or_crossed_instruments_count: number;
+  severe_imbalance_count: number;
+  holdings: HoldingLiquiditySummary[];
+}
+
+export interface LiquidityPreferenceResponse {
+  id: string;
+  user_id: string;
+  dashboard_name: string;
+  default_portfolio_id?: string | null;
+  spread_unit: 'BPS' | 'RELATIVE' | 'ABSOLUTE';
+  depth_levels_count: number;
+  default_lookback_days: number;
+  default_participation_rate: number;
+  default_liquidation_scenario: string;
+  default_target_percentage: number;
+  display_configuration?: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LiquiditySavedViewResponse {
+  id: string;
+  user_id: string;
+  view_name: string;
+  description?: string | null;
+  portfolio_id?: string | null;
+  filters: Record<string, unknown>;
+  selected_instrument_ids: string[];
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LiquidityInvestigationResponse {
+  id: string;
+  user_id: string;
+  portfolio_id?: string | null;
+  instrument_id: string;
+  investigation_type: string;
+  severity: string;
+  status: string;
+  title: string;
+  notes: string;
+  metrics_snapshot?: Record<string, unknown> | null;
+  resolved_at?: string | null;
+  resolved_by?: string | null;
+  created_at: string;
+  updated_at: string;
+}
