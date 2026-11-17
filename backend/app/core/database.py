@@ -131,6 +131,7 @@ async def init_db() -> None:
     import backend.app.modules.reporting_attribution_audit.audit_trail.models.audit_models  # noqa: F401
     import backend.app.modules.reporting_attribution_audit.report_archive.models.archive_models  # noqa: F401
     import backend.app.modules.infrastructure_platform.database_infrastructure.models.database_models  # noqa: F401
+    import backend.app.modules.infrastructure_platform.authentication.models.auth_models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
