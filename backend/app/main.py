@@ -248,6 +248,9 @@ from backend.app.modules.reporting_attribution_audit.portfolio_performance.route
 from backend.app.modules.reporting_attribution_audit.risk_attribution.router import (
     router as risk_attribution_router,
 )
+from backend.app.modules.reporting_attribution_audit.stress_testing.router import (
+    router as stress_reports_router,
+)
 
 
 @asynccontextmanager
@@ -389,6 +392,7 @@ app.include_router(custom_views_router, prefix="/api/v1/dashboard", tags=["M13.1
 app.include_router(daily_risk_reports_router, prefix="/api/v1", tags=["M14.01 - Daily Risk Reports"])
 app.include_router(portfolio_performance_router, prefix="/api/v1", tags=["M14.02 - Portfolio Performance Reports"])
 app.include_router(risk_attribution_router, prefix="/api/v1/reports/risk-attribution", tags=["M14.03 - Risk Attribution Reports"])
+app.include_router(stress_reports_router, prefix="/api/v1/reports/stress", tags=["M14.04 - Stress Testing Reports"])
 
 
 @app.get("/health", tags=["System"])
