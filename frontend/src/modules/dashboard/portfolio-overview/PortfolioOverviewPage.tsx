@@ -17,7 +17,7 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
   apiBaseUrl = '/api/v1',
   onNavigateDetail,
 }) => {
-  const [activePortfolioId, setActivePortfolioId] = useState<string>(initialPortfolioId || '');
+  const [activePortfolioId, setActivePortfolioId] = useState<string>('');
   const [availablePortfolios, setAvailablePortfolios] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
   const [data, setData] = useState<PortfolioOverviewResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -25,18 +25,18 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
 
   // 1. Fetch available portfolios on mount to resolve valid portfolio IDs dynamically
   useEffect(() => {
+    let isMounted = true;
     const fetchPortfolios = async () => {
       try {
         const res = await fetch(`${apiBaseUrl}/portfolios?limit=20`);
         if (res.ok) {
           const list = await res.json();
-          if (Array.isArray(list) && list.length > 0) {
+          if (Array.isArray(list) && list.length > 0 && isMounted) {
             setAvailablePortfolios(list);
-            // If the initial ID is not provided or not in the list, default to the first valid one
-            const exists = list.some((p: any) => p.portfolio_id === initialPortfolioId);
-            if (!exists || !initialPortfolioId) {
-              setActivePortfolioId(list[0].portfolio_id);
-            }
+            const exists = initialPortfolioId && list.some((p: any) => p.portfolio_id === initialPortfolioId);
+            const selectedId = exists ? (initialPortfolioId as string) : list[0].portfolio_id;
+            setActivePortfolioId(selectedId);
+            fetchOverview(selectedId);
           }
         }
       } catch (err) {
@@ -44,6 +44,7 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
       }
     };
     fetchPortfolios();
+    return () => { isMounted = false; };
   }, [initialPortfolioId, apiBaseUrl]);
 
   const fetchOverview = async (targetId: string) => {
@@ -64,11 +65,10 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (activePortfolioId) {
-      fetchOverview(activePortfolioId);
-    }
-  }, [activePortfolioId]);
+  const handlePortfolioChange = (newId: string) => {
+    setActivePortfolioId(newId);
+    fetchOverview(newId);
+  };
 
   if (isLoading && !data) {
     return (
@@ -94,7 +94,7 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
           {availablePortfolios.length > 0 && (
             <select
               value={activePortfolioId}
-              onChange={(e) => setActivePortfolioId(e.target.value)}
+              onChange={(e) => handlePortfolioChange(e.target.value)}
               className="text-xs border border-gray-300 rounded px-2 py-1 bg-white text-gray-800"
             >
               {availablePortfolios.map((p) => (
@@ -139,7 +139,7 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
           {availablePortfolios.length > 0 && (
             <select
               value={activePortfolioId}
-              onChange={(e) => setActivePortfolioId(e.target.value)}
+              onChange={(e) => handlePortfolioChange(e.target.value)}
               className="text-xs border border-gray-300 rounded px-2 py-1 bg-white text-gray-800"
             >
               {availablePortfolios.map((p) => (

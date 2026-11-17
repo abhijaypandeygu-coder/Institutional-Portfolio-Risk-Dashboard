@@ -71,7 +71,7 @@ export const App: React.FC = () => {
 
       {/* Main Content Area */}
       <main style={{ flex: 1, padding: '24px', backgroundColor: '#0f172a' }}>
-        {activeTab === 'overview' && <PortfolioOverviewPage portfolioId="PORTFOLIO_US_EQUITIES" />}
+        {activeTab === 'overview' && <PortfolioOverviewPage />}
         {activeTab === 'alerts' && <AlertsDashboardPage />}
         {activeTab === 'liquidity' && <LiquidityDashboardPage />}
         {activeTab === 'stress' && <StressTestingDashboardPage />}
