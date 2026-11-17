@@ -284,6 +284,9 @@ from backend.app.modules.infrastructure_platform.authentication.router import (
 from backend.app.modules.infrastructure_platform.authorization.router import (
     router as authz_router,
 )
+from backend.app.modules.infrastructure_platform.encryption.router import (
+    router as encryption_router,
+)
 
 
 @asynccontextmanager
@@ -319,6 +322,7 @@ setup_exception_handlers(app)
 # Register API Routers
 app.include_router(auth_router)
 app.include_router(authz_router)
+app.include_router(encryption_router)
 app.include_router(backend_api_core_router)
 app.include_router(realtime_api_router)
 app.include_router(database_infrastructure_router)
