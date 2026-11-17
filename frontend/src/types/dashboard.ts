@@ -615,3 +615,269 @@ export interface HeatmapDrilldownResponse {
   total_holdings: number;
   provenance_details: Record<string, unknown>;
 }
+
+// ===========================================================================
+// M13.05 — Correlation Dashboard Types
+// ===========================================================================
+
+export type CorrelationUniverseType = 
+  | 'PORTFOLIO_HOLDINGS' 
+  | 'SECTOR_GROUP' 
+  | 'CUSTOM_SECURITIES' 
+  | 'RISK_FACTORS' 
+  | 'MIXED';
+
+export type CorrelationSamplingFrequency = 
+  | 'ONE_MINUTE' 
+  | 'FIVE_MINUTE' 
+  | 'FIFTEEN_MINUTE' 
+  | 'THIRTY_MINUTE' 
+  | 'HOURLY' 
+  | 'DAILY' 
+  | 'WEEKLY';
+
+export type CorrelationEstimatorType = 'PEARSON' | 'SPEARMAN' | 'KENDALL_TAU_B';
+
+export type CorrelationReturnDefinition = 'LOGARITHMIC' | 'SIMPLE';
+
+export type CorrelationClusteringMethod = 'HIERARCHICAL' | 'K_MEANS';
+
+export type CorrelationHierarchicalLinkage = 'AVERAGE' | 'SINGLE' | 'COMPLETE' | 'WARD';
+
+export type CorrelationMatrixSortOrder = 
+  | 'ORIGINAL' 
+  | 'ALPHABETICAL' 
+  | 'SECTOR' 
+  | 'CLUSTER' 
+  | 'AVERAGE_CORRELATION';
+
+export type OutlierDetectionReason = 
+  | 'HIGH_POSITIVE_CORRELATION'
+  | 'STRONG_NEGATIVE_CORRELATION'
+  | 'LARGE_CORRELATION_CHANGE'
+  | 'SIGN_REVERSAL'
+  | 'REGIME_BREAK';
+
+export interface UniverseInstrumentItem {
+  instrument_id: string;
+  symbol: string;
+  instrument_name: string;
+  exchange_code: string;
+  market: string;
+  asset_class: string;
+  currency: string;
+  sector_name?: string | null;
+  industry_name?: string | null;
+  is_eligible: boolean;
+  data_quality_status: string;
+  observation_count: number;
+}
+
+export interface UniverseResolveResponse {
+  universe_type: CorrelationUniverseType;
+  portfolio_id?: string | null;
+  total_eligible: number;
+  total_excluded: number;
+  instruments: UniverseInstrumentItem[];
+  warnings: string[];
+}
+
+export interface MatrixCellMetadata {
+  instrument_a_id: string;
+  instrument_b_id: string;
+  instrument_a_symbol: string;
+  instrument_b_symbol: string;
+  correlation?: number | null;
+  observation_count: number;
+  data_quality_status: string;
+  is_statistically_valid: boolean;
+  color_hex?: string | null;
+}
+
+export interface CorrelationMatrixViewResponse {
+  matrix_id: string;
+  portfolio_id?: string | null;
+  as_of_date: string;
+  lookback_days: number;
+  frequency: CorrelationSamplingFrequency;
+  estimator: CorrelationEstimatorType;
+  return_type: CorrelationReturnDefinition;
+  dimension: number;
+  asset_ids: string[];
+  asset_symbols: string[];
+  matrix: (number | null)[][];
+  psd_status: string;
+  min_eigenvalue: number;
+  max_eigenvalue: number;
+  condition_number?: number | null;
+  average_correlation: number;
+  median_correlation: number;
+  completeness_ratio: number;
+  sort_order: CorrelationMatrixSortOrder;
+  reordered_symbols: string[];
+  pair_metadata: MatrixCellMetadata[];
+  warnings: string[];
+}
+
+export interface MatrixComparisonResponse {
+  portfolio_id?: string | null;
+  dimension: number;
+  asset_ids: string[];
+  asset_symbols: string[];
+  current_matrix: (number | null)[][];
+  comparison_matrix: (number | null)[][];
+  difference_matrix: (number | null)[][];
+  average_absolute_change: number;
+  largest_positive_change: number;
+  largest_negative_change: number;
+  warnings: string[];
+}
+
+export interface ClusterSummaryNode {
+  cluster_id: number;
+  cluster_name: string;
+  member_instrument_ids: string[];
+  member_symbols: string[];
+  dominant_sector?: string | null;
+  average_within_correlation: number;
+  min_within_correlation: number;
+  max_within_correlation: number;
+  member_count: number;
+}
+
+export interface DendrogramNode {
+  node_id: number;
+  left_child?: number | null;
+  right_child?: number | null;
+  distance: number;
+  count: number;
+  label?: string | null;
+}
+
+export interface CorrelationClusteringResponse {
+  portfolio_id?: string | null;
+  as_of_date: string;
+  clustering_method: CorrelationClusteringMethod;
+  linkage: CorrelationHierarchicalLinkage;
+  distance_formula: string;
+  total_instruments: number;
+  number_of_clusters: number;
+  clusters: ClusterSummaryNode[];
+  reordered_symbols: string[];
+  dendrogram_leaves: number[];
+  dendrogram_nodes?: DendrogramNode[] | null;
+  silhouette_score?: number | null;
+  warnings: string[];
+}
+
+export interface CorrelationOutlierItem {
+  instrument_a_id: string;
+  instrument_b_id: string;
+  instrument_a_symbol: string;
+  instrument_b_symbol: string;
+  instrument_a_sector?: string | null;
+  instrument_b_sector?: string | null;
+  current_correlation: number;
+  reference_correlation?: number | null;
+  delta_correlation?: number | null;
+  detection_reason: OutlierDetectionReason;
+  threshold_crossed?: number | null;
+  observation_count: number;
+  quality_status: string;
+  z_score?: number | null;
+}
+
+export interface CorrelationOutliersResponse {
+  portfolio_id?: string | null;
+  as_of_date: string;
+  high_positive_pairs: CorrelationOutlierItem[];
+  strong_negative_pairs: CorrelationOutlierItem[];
+  large_change_pairs: CorrelationOutlierItem[];
+  sign_reversal_pairs: CorrelationOutlierItem[];
+  total_outliers_flagged: number;
+}
+
+export interface ReturnObservationPair {
+  observation_date: string;
+  return_a: number;
+  return_b: number;
+}
+
+export interface CorrelationPairDetailResponse {
+  instrument_a_id: string;
+  instrument_b_id: string;
+  instrument_a_symbol: string;
+  instrument_b_symbol: string;
+  instrument_a_name: string;
+  instrument_b_name: string;
+  instrument_a_sector?: string | null;
+  instrument_b_sector?: string | null;
+  correlation: number;
+  estimator: CorrelationEstimatorType;
+  lookback_days: number;
+  frequency: CorrelationSamplingFrequency;
+  sample_size: number;
+  p_value?: number | null;
+  t_statistic?: number | null;
+  std_error?: number | null;
+  ci_lower_95?: number | null;
+  ci_upper_95?: number | null;
+  covariance?: number | null;
+  volatility_a?: number | null;
+  volatility_b?: number | null;
+  scatter_points: ReturnObservationPair[];
+  least_squares_slope?: number | null;
+  least_squares_intercept?: number | null;
+  rolling_points: Record<string, unknown>[];
+  data_quality_status: string;
+  provenance_module: string;
+}
+
+export interface CorrelationDashboardPreferenceResponse {
+  id: string;
+  user_id: string;
+  dashboard_name: string;
+  default_portfolio_id?: string | null;
+  default_universe_type: CorrelationUniverseType;
+  default_lookback_days: number;
+  sampling_frequency: CorrelationSamplingFrequency;
+  correlation_method: CorrelationEstimatorType;
+  return_definition: CorrelationReturnDefinition;
+  min_observations: number;
+  display_configuration: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CorrelationSavedUniverseResponse {
+  id: string;
+  user_id: string;
+  universe_name: string;
+  description?: string | null;
+  universe_type: CorrelationUniverseType;
+  portfolio_id?: string | null;
+  member_instrument_ids: string[];
+  member_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CorrelationInvestigationResponse {
+  id: string;
+  user_id: string;
+  portfolio_id?: string | null;
+  instrument_a_id: string;
+  instrument_b_id: string;
+  correlation_value: number;
+  previous_correlation?: number | null;
+  correlation_method: CorrelationEstimatorType;
+  lookback_days: number;
+  sampling_frequency: CorrelationSamplingFrequency;
+  observation_count: number;
+  detection_reason: OutlierDetectionReason;
+  source_result_reference?: string | null;
+  user_notes: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}

@@ -221,6 +221,9 @@ from backend.app.modules.dashboard_visualization.exposure_dashboard.router impor
 from backend.app.modules.dashboard_visualization.risk_heatmaps.router import (
     router as risk_heatmaps_router,
 )
+from backend.app.modules.dashboard_visualization.correlation_dashboard.router import (
+    router as correlation_dashboard_router,
+)
 
 
 @asynccontextmanager
@@ -353,6 +356,7 @@ app.include_router(portfolio_overview_router, prefix="/api/v1", tags=["M13.01 - 
 app.include_router(risk_overview_router, prefix="/api/v1/dashboard/portfolios", tags=["M13.02 - Risk Overview Dashboard"])
 app.include_router(exposure_dashboard_router, prefix="/api/v1/dashboard/portfolios", tags=["M13.03 - Exposure Dashboard"])
 app.include_router(risk_heatmaps_router, prefix="/api/v1/dashboard/portfolios", tags=["M13.04 - Risk Heatmaps"])
+app.include_router(correlation_dashboard_router, prefix="/api/v1/dashboard", tags=["M13.05 - Correlation Dashboard"])
 
 
 @app.get("/health", tags=["System"])
