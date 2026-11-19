@@ -95,17 +95,17 @@ export const HistoricalAnalyticsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-slate-950 min-h-screen text-slate-100 space-y-6">
+    <div className="p-6 bg-canvas min-h-screen text-ink space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-50 flex items-center gap-2">
+          <h1 className="text-2xl font-bold  text-ink flex items-center gap-2">
             Historical Analytics & Audit Workspace
-            <span className="text-xs px-2.5 py-1 bg-indigo-950 text-indigo-300 border border-indigo-800 rounded font-semibold">
+            <span className="text-xs px-2.5 py-1 bg-brand-soft text-brand border border-brand/20 rounded font-semibold">
               M13.09
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-muted mt-1">
             Bitemporal point-in-time investigation, authoritative snapshot reconstruction, and version comparison
           </p>
         </div>

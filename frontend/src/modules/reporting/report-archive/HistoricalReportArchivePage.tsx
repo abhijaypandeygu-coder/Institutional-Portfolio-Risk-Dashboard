@@ -130,20 +130,20 @@ export const HistoricalReportArchivePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
+    <div className="min-h-screen bg-canvas text-ink p-6">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-6 flex justify-between items-center border-b border-slate-800 pb-4">
+        <header className="mb-6 flex justify-between items-center border-b border-line pb-4">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
-              <span className="text-cyan-500">M14.08</span> Historical Report Archive
+            <h1 className="text-2xl font-black  text-ink flex items-center gap-2">
+              <span className="text-brand">M14.08</span> Historical Report Archive
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-muted mt-1">
               Institutional-grade immutable report preservation, cryptographic integrity verification, and provenance tracking.
             </p>
           </div>
           <div className="flex gap-2">
-            <span className="text-xs bg-slate-900 border border-slate-800 text-slate-300 px-3 py-1.5 rounded font-mono">
-              Total Preserved: <strong className="text-cyan-400">{archives.length}</strong>
+            <span className="text-xs bg-surface border border-line text-secondary px-3 py-1.5 rounded font-sans">
+              Total Preserved: <strong className="text-brand">{archives.length}</strong>
             </span>
           </div>
         </header>
@@ -192,44 +192,44 @@ export const HistoricalReportArchivePage: React.FC = () => {
         {/* Version Comparison Modal */}
         {comparison && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-            <div className="bg-slate-900 border border-slate-800 rounded-lg max-w-2xl w-full p-6 max-h-[85vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-                <h3 className="font-bold text-white text-sm">
+            <div className="bg-surface border border-line rounded-lg max-w-2xl w-full p-6 max-h-[85vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4 border-b border-line pb-3">
+                <h3 className="font-bold text-ink text-sm">
                   Comparing v{comparison.base_archive.version_number} vs v{comparison.compared_archive.version_number}
                 </h3>
-                <button onClick={() => setComparison(null)} className="text-slate-400 hover:text-white">&times;</button>
+                <button onClick={() => setComparison(null)} className="text-muted hover:text-ink">&times;</button>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-xs mb-4">
-                <div className="bg-slate-950 p-3 rounded">
-                  <div className="font-bold text-cyan-400">Base: {comparison.base_archive.archive_id}</div>
-                  <div className="text-slate-400 font-mono mt-1">NAV: {comparison.base_archive.summary_nav || 'N/A'}</div>
-                  <div className="text-slate-400 font-mono">VaR: {comparison.base_archive.summary_var_value || 'N/A'}</div>
+                <div className="bg-canvas p-3 rounded">
+                  <div className="font-bold text-brand">Base: {comparison.base_archive.archive_id}</div>
+                  <div className="text-muted font-sans mt-1">NAV: {comparison.base_archive.summary_nav || 'N/A'}</div>
+                  <div className="text-muted font-sans">VaR: {comparison.base_archive.summary_var_value || 'N/A'}</div>
                 </div>
-                <div className="bg-slate-950 p-3 rounded">
-                  <div className="font-bold text-emerald-400">Target: {comparison.compared_archive.archive_id}</div>
-                  <div className="text-slate-400 font-mono mt-1">NAV: {comparison.compared_archive.summary_nav || 'N/A'}</div>
-                  <div className="text-slate-400 font-mono">VaR: {comparison.compared_archive.summary_var_value || 'N/A'}</div>
+                <div className="bg-canvas p-3 rounded">
+                  <div className="font-bold text-positive">Target: {comparison.compared_archive.archive_id}</div>
+                  <div className="text-muted font-sans mt-1">NAV: {comparison.compared_archive.summary_nav || 'N/A'}</div>
+                  <div className="text-muted font-sans">VaR: {comparison.compared_archive.summary_var_value || 'N/A'}</div>
                 </div>
               </div>
 
               <div className="space-y-3 text-xs">
                 <div>
-                  <h4 className="font-semibold text-slate-300 mb-1">Model Changes</h4>
+                  <h4 className="font-semibold text-secondary mb-1">Model Changes</h4>
                   {comparison.model_changes.length > 0 ? (
-                    <ul className="list-disc pl-5 text-slate-400">
+                    <ul className="list-disc pl-5 text-muted">
                       {comparison.model_changes.map((c, i) => <li key={i}>{c}</li>)}
                     </ul>
-                  ) : <span className="text-slate-500">No model specification changes.</span>}
+                  ) : <span className="text-muted">No model specification changes.</span>}
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-slate-300 mb-1">Data Source Changes</h4>
+                  <h4 className="font-semibold text-secondary mb-1">Data Source Changes</h4>
                   {comparison.data_source_changes.length > 0 ? (
-                    <ul className="list-disc pl-5 text-slate-400">
+                    <ul className="list-disc pl-5 text-muted">
                       {comparison.data_source_changes.map((c, i) => <li key={i}>{c}</li>)}
                     </ul>
-                  ) : <span className="text-slate-500">Identical data source snapshots.</span>}
+                  ) : <span className="text-muted">Identical data source snapshots.</span>}
                 </div>
               </div>
             </div>
@@ -239,35 +239,35 @@ export const HistoricalReportArchivePage: React.FC = () => {
         {/* Retention Policy Dry-Run Modal */}
         {retentionDryRun && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-            <div className="bg-slate-900 border border-slate-800 rounded-lg max-w-3xl w-full p-6 max-h-[85vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-                <h3 className="font-bold text-white text-sm">Retention Policy Dry-Run Evaluation</h3>
-                <button onClick={() => setRetentionDryRun(null)} className="text-slate-400 hover:text-white">&times;</button>
+            <div className="bg-surface border border-line rounded-lg max-w-3xl w-full p-6 max-h-[85vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4 border-b border-line pb-3">
+                <h3 className="font-bold text-ink text-sm">Retention Policy Dry-Run Evaluation</h3>
+                <button onClick={() => setRetentionDryRun(null)} className="text-muted hover:text-ink">&times;</button>
               </div>
 
               <div className="grid grid-cols-3 gap-3 text-xs mb-4">
-                <div className="bg-slate-950 p-3 rounded text-center">
-                  <span className="text-slate-500 block">Evaluated</span>
-                  <span className="text-lg font-bold text-white">{retentionDryRun.total_evaluated}</span>
+                <div className="bg-canvas p-3 rounded text-center">
+                  <span className="text-muted block">Evaluated</span>
+                  <span className="text-lg font-bold text-ink">{retentionDryRun.total_evaluated}</span>
                 </div>
-                <div className="bg-slate-950 p-3 rounded text-center">
-                  <span className="text-slate-500 block">Protected By Holds</span>
-                  <span className="text-lg font-bold text-amber-400">{retentionDryRun.held_count}</span>
+                <div className="bg-canvas p-3 rounded text-center">
+                  <span className="text-muted block">Protected By Holds</span>
+                  <span className="text-lg font-bold text-warning">{retentionDryRun.held_count}</span>
                 </div>
-                <div className="bg-slate-950 p-3 rounded text-center">
-                  <span className="text-slate-500 block">Disposal Eligible</span>
-                  <span className="text-lg font-bold text-rose-400">{retentionDryRun.eligible_for_disposal_count}</span>
+                <div className="bg-canvas p-3 rounded text-center">
+                  <span className="text-muted block">Disposal Eligible</span>
+                  <span className="text-lg font-bold text-negative">{retentionDryRun.eligible_for_disposal_count}</span>
                 </div>
               </div>
 
               <div className="space-y-2">
                 {retentionDryRun.items.map((it) => (
-                  <div key={it.archive_id} className="bg-slate-950 p-2.5 rounded border border-slate-800 flex justify-between text-xs">
+                  <div key={it.archive_id} className="bg-canvas p-2.5 rounded border border-line flex justify-between text-xs">
                     <div>
-                      <span className="font-mono text-cyan-400 mr-2">{it.archive_id}</span>
-                      <span className="text-slate-400">({it.report_type}) - Age: {it.age_days} days</span>
+                      <span className="font-sans text-brand mr-2">{it.archive_id}</span>
+                      <span className="text-muted">({it.report_type}) - Age: {it.age_days} days</span>
                     </div>
-                    <span className={`font-semibold ${it.has_legal_hold ? 'text-amber-400' : it.eligible_for_disposal ? 'text-rose-400' : 'text-emerald-400'}`}>
+                    <span className={`font-semibold ${it.has_legal_hold ? 'text-warning' : it.eligible_for_disposal ? 'text-negative' : 'text-positive'}`}>
                       {it.recommended_action}
                     </span>
                   </div>

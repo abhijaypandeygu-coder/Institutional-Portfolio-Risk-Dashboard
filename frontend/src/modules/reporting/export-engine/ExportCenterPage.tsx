@@ -145,7 +145,7 @@ export const ExportCenterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
+    <div className="min-h-screen bg-canvas text-ink p-6">
       <ExportControlBar
         datasets={datasets}
         selectedDatasetCode={selectedDatasetCode}
@@ -161,13 +161,13 @@ export const ExportCenterPage: React.FC = () => {
       />
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-800 mb-6 gap-6">
+      <div className="flex border-b border-line mb-6 gap-6">
         <button
           onClick={() => setActiveTab('configure')}
           className={`pb-3 text-sm font-semibold transition-colors flex items-center gap-2 ${
             activeTab === 'configure'
-              ? 'border-b-2 border-emerald-500 text-emerald-400'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'border-b-2 border-emerald-500 text-positive'
+              : 'text-muted hover:text-secondary'
           }`}
         >
           <span>Dataset & Matrix Configuration</span>
@@ -176,12 +176,12 @@ export const ExportCenterPage: React.FC = () => {
           onClick={() => setActiveTab('history')}
           className={`pb-3 text-sm font-semibold transition-colors flex items-center gap-2 ${
             activeTab === 'history'
-              ? 'border-b-2 border-emerald-500 text-emerald-400'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'border-b-2 border-emerald-500 text-positive'
+              : 'text-muted hover:text-secondary'
           }`}
         >
           <span>Export Archive & Artifacts</span>
-          <span className="px-1.5 py-0.2 bg-slate-800 rounded-full text-xs text-slate-300">
+          <span className="px-1.5 py-0.2 bg-subtle rounded-full text-xs text-secondary">
             {jobs.length}
           </span>
         </button>

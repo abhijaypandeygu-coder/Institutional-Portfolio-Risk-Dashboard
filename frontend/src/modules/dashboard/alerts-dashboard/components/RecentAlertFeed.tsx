@@ -1,4 +1,5 @@
 import React from 'react';
+import { BellOff } from 'lucide-react';
 import { AlertFeedItem, AlertSeverity, AlertStatus } from '../../../../types/dashboard';
 
 interface RecentAlertFeedProps {
@@ -19,7 +20,7 @@ export const RecentAlertFeed: React.FC<RecentAlertFeedProps> = ({
   const getSeverityBadge = (severity: AlertSeverity | string) => {
     switch (severity) {
       case 'EMERGENCY':
-        return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-950 text-red-300 border border-red-700">EMG</span>;
+        return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-negative-soft text-negative border border-negative/20">EMG</span>;
       case 'CRITICAL':
         return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-orange-950 text-orange-300 border border-orange-700">CRIT</span>;
       case 'HIGH':
@@ -30,7 +31,7 @@ export const RecentAlertFeed: React.FC<RecentAlertFeedProps> = ({
       case 'LOW':
       case 'INFO':
       default:
-        return <span className="px-1.5 py-0.5 text-[10px] rounded bg-slate-800 text-slate-300">{severity || 'INFO'}</span>;
+        return <span className="px-1.5 py-0.5 text-[10px] rounded bg-subtle text-secondary">{severity || 'INFO'}</span>;
     }
   };
 
@@ -38,20 +39,20 @@ export const RecentAlertFeed: React.FC<RecentAlertFeedProps> = ({
     switch (status) {
       case 'OPEN':
       case 'TRIGGERED':
-        return <span className="text-[10px] font-mono text-amber-400 bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-800/60">OPEN</span>;
+        return <span className="text-[10px] font-sans text-warning bg-warning-soft/40 px-1.5 py-0.5 rounded border border-warning/20">OPEN</span>;
       case 'ACKNOWLEDGED':
-        return <span className="text-[10px] font-mono text-blue-400 bg-blue-950/40 px-1.5 py-0.5 rounded border border-blue-800/60">ACKNOWLEDGED</span>;
+        return <span className="text-[10px] font-sans text-brand bg-brand-soft/40 px-1.5 py-0.5 rounded border border-brand/20">ACKNOWLEDGED</span>;
       case 'ASSIGNED':
       case 'INVESTIGATING':
-        return <span className="text-[10px] font-mono text-purple-400 bg-purple-950/40 px-1.5 py-0.5 rounded border border-purple-800/60">{status}</span>;
+        return <span className="text-[10px] font-sans text-info bg-info-soft/40 px-1.5 py-0.5 rounded border border-info/20">{status}</span>;
       case 'ESCALATED':
-        return <span className="text-[10px] font-mono text-rose-400 bg-rose-950/40 px-1.5 py-0.5 rounded border border-rose-800/60">ESCALATED</span>;
+        return <span className="text-[10px] font-sans text-negative bg-negative-soft/40 px-1.5 py-0.5 rounded border border-negative/20">ESCALATED</span>;
       case 'RESOLVED':
-        return <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-800/60">RESOLVED</span>;
+        return <span className="text-[10px] font-sans text-positive bg-positive-soft/40 px-1.5 py-0.5 rounded border border-positive/20">RESOLVED</span>;
       case 'CLOSED':
-        return <span className="text-[10px] font-mono text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">CLOSED</span>;
+        return <span className="text-[10px] font-sans text-muted bg-subtle px-1.5 py-0.5 rounded">CLOSED</span>;
       default:
-        return <span className="text-[10px] font-mono text-slate-400">{status}</span>;
+        return <span className="text-[10px] font-sans text-muted">{status}</span>;
     }
   };
 
@@ -62,7 +63,7 @@ export const RecentAlertFeed: React.FC<RecentAlertFeedProps> = ({
 
   if (loading && alerts.length === 0) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center text-slate-500">
+      <div className="bg-surface border border-line rounded-lg p-6 text-center text-muted">
         Loading recent alert feed...
       </div>
     );
@@ -70,19 +71,21 @@ export const RecentAlertFeed: React.FC<RecentAlertFeedProps> = ({
 
   if (alerts.length === 0) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center">
-        <div className="text-2xl mb-1">🔕</div>
-        <div className="text-slate-300 font-semibold text-sm">No Alerts Triggered</div>
-        <div className="text-slate-500 text-xs mt-1">No alerts match the current filter selection.</div>
+      <div className="bg-surface border border-line rounded-lg p-6 text-center flex flex-col items-center">
+        <div className="size-9 rounded-full bg-subtle/80 border border-line-strong/60 flex items-center justify-center text-muted mb-2">
+          <BellOff className="size-4" />
+        </div>
+        <div className="text-secondary font-semibold text-sm">No Alerts Triggered</div>
+        <div className="text-muted text-xs mt-1">No alerts match the current filter selection.</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden shadow-sm">
-      <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-200">Alerts Activity Feed (M12 Engine)</h3>
-        <span className="text-xs text-slate-400 font-mono">{alerts.length} items</span>
+    <div className="bg-surface border border-line rounded-lg overflow-hidden shadow-sm">
+      <div className="px-4 py-3 border-b border-line flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-secondary">Alerts Activity Feed (M12 Engine)</h3>
+        <span className="text-xs text-muted font-sans">{alerts.length} items</span>
       </div>
       <div className="divide-y divide-slate-800/80 max-h-[600px] overflow-y-auto">
         {alerts.map((a) => {
@@ -92,7 +95,7 @@ export const RecentAlertFeed: React.FC<RecentAlertFeedProps> = ({
               key={a.alert_id}
               onClick={() => onSelectAlert(a)}
               className={`p-3.5 flex flex-col gap-2 cursor-pointer transition ${
-                isSelected ? 'bg-indigo-950/30 border-l-4 border-indigo-500' : 'hover:bg-slate-800/40'
+                isSelected ? 'bg-brand-soft/30 border-l-4 border-indigo-500' : 'hover:bg-subtle/40'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
@@ -100,49 +103,49 @@ export const RecentAlertFeed: React.FC<RecentAlertFeedProps> = ({
                   {getSeverityBadge(a.severity)}
                   {getStatusBadge(a.status)}
                   {a.priority_score !== undefined && a.priority_score !== null && (
-                    <span className="text-xs font-mono font-semibold text-slate-400">
+                    <span className="text-xs font-sans font-semibold text-muted">
                       P:{Number(a.priority_score).toFixed(0)}
                     </span>
                   )}
                   {a.has_linked_breach && (
-                    <span className="text-[10px] px-1 py-0.2 bg-red-900/40 text-red-300 border border-red-700/60 rounded">
+                    <span className="text-[10px] px-1 py-0.2 bg-negative-soft/40 text-negative border border-negative/20 rounded">
                       M11 BREACH
                     </span>
                   )}
                 </div>
-                <span className="text-[11px] font-mono text-slate-500">
+                <span className="text-[11px] font-sans text-muted">
                   {formatTimestamp(a.triggered_at)}
                 </span>
               </div>
 
-              <div className="text-xs font-medium text-slate-100 flex items-center justify-between">
+              <div className="text-xs font-medium text-ink flex items-center justify-between">
                 <span>{a.title}</span>
                 {a.portfolio_id && (
-                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                  <span className="text-[10px] font-sans text-muted bg-canvas px-1.5 py-0.5 rounded border border-line">
                     {a.portfolio_id}
                   </span>
                 )}
               </div>
 
               {(a.metric_name || a.trigger_value !== null) && (
-                <div className="text-[11px] font-mono text-slate-400 flex items-center gap-3">
+                <div className="text-[11px] font-sans text-muted flex items-center gap-3">
                   {a.metric_name && <span>Metric: {a.metric_name}</span>}
                   {a.trigger_value !== null && a.trigger_value !== undefined && (
-                    <span className="text-slate-300">
+                    <span className="text-secondary">
                       Value: {a.trigger_value.toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
                       {a.unit || ''}
                     </span>
                   )}
                   {a.threshold_value !== null && a.threshold_value !== undefined && (
-                    <span className="text-slate-500">
+                    <span className="text-muted">
                       Limit: {a.threshold_value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                     </span>
                   )}
                 </div>
               )}
 
-              <div className="flex items-center justify-between pt-1 border-t border-slate-800/60">
-                <span className="text-[10px] text-slate-500">
+              <div className="flex items-center justify-between pt-1 border-t border-line/60">
+                <span className="text-[10px] text-muted">
                   {a.assigned_to ? `Assigned: ${a.assigned_to}` : 'Unassigned'}
                 </span>
                 <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
@@ -150,7 +153,7 @@ export const RecentAlertFeed: React.FC<RecentAlertFeedProps> = ({
                     <button
                       type="button"
                       onClick={() => onQuickAcknowledge(a.alert_id)}
-                      className="px-2 py-0.5 bg-amber-900/50 hover:bg-amber-800 text-amber-200 text-[10px] font-semibold rounded border border-amber-700/50 transition"
+                      className="px-2 py-0.5 bg-warning-soft/50 hover:bg-warning-soft text-warning text-[10px] font-semibold rounded border border-warning/20 transition"
                     >
                       Ack
                     </button>

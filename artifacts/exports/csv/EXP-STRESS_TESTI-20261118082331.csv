@@ -1,0 +1,9 @@
+# source_module: M14
+# dataset_id: stress_testing_results
+# portfolio_id: PORT_STR_a74557
+# as_of_timestamp: 2026-11-18T08:23:31.630591+00:00
+# export_timestamp: 2026-11-18T08:23:31.630591+00:00
+# reporting_currency: INR
+scenario_id,scenario_name,scenario_category,baseline_nav,stressed_nav,stressed_pnl,pnl_impact_pct
+GLOBAL_CRASH_2008,2008 Global Financial Crisis,HISTORICAL,35720000.0,24289600.0,-11430400.0,-32.0
+RATE_HIKE_300BPS,300bps Emergency Rate Hike,HYPOTHETICAL,35720000.0,31433600.0,-4286400.0,-12.0

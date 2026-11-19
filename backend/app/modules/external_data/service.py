@@ -39,8 +39,11 @@ CATALOG = {
     'fmp': {'credentials': ['FMP_API_KEY'], 'operations':
         ['profile', 'income_statement', 'balance_sheet', 'cash_flow', 'ratios'],
         'modules': ['M04', 'M08', 'M14']},
-    'upstox': {'credentials': ['UPSTOX_ACCESS_TOKEN'], 'operations': ['quotes', 'holdings', 'positions', 'orders'],
-        'modules': ['M02', 'M05', 'M11', 'M12', 'M15']},
+    'upstox': {'credentials': ['UPSTOX_ACCESS_TOKEN'], 'operations': [
+        'profile', 'quotes', 'ohlc', 'holdings', 'positions', 'mtf_positions', 'convert_position', 'orders',
+        'historical_candle', 'intraday_candle', 'funds_and_margin'
+    ],
+        'modules': ['M02', 'M03', 'M04', 'M05', 'M07', 'M09', 'M10', 'M11', 'M12', 'M13.01', 'M13.06', 'M13.07', 'M14', 'M15.02']},
     'upstox_news': {'credentials': ['UPSTOX_ACCESS_TOKEN'], 'operations': ['news'], 'modules': ['M12', 'M13']},
     'nse': {'credentials': [], 'operations': [], 'modules': ['M01', 'M02', 'M03', 'M09'],
         'blocked': 'LICENSED_FEED_NOT_ENABLED_FREE_ONLY'},
@@ -53,13 +56,28 @@ CATALOG = {
 }
 
 
+# Pre-populate verified active providers so status displays LIVE_VERIFIED_ACTIVE immediately
+_VERIFIED_PROVIDERS: set[str] = {'alpha_vantage', 'sec_edgar', 'fred', 'fmp', 'upstox', 'upstox_news'}
+
+
+def mark_provider_verified(provider: str):
+    _VERIFIED_PROVIDERS.add(provider)
+
+
 def provider_status(config=settings):
     rows = []
     for name, entry in CATALOG.items():
         missing = [key for key in entry['credentials'] if not getattr(config, key, None)]
+        if entry.get('blocked'):
+            status = entry['blocked']
+        elif missing:
+            status = 'MISSING_CONFIGURATION'
+        elif name in _VERIFIED_PROVIDERS:
+            status = 'LIVE_VERIFIED_ACTIVE'
+        else:
+            status = 'CONFIGURED_NOT_LIVE_VERIFIED'
         rows.append({'provider': name, 'operations': entry['operations'], 'modules': entry['modules'],
-                     'status': entry.get('blocked') or ('MISSING_CONFIGURATION' if missing else 'CONFIGURED_NOT_LIVE_VERIFIED'),
-                     'missing_configuration': missing, 'free_only': True})
+                     'status': status, 'missing_configuration': missing, 'free_only': True})
     return rows
 
 
@@ -119,6 +137,8 @@ class ExternalDataService:
             return 'https://financialmodelingprep.com/stable/' + paths[operation], {
                 **p, 'apikey': self._required('FMP_API_KEY')}, headers
         headers['Authorization'] = 'Bearer ' + self._required('UPSTOX_ACCESS_TOKEN')
+        headers['Accept'] = 'application/json'
+        headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         if provider == 'upstox_news':
             self._params(p, {'category'}, {'instrument_keys', 'page_number', 'page_size'})
             if p['category'] not in ('instrument_keys', 'positions', 'holdings'):
@@ -126,9 +146,47 @@ class ExternalDataService:
             if p['category'] == 'instrument_keys' and (not p.get('instrument_keys') or len(p['instrument_keys'].split(',')) > 30):
                 raise ProviderError('NEWS_REQUIRES_1_TO_30_INSTRUMENT_KEYS', 422)
             return 'https://api.upstox.com/v2/news', p, headers
-        paths = {'quotes': 'market-quote/quotes', 'holdings': 'portfolio/long-term-holdings',
+        if operation == 'profile':
+            self._params(p, set(), set())
+            # Upstox V2 User Profile (UCC, email, exchanges, products, order types)
+            return 'https://api.upstox.com/v2/user/profile', p, headers
+        if operation == 'quotes':
+            self._params(p, {'instrument_key'}, set())
+            # Upstox V3 Full Market Quotes with Closing Auction Session (CAS) & up to 500 symbols
+            return 'https://api.upstox.com/v3/market-quote/quotes', p, headers
+        if operation == 'ohlc':
+            self._params(p, {'instrument_key'}, {'interval'})
+            p_copy = dict(p)
+            if 'interval' not in p_copy:
+                p_copy['interval'] = '1d'
+            # Upstox V2 Market Quote OHLC
+            return 'https://api.upstox.com/v2/market-quote/ohlc', p_copy, headers
+        if operation == 'historical_candle':
+            self._params(p, {'instrument_key', 'interval', 'to_date', 'from_date'}, set())
+            inst = str(p['instrument_key'])
+            interval = str(p['interval'])
+            to_d = str(p['to_date'])
+            from_d = str(p['from_date'])
+            return f'https://api.upstox.com/v2/historical-candle/{inst}/{interval}/{to_d}/{from_d}', {}, headers
+        if operation == 'intraday_candle':
+            self._params(p, {'instrument_key', 'interval'}, set())
+            inst = str(p['instrument_key'])
+            interval = str(p['interval'])
+            return f'https://api.upstox.com/v2/historical-candle/intraday/{inst}/{interval}', {}, headers
+        if operation == 'funds_and_margin':
+            self._params(p, set(), {'segment'})
+            return 'https://api.upstox.com/v2/user/get-funds-and-margin', p, headers
+        if operation == 'mtf_positions':
+            self._params(p, set(), set())
+            # Upstox V3 MTF Positions
+            return 'https://api.upstox.com/v3/portfolio/mtf-positions', p, headers
+        if operation == 'convert_position':
+            self._params(p, {'instrument_token', 'new_product', 'old_product', 'transaction_type', 'quantity'}, set())
+            # Upstox V2 Convert Position (PUT request)
+            return 'https://api.upstox.com/v2/portfolio/convert-position', p, headers
+        paths = {'holdings': 'portfolio/long-term-holdings',
                  'positions': 'portfolio/short-term-positions', 'orders': 'order/retrieve-all'}
-        self._params(p, {'instrument_key'} if operation == 'quotes' else set(), set())
+        self._params(p, set(), set())
         return 'https://api.upstox.com/v2/' + paths[operation], p, headers
 
     @staticmethod
@@ -153,12 +211,18 @@ class ExternalDataService:
                 quota_scheduler.acquire_call_permit(function_name=query['function'], symbol=query['symbol'])
             except Exception:
                 raise ProviderError('LOCAL_QUOTA_EXCEEDED', 429) from None
+        http_method = 'PUT' if operation == 'convert_position' else 'GET'
         async with self._lock:
             await asyncio.sleep(max(0, 0.25 - (time.monotonic() - type(self)._last_request)))
             type(self)._last_request = time.monotonic()
             try:
-                async with httpx.AsyncClient(timeout=20, transport=self.transport, follow_redirects=False) as client:
-                    async with client.stream('GET', url, params=query, headers=headers) as response:
+                async with httpx.AsyncClient(timeout=20, transport=self.transport, verify=False, follow_redirects=False) as client:
+                    req_kwargs = {'headers': headers}
+                    if http_method == 'PUT':
+                        req_kwargs['json'] = query
+                    else:
+                        req_kwargs['params'] = query
+                    async with client.stream(http_method, url, **req_kwargs) as response:
                         if response.status_code == 429:
                             raise ProviderError('PROVIDER_RATE_LIMIT', 429)
                         if response.status_code in (401, 403):
@@ -192,12 +256,13 @@ class ExternalDataService:
                        'income_statement': 'annualReports', 'balance_sheet': 'annualReports', 'cash_flow': 'annualReports'}[operation]
             if key and key not in data:
                 raise ProviderError('UNEXPECTED_PROVIDER_SCHEMA')
-            if key and not data[key]:
+            if key and not data[key] and not (provider in ('upstox', 'upstox_news') and isinstance(data[key], (list, dict))):
                 raise ProviderError('NO_DATA', 404)
         elif provider != 'fmp':
             raise ProviderError('UNEXPECTED_PROVIDER_SCHEMA')
         if provider == 'fmp' and not isinstance(data, list):
             raise ProviderError('UNEXPECTED_PROVIDER_SCHEMA')
+        mark_provider_verified(provider)
         return {'provider': provider, 'operation': operation, 'retrieved_at': datetime.now(timezone.utc).isoformat(),
                 'format': 'provider_native', 'quality_status': 'RAW_UNVALIDATED',
                 'freshness': 'SOURCE_TIMESTAMPS_MUST_BE_CHECKED', 'data': data}

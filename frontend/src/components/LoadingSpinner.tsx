@@ -1,5 +1,6 @@
 export const LoadingSpinner = () => (
-  <div className="flex items-center justify-center py-8">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400" />
+  <div role="status" className="flex items-center justify-center gap-3 py-8 text-sm text-muted">
+    <span className="size-2 rounded-full bg-muted" aria-hidden="true" />
+    Loading data…
   </div>
 );

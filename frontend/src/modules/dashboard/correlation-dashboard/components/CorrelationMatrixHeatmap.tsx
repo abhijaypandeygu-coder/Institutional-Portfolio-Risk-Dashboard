@@ -18,28 +18,28 @@ export const CorrelationMatrixHeatmap: React.FC<CorrelationMatrixHeatmapProps> =
   const dim = matrixData.dimension;
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 shadow-sm overflow-hidden">
+    <div className="bg-surface border border-line rounded-lg p-5 shadow-sm overflow-hidden">
       {/* Title & Diagnostic Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-line text-xs">
         <div>
-          <h3 className="text-sm font-semibold text-slate-100 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold text-ink uppercase ">
             Pairwise Correlation Matrix ({dim} × {dim})
           </h3>
-          <p className="text-[11px] text-slate-400 mt-0.5">
-            Method: <strong className="text-slate-200">{matrixData.estimator}</strong> | Lookback:{' '}
-            <strong className="text-slate-200">{matrixData.lookback_days} Trading Days</strong> | Freq:{' '}
-            <strong className="text-slate-200">{matrixData.frequency}</strong>
+          <p className="text-[11px] text-muted mt-0.5">
+            Method: <strong className="text-secondary">{matrixData.estimator}</strong> | Lookback:{' '}
+            <strong className="text-secondary">{matrixData.lookback_days} Trading Days</strong> | Freq:{' '}
+            <strong className="text-secondary">{matrixData.frequency}</strong>
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-slate-400">
-            Avg Corr: <strong className="text-slate-200">{Number(matrixData.average_correlation).toFixed(2)}</strong>
+          <span className="text-muted">
+            Avg Corr: <strong className="text-secondary">{Number(matrixData.average_correlation).toFixed(2)}</strong>
           </span>
-          <span className="text-slate-400">
-            Median: <strong className="text-slate-200">{Number(matrixData.median_correlation).toFixed(2)}</strong>
+          <span className="text-muted">
+            Median: <strong className="text-secondary">{Number(matrixData.median_correlation).toFixed(2)}</strong>
           </span>
           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-            matrixData.psd_status === 'POSITIVE_SEMIDEFINITE' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'
+            matrixData.psd_status === 'POSITIVE_SEMIDEFINITE' ? 'bg-positive-soft text-positive border border-positive/20' : 'bg-warning-soft text-warning border border-warning/20'
           }`}>
             PSD: {matrixData.psd_status}
           </span>
@@ -51,13 +51,13 @@ export const CorrelationMatrixHeatmap: React.FC<CorrelationMatrixHeatmapProps> =
         <table className="border-collapse text-xs select-none">
           <thead>
             <tr>
-              <th className="p-2 sticky left-0 top-0 bg-slate-950 text-slate-400 font-semibold border-b border-r border-slate-800 z-20">
+              <th className="p-2 sticky left-0 top-0 bg-canvas text-muted font-semibold border-b border-r border-line z-20">
                 Asset
               </th>
               {symbols.map((sym, j) => (
                 <th
                   key={`col_${j}`}
-                  className="p-2 sticky top-0 bg-slate-950 text-slate-300 font-bold border-b border-slate-800 min-w-[56px] text-center z-10"
+                  className="p-2 sticky top-0 bg-canvas text-secondary font-bold border-b border-line min-w-[56px] text-center z-10"
                 >
                   {sym}
                 </th>
@@ -67,7 +67,7 @@ export const CorrelationMatrixHeatmap: React.FC<CorrelationMatrixHeatmapProps> =
           <tbody>
             {symbols.map((rowSym, i) => (
               <tr key={`row_${i}`}>
-                <td className="p-2 sticky left-0 bg-slate-950 text-slate-200 font-bold border-r border-slate-800 z-10 whitespace-nowrap">
+                <td className="p-2 sticky left-0 bg-canvas text-secondary font-bold border-r border-line z-10 whitespace-nowrap">
                   {rowSym}
                 </td>
                 {symbols.map((colSym, j) => {
@@ -86,7 +86,7 @@ export const CorrelationMatrixHeatmap: React.FC<CorrelationMatrixHeatmapProps> =
                       key={`cell_${i}_${j}`}
                       onClick={() => onCellClick(rowSym, colSym, assetIds[i], assetIds[j])}
                       style={{ backgroundColor: hexColor }}
-                      className={`p-2 text-center cursor-pointer transition-all border border-slate-900/60 font-semibold min-w-[56px] ${
+                      className={`p-2 text-center cursor-pointer transition-opacity border border-line/60 font-semibold min-w-[56px] ${
                         isSelected ? 'ring-2 ring-blue-400 font-black' : 'hover:opacity-85'
                       }`}
                       title={`${rowSym} vs ${colSym}: ${val !== null && val !== undefined ? Number(val).toFixed(4) : 'N/A'}`}
@@ -104,14 +104,14 @@ export const CorrelationMatrixHeatmap: React.FC<CorrelationMatrixHeatmapProps> =
       </div>
 
       {/* Diverging Color Legend Bar */}
-      <div className="flex items-center justify-between pt-4 mt-2 border-t border-slate-800 text-xs text-slate-400">
+      <div className="flex items-center justify-between pt-4 mt-2 border-t border-line text-xs text-muted">
         <span>Click cell to inspect scatter observations & rolling trend</span>
         <div className="flex items-center gap-2">
           <span>-1.0</span>
           <div className="h-3 w-44 rounded overflow-hidden flex shadow-inner">
             <div className="h-full flex-1 bg-red-700" title="-1.0 to -0.5" />
             <div className="h-full flex-1 bg-red-400" title="-0.5 to -0.2" />
-            <div className="h-full flex-1 bg-slate-100" title="-0.2 to +0.2" />
+            <div className="h-full flex-1 bg-subtle" title="-0.2 to +0.2" />
             <div className="h-full flex-1 bg-emerald-400" title="+0.2 to +0.5" />
             <div className="h-full flex-1 bg-emerald-700" title="+0.5 to +1.0" />
           </div>

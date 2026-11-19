@@ -1,23 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Wallet, 
-  Layers, 
-  Activity, 
-  Search, 
-  Bell, 
-  Calendar, 
-  Share2, 
-  Plus, 
-  ChevronDown, 
-  ArrowUpRight, 
+import { useLiveRefresh, useLiveUpdates } from './hooks/useLiveRefresh';
+import { AppShell } from './components/AppShell';
+import { ExecutivePortfolioLayout } from './components/ExecutivePortfolioLayout';
+import { cn } from './utils/cn';
+import { ModalSurface } from './components/ModalSurface';
+import { UpstoxBrokerPanel } from './components/UpstoxBrokerPanel';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  TrendingUp,
+  Wallet,
+  Layers,
+  Activity,
+  Search,
+  Bell,
+  Calendar,
+  Share2,
+  Plus,
+  ChevronDown,
+  ArrowUpRight,
   ArrowDownRight,
   ShieldCheck,
-  BarChart3,
+  FolderOpen,
+  Command,
   SlidersHorizontal,
-  RefreshCw,
-  FolderOpen
+  Flame,
+  FileSpreadsheet,
+  X
 } from 'lucide-react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ExternalProvidersPage } from './modules/dashboard/ExternalProvidersPage';
@@ -25,551 +32,364 @@ import { PortfolioOverviewPage } from './modules/dashboard/portfolio-overview/Po
 import { AlertsDashboardPage } from './modules/dashboard/alerts-dashboard/AlertsDashboardPage';
 import { LiquidityDashboardPage } from './modules/dashboard/liquidity-dashboard/LiquidityDashboardPage';
 import { StressTestingDashboardPage } from './modules/dashboard/stress-dashboard/StressTestingDashboardPage';
+import { ExportModal } from './components/ExportModal';
+import { OrderAllocationModal } from './components/OrderAllocationModal';
 
 export const App: React.FC = () => {
+  const { refreshAll } = useLiveUpdates();
   const [activeTab, setActiveTab] = useState<'overview' | 'alerts' | 'liquidity' | 'stress' | 'providers'>('overview');
   const [timeRange, setTimeRange] = useState<'1D' | '1W' | '1M' | '3M' | '6M' | '1Y' | 'All'>('1Y');
-  const [selectedPortfolio, setSelectedPortfolio] = useState<string>('PORT_ALR_b16421');
+  const [selectedPortfolio, setSelectedPortfolio] = useState<string>('PORT_API_RISK_484889');
+  const [selectedTicker, setSelectedTicker] = useState<string | null>('AAPL');
   const [portfolioList, setPortfolioList] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
   const [showEngineDetails, setShowEngineDetails] = useState<boolean>(false);
+  const [overviewData, setOverviewData] = useState<any>(null);
+  const [liquidityData, setLiquidityData] = useState<any>(null);
+  const [liveMarketWatch, setLiveMarketWatch] = useState<Array<{ symbol: string; name: string; price: string; change: string; up: boolean }>>([]);
+  const [recentTransactions, setRecentTransactions] = useState<Array<{ symbol: string; title: string; subtitle: string; amount: string; isNegative: boolean }>>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<Array<{ title: string; date: string; tag: string; color: string }>>([]);
+
+
+  // Date range dropdown & modals state
+  const selectedDateRange = overviewData?.total_nav?.as_of ? `Valued ${new Date(overviewData.total_nav.as_of).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : 'Valuation date unavailable';
+  const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState<boolean>(false);
+
+  // Command / Quick-Finder palette state
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [liveSearchResults, setLiveSearchResults] = useState<Array<{ symbol: string; name: string; sector: string; exchange: string }>>([]);
+  const [isSearchingLive, setIsSearchingLive] = useState<boolean>(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Debounced live market ticker search via yfinance
+  useEffect(() => {
+    if (!searchQuery.trim() || searchQuery.trim().length < 1) {
+      setLiveSearchResults([]);
+      setIsSearchingLive(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setIsSearchingLive(true);
+      fetch(`/api/v1/dashboard/liquidity/search-tickers?q=${encodeURIComponent(searchQuery.trim())}&limit=8`)
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setLiveSearchResults(data);
+          }
+        })
+        .catch(() => setLiveSearchResults([]))
+        .finally(() => setIsSearchingLive(false));
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Keyboard shortcut listener (Cmd+K / Ctrl+K / / key)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      } else if (e.key === 'Escape' && isSearchOpen) {
+        setIsSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSearchOpen]);
 
   useEffect(() => {
-    fetch('/api/v1/portfolios?limit=20')
+    if (isSearchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    } else {
+      setSearchQuery('');
+    }
+  }, [isSearchOpen]);
+
+  useEffect(() => {
+    fetch('/api/v1/portfolios?limit=50')
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setPortfolioList(data);
-          setSelectedPortfolio(data[0].portfolio_id);
+          const hasRisk = data.some((p: any) => p.portfolio_id === 'PORT_API_RISK_484889');
+          if (hasRisk) {
+            setSelectedPortfolio('PORT_API_RISK_484889');
+          } else {
+            setSelectedPortfolio(data[0].portfolio_id);
+          }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
-  const marketWatch = [
-    { symbol: 'AAPL', name: 'Apple Inc.', price: '$191.45', change: '+1.25%', up: true },
-    { symbol: 'GOOGL', name: 'Alphabet Inc.', price: '$163.85', change: '+0.85%', up: true },
-    { symbol: 'AMZN', name: 'Amazon.com', price: '$179.32', change: '+2.31%', up: true },
-    { symbol: 'MSFT', name: 'Microsoft Corp.', price: '$415.59', change: '+0.92%', up: true },
-    { symbol: 'TSLA', name: 'Tesla, Inc.', price: '$171.21', change: '-0.45%', up: false },
-  ];
+  useEffect(() => {
+    if (!selectedPortfolio) return;
+    const controller = new AbortController();
+    setOverviewData(null); setLiquidityData(null);
+    // Fetch real position transactions from authoritative position ledger
+    fetch(`/api/v1/positions/portfolios/${selectedPortfolio}`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then(async (positions) => {
+        if (!Array.isArray(positions) || positions.length === 0) {
+          setRecentTransactions([]);
+          return;
+        }
+        const eventPromises = positions.slice(0, 8).map((p: any) =>
+          fetch(`/api/v1/positions/${p.position_id}/events`)
+            .then((res) => (res.ok ? res.json() : []))
+            .catch(() => [])
+        );
+        const eventArrays = await Promise.all(eventPromises);
+        const allEvents = eventArrays.flat();
 
-  const topHoldings = [
-    { symbol: 'AAPL', name: 'Apple Inc.', pct: '23.5%', notional: '$30,215.30', bg: 'bg-emerald-500' },
-    { symbol: 'MSFT', name: 'Microsoft Corp.', pct: '18.7%', notional: '$24,070.45', bg: 'bg-cyan-500' },
-    { symbol: 'AMZN', name: 'Amazon.com', pct: '15.3%', notional: '$19,690.20', bg: 'bg-amber-500' },
-    { symbol: 'VOO', name: 'Vanguard S&P 500 ETF', pct: '12.1%', notional: '$15,590.50', bg: 'bg-indigo-500' },
-    { symbol: 'TSLA', name: 'Tesla, Inc.', pct: '8.9%', notional: '$11,449.10', bg: 'bg-rose-500' },
-  ];
+        allEvents.sort((a, b) => {
+          const tA = new Date(a.recorded_at || a.effective_timestamp || 0).getTime();
+          const tB = new Date(b.recorded_at || b.effective_timestamp || 0).getTime();
+          return tB - tA;
+        });
 
-  const recentTransactions = [
-    { symbol: 'AAPL', title: 'Apple Inc. (AAPL)', subtitle: 'Buy 2 Shares • May 18, 2026', amount: '-$382.90', isNegative: true },
-    { symbol: 'MSFT', title: 'Dividend from Microsoft', subtitle: 'May 17, 2026', amount: '+$50.25', isNegative: false },
-    { symbol: 'VOO', title: 'Vanguard S&P 500 ETF', subtitle: 'Buy 1 Share • May 16, 2026', amount: '-$410.50', isNegative: true },
-    { symbol: 'USD', title: 'Interest from Cash Reserve', subtitle: 'May 15, 2026', amount: '+$12.35', isNegative: false },
-  ];
+        const formatted = allEvents.slice(0, 5).map((ev: any) => {
+          const qty = Number(ev.signed_quantity_delta) || 0;
+          const sym = ev.instrument_id || 'ASSET';
+          const evType = (ev.event_type || 'TRADE').replace(/_/g, ' ');
+          const dateStr = ev.recorded_at ? ev.recorded_at.slice(0, 10) : 'Recent';
+          return {
+            symbol: sym,
+            title: `${sym} • ${evType}`,
+            subtitle: `${Math.abs(qty).toLocaleString()} Shares • ${dateStr}`,
+            amount: `${qty >= 0 ? '+' : ''}${qty.toLocaleString()} shs`,
+            isNegative: qty < 0,
+          };
+        });
+        setRecentTransactions(formatted);
+      })
+      .catch(() => setRecentTransactions([]));
+    return () => controller.abort();
+  }, [selectedPortfolio]);
 
-  const upcomingEvents = [
-    { title: 'Fed Interest Rate Decision', date: 'May 21, 2026', tag: 'MACRO', color: 'text-purple-400 bg-purple-950/60 border-purple-800/40' },
-    { title: 'Earnings Report — NVIDIA', date: 'May 28, 2026', tag: 'EARNINGS', color: 'text-emerald-400 bg-emerald-950/60 border-emerald-800/40' },
-    { title: 'US Non-Farm Payrolls (Jobs Report)', date: 'June 6, 2026', tag: 'EMPLOYMENT', color: 'text-amber-400 bg-amber-950/60 border-amber-800/40' },
-  ];
+  const overviewRefresh = useLiveRefresh(`overview:${selectedPortfolio}`, async signal => {
+    if (!selectedPortfolio) return;
+    const response = await fetch(`/api/v1/dashboard/portfolios/${encodeURIComponent(selectedPortfolio)}/overview`, { signal });
+    if (!response.ok) throw new Error(`Portfolio valuation refresh failed (HTTP ${response.status}). Previous values are retained.`);
+    const data = await response.json(); if (!signal.aborted) setOverviewData(data);
+  });
+  const holdingsRefresh = useLiveRefresh(`holdings:${selectedPortfolio}`, async signal => {
+    if (!selectedPortfolio) return;
+    const response = await fetch(`/api/v1/dashboard/liquidity/portfolio/${encodeURIComponent(selectedPortfolio)}`, { signal });
+    if (!response.ok) throw new Error('Holdings refresh failed. Previous values are retained.');
+    const data = await response.json(); if (!signal.aborted) setLiquidityData(data);
+  }, 120000);
+  const heldSymbols = [...new Set<string>((liquidityData?.portfolio_id === selectedPortfolio ? liquidityData.holdings : []).filter((h: any) => Number(h.position_shares) !== 0).map((h: any) => h.symbol))].sort().join(',');
+  const marketRefresh = useLiveRefresh(`market-watch:${selectedPortfolio}:${heldSymbols}`, async signal => {
+    if (!heldSymbols) { setLiveMarketWatch([]); return; }
+    const response = await fetch(`/api/v1/dashboard/liquidity/market-watch?symbols=${encodeURIComponent(heldSymbols)}`, { signal });
+    if (!response.ok) throw new Error('Market quote refresh failed. Previous quotes are retained.');
+    const data = await response.json(); if (!Array.isArray(data)) throw new Error('Invalid market quote response.');
+    if (!signal.aborted) setLiveMarketWatch(data);
+  });
+
+  // Fetch authoritative events (breaches, risk alerts) from history/events
+  useEffect(() => {
+    fetch('/api/v1/dashboard/history/events?page_size=6')
+      .then((res) => (res.ok ? res.json() : { events: [] }))
+      .then((data) => {
+        if (Array.isArray(data.events) && data.events.length > 0) {
+          const colors: Record<string, string> = {
+            CRITICAL: 'text-negative bg-negative-soft/60 border-negative/20',
+            HIGH: 'text-warning bg-warning-soft/60 border-warning/20',
+            MEDIUM: 'text-brand bg-brand-soft/60 border-brand/20',
+            LOW: 'text-muted bg-subtle border-line-strong/40',
+          };
+          const mapped = data.events.slice(0, 4).map((e: any) => ({
+            title: e.event_title || 'Governance Event',
+            date: e.occurrence_time ? e.occurrence_time.slice(0, 10) : 'Active',
+            tag: (e.severity || e.event_category || 'RISK').toUpperCase(),
+            color: colors[e.severity] || 'text-positive bg-positive-soft/60 border-positive/20',
+          }));
+          setUpcomingEvents(mapped);
+        }
+      })
+      .catch(() => { });
+  }, [selectedPortfolio]);
+
 
   return (
-    <div className="min-h-screen bg-[#080B10] text-slate-100 font-sans flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
-      {/* 1. FinSight Institutional Top Navigation */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#080B10]/95 border-b border-[#181F2C] px-6 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          {/* Brand Logo */}
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveTab('overview')}>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Activity className="w-5 h-5 text-[#080B10] stroke-[2.5]" />
-            </div>
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-              FinSight
-            </span>
-            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              M15 Risk
-            </span>
-          </div>
-
-          {/* Clean Module Tabs */}
-          <nav className="flex items-center gap-1.5 bg-[#0D121C] p-1 rounded-xl border border-[#182030]">
-            {[
-              { id: 'overview', label: 'Executive Dashboard' },
-              { id: 'alerts', label: 'Risk Alerts' },
-              { id: 'liquidity', label: 'Liquidity Analytics' },
-              { id: 'stress', label: 'Stress Testing' },
-              { id: 'providers', label: 'Data Feeds' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#141B26]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        {/* Global Controls & User Profile */}
-        <div className="flex items-center gap-4">
-          {/* Portfolio Selector dropdown directly in header */}
-          <div className="flex items-center gap-2 bg-[#0D121C] border border-[#182030] rounded-xl px-3 py-1.5">
-            <FolderOpen className="w-3.5 h-3.5 text-emerald-400" />
-            <select
-              value={selectedPortfolio}
-              onChange={(e) => setSelectedPortfolio(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-slate-200 focus:outline-none cursor-pointer"
-            >
-              {portfolioList.map((p) => (
-                <option key={p.portfolio_id} value={p.portfolio_id} className="bg-[#0D121C] text-slate-200">
-                  {p.portfolio_name} ({p.portfolio_id})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="relative hidden md:block">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search ticker, ISIN, factor..."
-              className="pl-9 pr-4 py-1.5 bg-[#0D121C] border border-[#182030] rounded-xl text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 w-52 transition-all"
-            />
-          </div>
-
-          <button className="relative p-2 rounded-xl bg-[#0D121C] border border-[#182030] text-slate-400 hover:text-slate-200 hover:border-slate-700 transition">
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#080B10]"></span>
-          </button>
-
-          <div className="flex items-center gap-2.5 pl-2 border-l border-[#182030]">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-emerald-400 p-[1.5px] cursor-pointer">
-              <div className="w-full h-full rounded-full bg-[#101622] flex items-center justify-center font-bold text-xs text-emerald-400">
-                OR
-              </div>
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-semibold text-slate-200 leading-tight">Olivia Rhye</span>
-              <span className="text-[10px] text-emerald-400/90 font-medium">Head of Risk</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* 2. Page Content */}
-      <main className="flex-1 px-6 py-6 max-w-[1600px] w-full mx-auto space-y-6">
-        {/* Sub-pages: Risk Alerts, Liquidity, Stress, Providers */}
+    <>
+      <AppShell view={activeTab} onView={setActiveTab} portfolio={selectedPortfolio} onPortfolio={setSelectedPortfolio}
+        portfolios={portfolioList} onSearch={() => setIsSearchOpen(true)}>
         {activeTab !== 'overview' && (
-          <div className="bg-[#0D121C] border border-[#182030] rounded-2xl p-6 shadow-2xl">
+          <div className="min-w-0">
             <ErrorBoundary fallbackTitle="Module View Error">
-              {activeTab === 'alerts' && <AlertsDashboardPage />}
-              {activeTab === 'liquidity' && <LiquidityDashboardPage />}
-              {activeTab === 'stress' && <StressTestingDashboardPage />}
+              {activeTab === 'alerts' && <AlertsDashboardPage portfolioId={selectedPortfolio} />}
+              {activeTab === 'liquidity' && (
+                <LiquidityDashboardPage
+                  portfolioId={selectedPortfolio}
+                  defaultInstrumentId={selectedTicker || undefined}
+                  onOpenOrderModal={() => setIsOrderModalOpen(true)}
+                  onPortfolioUpdated={data => { setLiquidityData(data); refreshAll(); }}
+                />
+              )}
+              {activeTab === 'stress' && <StressTestingDashboardPage portfolioId={selectedPortfolio} />}
               {activeTab === 'providers' && <ExternalProvidersPage />}
             </ErrorBoundary>
           </div>
         )}
 
-        {/* Executive Dashboard Layout */}
         {activeTab === 'overview' && (
           <>
-            {/* Top Bar: Title & Primary Controls */}
+            {/* Top Bar: Title & Actions */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-1">
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-                  Dashboard Overview
-                  <span className="text-xs font-medium text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50">
-                    Live Session
-                  </span>
+                <h1 className="text-3xl font-semibold text-ink text-balance flex flex-wrap items-center gap-2.5">
+                  Overview
+
                 </h1>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Institutional portfolio performance, asset allocation, and underlying risk metrics.
+                <p className="text-sm text-muted text-pretty mt-2">
+                  A clear view of your portfolio, performance, and risk.
                 </p>
               </div>
 
-              <div className="flex items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <button
+                  type="button"
                   onClick={() => setShowEngineDetails(!showEngineDetails)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition ${
-                    showEngineDetails
-                      ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/20'
-                      : 'bg-[#0D121C] border-[#182030] text-slate-300 hover:border-slate-700'
-                  }`}
+                  className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-colors ${showEngineDetails
+                      ? 'bg-brand text-white border-brand'
+                      : 'bg-surface border-line text-secondary hover:border-line-strong'
+                    }`}
                 >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>{showEngineDetails ? 'Hide Deep Risk Metrics' : 'Detailed Risk Breakdown'}</span>
+                  {showEngineDetails ? 'Hide Deep Risk Metrics' : 'Detailed Risk Breakdown'}
                 </button>
 
-                <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0D121C] border border-[#182030] text-xs font-medium text-slate-300 hover:border-slate-700 transition">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                  <span>May 12 – May 18, 2026</span>
-                  <ChevronDown className="w-3 h-3 text-slate-500" />
-                </button>
+                <span className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-muted"><Calendar className="size-3.5" />{selectedDateRange}</span>
 
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0D121C] border border-[#182030] text-xs font-medium text-slate-300 hover:border-slate-700 transition">
-                  <Share2 className="w-3.5 h-3.5 text-slate-400" />
+                {/* Export Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsExportOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-line text-xs font-medium text-secondary hover:border-line-strong hover:text-ink transition-colors"
+                >
+                  <Share2 className="size-3.5 text-muted" />
                   <span>Export</span>
                 </button>
 
-                <button className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-xs font-bold text-slate-950 hover:brightness-110 shadow-lg shadow-emerald-500/20 transition">
-                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                {/* New Order / Allocation Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsOrderModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-brand text-xs font-semibold text-white hover:bg-brand-hover transition-colors"
+                >
+                  <Plus className="size-3.5 stroke-[3]" />
                   <span>New Order / Allocation</span>
                 </button>
               </div>
             </div>
 
-            {/* Top 4 KPI Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-[#0D121C] border border-[#182030] hover:border-emerald-500/40 transition-all rounded-2xl p-5 shadow-lg flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-400">Total Portfolio Value</span>
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                    <Wallet className="w-4 h-4 text-emerald-400" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="text-2xl font-bold tracking-tight text-white font-mono">$128,750.60</div>
-                  <div className="flex items-center gap-1 mt-1.5 text-xs text-emerald-400 font-medium">
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                    <span>+5.21%</span>
-                    <span className="text-slate-500 ml-1">vs last week</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#0D121C] border border-[#182030] hover:border-cyan-500/40 transition-all rounded-2xl p-5 shadow-lg flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-400">Total Gains</span>
-                  <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-cyan-400" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="text-2xl font-bold tracking-tight text-white font-mono">$12,540.75</div>
-                  <div className="flex items-center gap-1 mt-1.5 text-xs text-emerald-400 font-medium">
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                    <span>+8.75%</span>
-                    <span className="text-slate-500 ml-1">vs last week</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#0D121C] border border-[#182030] hover:border-purple-500/40 transition-all rounded-2xl p-5 shadow-lg flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-400">Total Income</span>
-                  <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-                    <Layers className="w-4 h-4 text-purple-400" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="text-2xl font-bold tracking-tight text-white font-mono">$2,340.50</div>
-                  <div className="flex items-center gap-1 mt-1.5 text-xs text-emerald-400 font-medium">
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                    <span>+3.18%</span>
-                    <span className="text-slate-500 ml-1">vs last week</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#0D121C] border border-[#182030] hover:border-amber-500/40 transition-all rounded-2xl p-5 shadow-lg flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-400">Cash Balance</span>
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                    <Activity className="w-4 h-4 text-amber-400" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="text-2xl font-bold tracking-tight text-white font-mono">$8,954.30</div>
-                  <div className="flex items-center gap-1 mt-1.5 text-xs text-rose-400 font-medium">
-                    <ArrowDownRight className="w-3.5 h-3.5" />
-                    <span>-1.23%</span>
-                    <span className="text-slate-500 ml-1">vs last week</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Section 1: Portfolio Performance & Asset Allocation Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Performance Curve (Col 8) */}
-              <div className="lg:col-span-8 bg-[#0D121C] border border-[#182030] rounded-2xl p-6 shadow-xl flex flex-col justify-between">
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
-                  <div>
-                    <h2 className="text-base font-bold text-white flex items-center gap-2">
-                      Portfolio Performance
-                      <span className="text-[10px] text-slate-500 font-normal">Daily MTM Mark-to-Market</span>
-                    </h2>
-                  </div>
-
-                  <div className="flex items-center bg-[#101622] border border-[#1E293B] rounded-xl p-1 gap-1">
-                    {(['1D', '1W', '1M', '3M', '6M', '1Y', 'All'] as const).map((r) => (
-                      <button
-                        key={r}
-                        onClick={() => setTimeRange(r)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                          timeRange === r
-                            ? 'bg-[#182232] text-emerald-400 shadow-sm'
-                            : 'text-slate-400 hover:text-slate-200'
-                        }`}
-                      >
-                        {r}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* SVG Performance Line Graph */}
-                <div className="relative w-full h-64 mt-2">
-                  <svg className="w-full h-full overflow-visible" viewBox="0 0 800 240" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                      </linearGradient>
-                    </defs>
-
-                    <line x1="0" y1="40" x2="800" y2="40" stroke="#141B26" strokeDasharray="4 4" />
-                    <line x1="0" y1="100" x2="800" y2="100" stroke="#141B26" strokeDasharray="4 4" />
-                    <line x1="0" y1="160" x2="800" y2="160" stroke="#141B26" strokeDasharray="4 4" />
-                    <line x1="0" y1="220" x2="800" y2="220" stroke="#141B26" strokeDasharray="4 4" />
-
-                    <polygon
-                      fill="url(#chartGradient)"
-                      points="
-                        0,200 
-                        60,190 120,185 180,165 240,175 300,150 360,135 
-                        420,140 480,110 540,115 600,90 660,95 720,70 780,60 800,55
-                        800,240 0,240
-                      "
-                    />
-
-                    <polyline
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      points="
-                        0,200 
-                        60,190 120,185 180,165 240,175 300,150 360,135 
-                        420,140 480,110 540,115 600,90 660,95 720,70 780,60 800,55
-                      "
-                    />
-
-                    <circle cx="800" cy="55" r="5" fill="#10b981" className="animate-ping origin-center" />
-                    <circle cx="800" cy="55" r="4" fill="#10b981" stroke="#080B10" strokeWidth="2" />
-                  </svg>
-
-                  <div className="absolute right-4 top-2 bg-[#101622]/95 border border-emerald-500/40 rounded-xl px-3 py-2 shadow-xl backdrop-blur-sm pointer-events-none">
-                    <span className="text-[10px] text-slate-400 block font-medium">May 18, 2026</span>
-                    <span className="text-sm font-bold text-white font-mono">$128,750.60</span>
-                    <span className="text-[11px] text-emerald-400 font-semibold block mt-0.5">↑ +5.21%</span>
-                  </div>
-
-                  <div className="flex justify-between text-[11px] text-slate-500 font-mono mt-3">
-                    <span>Jun 2025</span>
-                    <span>Aug 2025</span>
-                    <span>Oct 2025</span>
-                    <span>Dec 2025</span>
-                    <span>Feb 2026</span>
-                    <span>Apr 2026</span>
-                    <span>May 2026</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Asset Allocation Donut (Col 4) */}
-              <div className="lg:col-span-4 bg-[#0D121C] border border-[#182030] rounded-2xl p-6 shadow-xl flex flex-col justify-between">
-                <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-base font-bold text-white">Asset Allocation</h2>
-                  <span className="text-xs text-slate-400 bg-[#101622] px-2.5 py-1 rounded-lg border border-[#1E293B]">
-                    Multi-Asset
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-center my-3 relative">
-                  <svg className="w-44 h-44 -rotate-90 transform" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="38" stroke="#161F2E" strokeWidth="12" fill="none" />
-                    <circle cx="50" cy="50" r="38" stroke="#10b981" strokeWidth="12" fill="none"
-                      strokeDasharray="109 239" strokeDashoffset="0" />
-                    <circle cx="50" cy="50" r="38" stroke="#06b6d4" strokeWidth="12" fill="none"
-                      strokeDasharray="60 239" strokeDashoffset="-109" />
-                    <circle cx="50" cy="50" r="38" stroke="#a855f7" strokeWidth="12" fill="none"
-                      strokeDasharray="38 239" strokeDashoffset="-169" />
-                    <circle cx="50" cy="50" r="38" stroke="#64748b" strokeWidth="12" fill="none"
-                      strokeDasharray="21 239" strokeDashoffset="-207" />
-                    <circle cx="50" cy="50" r="38" stroke="#f59e0b" strokeWidth="12" fill="none"
-                      strokeDasharray="11 239" strokeDashoffset="-228" />
-                  </svg>
-                  
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-[10px] text-slate-400 uppercase font-medium">Total Value</span>
-                    <span className="text-base font-bold text-white font-mono">$128,750</span>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  {[
-                    { label: 'Stocks', pct: '45.6%', val: '$58,750', color: 'bg-emerald-500' },
-                    { label: 'Bonds', pct: '25.3%', val: '$32,550', color: 'bg-cyan-500' },
-                    { label: 'ETFs', pct: '15.8%', val: '$20,350', color: 'bg-purple-500' },
-                    { label: 'Real Estate', pct: '8.7%', val: '$11,200', color: 'bg-slate-400' },
-                    { label: 'Cash', pct: '4.6%', val: '$5,899', color: 'bg-amber-500' },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between text-xs py-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${item.color}`} />
-                        <span className="text-slate-300 font-medium">{item.label}</span>
-                      </div>
-                      <div className="flex items-center gap-3 font-mono">
-                        <span className="text-slate-400">{item.pct}</span>
-                        <span className="text-slate-200 font-semibold">{item.val}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Section 2: Market Watch Strip */}
-            <div className="bg-[#0D121C] border border-[#182030] rounded-2xl p-4 shadow-xl">
-              <div className="flex items-center justify-between mb-3 px-1">
-                <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                  <Activity className="w-3.5 h-3.5 text-emerald-400" />
-                  Live Market Watch
-                </span>
-                <span className="text-[11px] text-slate-500 font-mono">Real-time Quotes</span>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {marketWatch.map((item) => (
-                  <div
-                    key={item.symbol}
-                    className="bg-[#101622] border border-[#182030] hover:border-slate-700 rounded-xl p-3 flex flex-col justify-between transition cursor-pointer group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-xs font-bold text-white group-hover:text-emerald-400 transition">{item.symbol}</div>
-                        <div className="text-[10px] text-slate-500 truncate max-w-[100px]">{item.name}</div>
-                      </div>
-                      <span className={`text-[11px] font-semibold font-mono ${item.up ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        {item.change}
-                      </span>
-                    </div>
-
-                    <div className="mt-2 text-xs font-bold font-mono text-slate-200">
-                      {item.price}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {(overviewRefresh.error || marketRefresh.error || holdingsRefresh.error) && <p role="status" className="rounded-lg bg-warning-soft p-3 text-xs text-warning">{overviewRefresh.error || marketRefresh.error || holdingsRefresh.error} Data may be stale.</p>}
+            <ExecutivePortfolioLayout overview={overviewData} holdings={liquidityData?.holdings || []} quotes={liveMarketWatch}
+              currentValuation={liquidityData?.portfolio_id === selectedPortfolio ? liquidityData : null} portfolioId={selectedPortfolio} holdingsPending={liquidityData === null} range={timeRange} onRange={setTimeRange}
+              onInstrument={symbol => { setSelectedTicker(symbol); setActiveTab('liquidity'); }} />
 
             {/* Section 3: Recent Transactions | Top Holdings | Upcoming Events */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#0D121C] border border-[#182030] rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="bg-surface border border-line rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-white">Recent Transactions</h3>
-                    <button className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">View All</button>
+                    <h3 className="text-sm font-bold text-ink">Recent Transactions</h3>
+                    <button
+                      type="button"
+                      onClick={() => setIsOrderModalOpen(true)}
+                      className="text-xs font-semibold text-positive hover:text-positive"
+                    >
+                      + Order
+                    </button>
                   </div>
 
                   <div className="space-y-3">
-                    {recentTransactions.map((tx, idx) => (
-                      <div key={idx} className="flex items-center justify-between py-1.5 border-b border-[#141B26] last:border-none">
-                        <div>
-                          <div className="text-xs font-semibold text-slate-200">{tx.title}</div>
-                          <div className="text-[10px] text-slate-500">{tx.subtitle}</div>
-                        </div>
-                        <span className={`text-xs font-bold font-mono ${tx.isNegative ? 'text-slate-300' : 'text-emerald-400'}`}>
-                          {tx.amount}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#0D121C] border border-[#182030] rounded-2xl p-5 shadow-xl flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-white">Top Holdings</h3>
-                    <button className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">View All</button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {topHoldings.map((h) => (
-                      <div key={h.symbol} className="flex items-center justify-between py-1 border-b border-[#141B26] last:border-none">
-                        <div className="flex items-center gap-2.5">
+                    {recentTransactions.length > 0 ? (
+                      recentTransactions.map((tx, idx) => (
+                        <div key={idx} className="flex items-center justify-between py-1.5 border-b border-line last:border-none">
                           <div>
-                            <div className="text-xs font-semibold text-slate-200">{h.name}</div>
-                            <div className="w-24 bg-[#141B26] h-1.5 rounded-full mt-1 overflow-hidden">
-                              <div className={`h-full ${h.bg}`} style={{ width: h.pct }}></div>
-                            </div>
+                            <div className="text-xs font-semibold text-secondary">{tx.title}</div>
+                            <div className="text-xs text-muted">{tx.subtitle}</div>
                           </div>
+                          <span className={`text-xs font-bold font-sans tabular-nums ${tx.isNegative ? 'text-negative' : 'text-positive'}`}>
+                            {tx.amount}
+                          </span>
                         </div>
-
-                        <div className="text-right font-mono">
-                          <div className="text-xs font-bold text-slate-200">{h.notional}</div>
-                          <div className="text-[10px] text-slate-500">{h.pct}</div>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="py-4 text-center text-xs text-muted italic">
+                        No transactions recorded for this portfolio yet. Click '+ Order' to book a trade.
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               </div>
 
-              <div className="bg-[#0D121C] border border-[#182030] rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+              <div className="bg-surface border border-line rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-white">Upcoming Events</h3>
-                    <button className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">Calendar</button>
+                    <h3 className="text-sm font-bold text-ink">Risk & Governance Events</h3>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('alerts')}
+                      className="text-xs font-semibold text-positive hover:text-positive"
+                    >
+                      Alerts Feed
+                    </button>
                   </div>
 
                   <div className="space-y-3">
-                    {upcomingEvents.map((evt, idx) => (
-                      <div key={idx} className="p-3 rounded-xl bg-[#101622] border border-[#182030] flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-[#141B26] text-slate-300">
-                          <Calendar className="w-4 h-4 text-emerald-400" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-slate-200">{evt.title}</span>
-                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${evt.color}`}>
-                              {evt.tag}
-                            </span>
+                    {upcomingEvents.length > 0 ? (
+                      upcomingEvents.map((evt, idx) => (
+                        <div key={idx} className="p-3 rounded-xl bg-canvas border border-line flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-surface text-secondary">
+                            <Calendar className="size-4 text-positive" />
                           </div>
-                          <span className="text-[11px] text-slate-500 block mt-1">{evt.date}</span>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-semibold text-secondary">{evt.title}</span>
+                              <span className={`text-xs font-bold px-1.5 py-0.5 rounded border ${evt.color}`}>
+                                {evt.tag}
+                              </span>
+                            </div>
+                            <span className="text-xs text-muted block mt-1">{evt.date}</span>
+                          </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="py-4 text-center text-xs text-muted italic">
+                        No active risk or limit breach events detected.
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Section 4: Authoritative Risk Breakdown (Collapsible / Toggleable) */}
+            <UpstoxBrokerPanel mode="account" />
+
+            {/* Section 4: Authoritative Risk Breakdown */}
             {showEngineDetails && (
-              <div className="bg-[#0D121C] border border-emerald-500/30 rounded-2xl p-6 shadow-2xl transition-all">
-                <div className="flex items-center justify-between border-b border-[#182030] pb-4 mb-4">
+              <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center justify-between border-b border-line pb-4 mb-4">
                   <div>
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <h3 className="text-base font-bold text-ink flex items-center gap-2">
+                      <ShieldCheck className="size-4 text-positive" />
                       Authoritative Risk Engine — Deep Breakdown
                     </h3>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted">
                       M05.03 Valuation, M06 Exposure Limits, and M07 Market Risk Metrics
                     </p>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setShowEngineDetails(false)}
-                    className="text-xs text-slate-400 hover:text-slate-200 bg-[#101622] px-3 py-1 rounded-lg border border-[#182030]"
+                    className="text-xs text-muted hover:text-secondary bg-canvas px-3 py-1 rounded-lg border border-line"
                   >
                     Close Breakdown
                   </button>
@@ -579,7 +399,237 @@ export const App: React.FC = () => {
             )}
           </>
         )}
-      </main>
-    </div>
+      </AppShell>
+
+      {/* 3. Command / Quick-Finder Palette Modal */}
+      {isSearchOpen && (
+        <ModalSurface open={isSearchOpen} onClose={() => setIsSearchOpen(false)} label="Search portfolios and views">
+          <div
+            className="w-full min-w-0 bg-surface overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Search Header */}
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-line bg-canvas/50">
+              <Search className="size-4 text-muted shrink-0" />
+              <input
+                ref={searchInputRef}
+                aria-label="Search portfolios, views and tickers"
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search portfolios, views, tickers (e.g. 'AAPL', 'stress', 'risk')..."
+                className="w-full bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(false)}
+                aria-label="Close search"
+                className="p-1 rounded-md text-muted hover:text-secondary hover:bg-subtle"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Quick Suggestions & Filtered Results */}
+            <div className="max-h-96 overflow-y-auto p-2 space-y-4">
+              {/* Navigation Views */}
+              <div>
+                <div className="px-2.5 py-1 text-[11px] font-semibold text-muted uppercase ">
+                  Dashboard Views
+                </div>
+                <div className="space-y-0.5 mt-1">
+                  {[
+                    { id: 'overview', label: 'Executive Dashboard', desc: 'Summary NAV, P&L, holdings and market events', icon: Activity },
+                    { id: 'alerts', label: 'Risk Alerts & Breaches', desc: 'Active limit violations, warnings and utilization thresholds', icon: Flame },
+                    { id: 'liquidity', label: 'Liquidity Analytics', desc: 'Holdings depth, liquidation cost, bid-ask spread', icon: SlidersHorizontal },
+                    { id: 'stress', label: 'Stress Testing & Monte Carlo', desc: 'Historical stress shocks, tail quantiles, loss attribution', icon: Layers },
+                    { id: 'providers', label: 'External Data Feeds', desc: 'Market data providers, latency and connection status', icon: FileSpreadsheet },
+                  ]
+                    .filter((item) =>
+                      !searchQuery ||
+                      item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      item.desc.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setActiveTab(item.id as any);
+                            setIsSearchOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-subtle/70 transition-colors group"
+                        >
+                          <div className="p-1.5 rounded-lg bg-subtle text-muted group-hover:text-positive group-hover:bg-brand-hover/10 transition-colors">
+                            <Icon className="size-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-medium text-secondary group-hover:text-ink">
+                              {item.label}
+                            </div>
+                            <div className="text-[11px] text-muted truncate">
+                              {item.desc}
+                            </div>
+                          </div>
+                          <kbd className="text-[10px] text-muted font-sans">Jump</kbd>
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+
+              {/* Portfolios List */}
+              {portfolioList.length > 0 && (
+                <div>
+                  <div className="px-2.5 py-1 text-[11px] font-semibold text-muted uppercase ">
+                    Portfolios & Funds
+                  </div>
+                  <div className="space-y-0.5 mt-1">
+                    {portfolioList
+                      .filter((p) =>
+                        !searchQuery ||
+                        p.portfolio_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        p.portfolio_id.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                      .slice(0, 5)
+                      .map((p) => (
+                        <button
+                          key={p.portfolio_id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedPortfolio(p.portfolio_id);
+                            setIsSearchOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors ${selectedPortfolio === p.portfolio_id
+                              ? 'bg-subtle/90 text-ink'
+                              : 'hover:bg-subtle/50 text-secondary'
+                            }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <FolderOpen className="size-3.5 text-muted" />
+                            <span className="text-xs font-medium">{p.portfolio_name}</span>
+                          </div>
+                          <span className="text-[10px] font-sans text-muted">{p.portfolio_id}</span>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Live Market Stocks & Tickers (via yfinance) */}
+              <div>
+                <div className="flex items-center justify-between px-2.5 py-1 text-[11px] font-semibold text-muted uppercase ">
+                  <span>Global Equities & Tickers</span>
+                  {isSearchingLive && (
+                    <span className="text-[10px] text-positive font-sans ">Searching live market...</span>
+                  )}
+                </div>
+                <div className="space-y-0.5 mt-1">
+                  {/* If user typed a query, display live market search results */}
+                  {searchQuery.trim().length > 0 ? (
+                    liveSearchResults.length > 0 ? (
+                      liveSearchResults.map((t) => (
+                        <button
+                          key={t.symbol}
+                          type="button"
+                          onClick={() => {
+                            setSelectedTicker(t.symbol);
+                            setActiveTab('liquidity');
+                            setIsSearchOpen(false);
+                          }}
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left hover:bg-subtle/70 transition-colors group"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-xs font-bold font-sans text-positive">{t.symbol}</span>
+                            <span className="text-xs text-secondary truncate max-w-[260px]">{t.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] text-muted font-sans">
+                            <span>{t.sector}</span>
+                            <span className="px-1.5 py-0.5 rounded bg-subtle text-muted border border-line-strong/50">{t.exchange}</span>
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      !isSearchingLive && (
+                        <div className="px-3 py-2 text-xs text-muted italic">
+                          No matching live tickers found for "{searchQuery}".
+                        </div>
+                      )
+                    )
+                  ) : (
+                    /* Default popular benchmark assets when search box is empty */
+                    [
+                      { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Information Technology' },
+                      { symbol: 'MSFT', name: 'Microsoft Corp.', sector: 'Software & Cloud' },
+                      { symbol: 'AMZN', name: 'Amazon.com', sector: 'Consumer Discretionary' },
+                      { symbol: 'NVDA', name: 'NVIDIA Corporation', sector: 'Semiconductors' },
+                      { symbol: 'VOO', name: 'Vanguard S&P 500 ETF', sector: 'Broad Index ETF' },
+                      { symbol: 'TSLA', name: 'Tesla, Inc.', sector: 'Automotive / Energy' },
+                      { symbol: 'GOOGL', name: 'Alphabet Inc.', sector: 'Communication Services' },
+                    ].map((t) => (
+                      <button
+                        key={t.symbol}
+                        type="button"
+                        onClick={() => {
+                          setSelectedTicker(t.symbol);
+                          setActiveTab('liquidity');
+                          setIsSearchOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left hover:bg-subtle/70 transition-colors group"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xs font-bold font-sans text-secondary group-hover:text-positive">{t.symbol}</span>
+                          <span className="text-xs text-muted">{t.name}</span>
+                        </div>
+                        <span className="text-[10px] text-muted">{t.sector}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer tips */}
+            <div className="px-4 py-2 border-t border-line bg-canvas/60 flex items-center justify-between text-[11px] text-muted">
+              <span>Press <kbd className="px-1 py-0.5 bg-subtle rounded font-sans text-muted">Esc</kbd> to close</span>
+              <span>Navigate with click or search query</span>
+            </div>
+          </div>
+        </ModalSurface>
+      )}
+
+      {/* Export Institutional Dataset Modal */}
+      <ExportModal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        selectedPortfolio={selectedPortfolio}
+        portfolioList={portfolioList}
+        dateRangeLabel={selectedDateRange}
+      />
+
+      {/* New Order / Allocation & Pre-Trade Risk Modal */}
+      <OrderAllocationModal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        selectedPortfolio={selectedPortfolio}
+        portfolioList={portfolioList}
+        onOrderSuccess={() => {
+          refreshAll();
+          // Re-fetch overview and liquidity data to reflect updated balances/positions
+          if (selectedPortfolio) {
+            fetch(`/api/v1/dashboard/portfolios/${selectedPortfolio}/overview`)
+              .then((res) => (res.ok ? res.json() : null))
+              .then((data) => setOverviewData(data))
+              .catch(() => { });
+            fetch(`/api/v1/dashboard/liquidity/portfolio/${selectedPortfolio}`)
+              .then((res) => (res.ok ? res.json() : null))
+              .then((data) => setLiquidityData(data))
+              .catch(() => { });
+          }
+        }}
+      />
+    </>
   );
 };

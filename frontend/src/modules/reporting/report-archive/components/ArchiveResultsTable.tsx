@@ -18,7 +18,7 @@ export const ArchiveResultsTable: React.FC<Props> = ({
 }) => {
   if (loading) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-12 text-center text-slate-400">
+      <div className="bg-surface border border-line rounded-lg p-12 text-center text-muted">
         Loading historical archive records...
       </div>
     );
@@ -26,25 +26,25 @@ export const ArchiveResultsTable: React.FC<Props> = ({
 
   if (items.length === 0) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-12 text-center text-slate-500">
+      <div className="bg-surface border border-line rounded-lg p-12 text-center text-muted">
         No archived reports matched the search criteria.
       </div>
     );
   }
 
   const getStatusBadge = (status: ArchiveStatus, hasHold: boolean) => {
-    let color = 'bg-slate-800 text-slate-300';
-    if (status === 'AVAILABLE') color = 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40';
-    if (status === 'SUPERSEDED') color = 'bg-amber-950/60 text-amber-400 border border-amber-800/40';
-    if (status === 'RESTATED') color = 'bg-blue-950/60 text-blue-400 border border-blue-800/40';
-    if (status === 'WITHDRAWN') color = 'bg-purple-950/60 text-purple-400 border border-purple-800/40';
-    if (status === 'QUARANTINED') color = 'bg-rose-950/60 text-rose-400 border border-rose-800/40 animate-pulse';
+    let color = 'bg-subtle text-secondary';
+    if (status === 'AVAILABLE') color = 'bg-positive-soft/60 text-positive border border-positive/20';
+    if (status === 'SUPERSEDED') color = 'bg-warning-soft/60 text-warning border border-warning/20';
+    if (status === 'RESTATED') color = 'bg-brand-soft/60 text-brand border border-brand/20';
+    if (status === 'WITHDRAWN') color = 'bg-info-soft/60 text-info border border-info/20';
+    if (status === 'QUARANTINED') color = 'bg-negative-soft/60 text-negative border border-negative/20 ';
 
     return (
       <div className="flex items-center gap-1.5">
         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${color}`}>{status}</span>
         {hasHold && (
-          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40" title="Legal Hold Active">
+          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-warning border border-amber-500/40" title="Legal Hold Active">
             HOLD
           </span>
         )}
@@ -53,10 +53,10 @@ export const ArchiveResultsTable: React.FC<Props> = ({
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden shadow-sm">
+    <div className="bg-surface border border-line rounded-lg overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs text-slate-300">
-          <thead className="bg-slate-800/70 text-slate-400 uppercase font-semibold border-b border-slate-800">
+        <table className="w-full text-left text-xs text-secondary">
+          <thead className="bg-subtle/70 text-muted uppercase font-semibold border-b border-line">
             <tr>
               <th className="py-3 px-4">Archive / Run ID</th>
               <th className="py-3 px-4">Portfolio</th>
@@ -70,51 +70,51 @@ export const ArchiveResultsTable: React.FC<Props> = ({
           </thead>
           <tbody className="divide-y divide-slate-800/60">
             {items.map((row) => (
-              <tr key={row.archive_id} className="hover:bg-slate-800/40 transition">
-                <td className="py-3 px-4 font-mono">
-                  <div className="font-semibold text-cyan-400 cursor-pointer hover:underline" onClick={() => onSelectArchive(row.archive_id)}>
+              <tr key={row.archive_id} className="hover:bg-subtle/40 transition">
+                <td className="py-3 px-4 font-sans">
+                  <div className="font-semibold text-brand cursor-pointer hover:underline" onClick={() => onSelectArchive(row.archive_id)}>
                     {row.archive_id}
                   </div>
-                  <div className="text-[10px] text-slate-500">Run: {row.report_run_id}</div>
+                  <div className="text-[10px] text-muted">Run: {row.report_run_id}</div>
                 </td>
                 <td className="py-3 px-4">
-                  <div className="font-medium text-slate-200">{row.portfolio_id}</div>
-                  <div className="text-[10px] text-slate-500">{row.portfolio_name_snapshot || 'Primary Fund'}</div>
+                  <div className="font-medium text-secondary">{row.portfolio_id}</div>
+                  <div className="text-[10px] text-muted">{row.portfolio_name_snapshot || 'Primary Fund'}</div>
                 </td>
                 <td className="py-3 px-4">
-                  <div className="font-medium text-slate-200">{row.report_title_snapshot}</div>
-                  <div className="text-[10px] text-cyan-400/80">{row.report_type}</div>
+                  <div className="font-medium text-secondary">{row.report_title_snapshot}</div>
+                  <div className="text-[10px] text-brand/80">{row.report_type}</div>
                 </td>
-                <td className="py-3 px-4 font-mono text-[11px] text-slate-400">
+                <td className="py-3 px-4 font-sans text-[11px] text-muted">
                   {new Date(row.period_start).toLocaleDateString()} &rarr; {new Date(row.period_end).toLocaleDateString()}
                 </td>
                 <td className="py-3 px-4 text-center">
-                  <span className="font-bold text-slate-200 bg-slate-800 px-2 py-0.5 rounded text-[11px]">
+                  <span className="font-bold text-secondary bg-subtle px-2 py-0.5 rounded text-[11px]">
                     v{row.version_number}
                   </span>
                 </td>
                 <td className="py-3 px-4">{getStatusBadge(row.status, row.has_active_legal_hold)}</td>
-                <td className="py-3 px-4 text-[11px] text-slate-400 font-mono">
+                <td className="py-3 px-4 text-[11px] text-muted font-sans">
                   {new Date(row.generated_at).toLocaleString()}
                 </td>
                 <td className="py-3 px-4 text-right">
                   <div className="flex justify-end gap-1.5">
                     <button
                       onClick={() => onSelectArchive(row.archive_id)}
-                      className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1 rounded"
+                      className="text-xs bg-subtle hover:bg-hover text-secondary px-2 py-1 rounded"
                     >
                       Detail
                     </button>
                     <button
                       onClick={() => onDownload(row.archive_id, row.artifact?.format)}
                       disabled={row.status === 'QUARANTINED' || row.status === 'EXPIRED'}
-                      className="text-xs bg-cyan-900/40 hover:bg-cyan-800/60 disabled:opacity-40 text-cyan-300 border border-cyan-700/50 px-2 py-1 rounded"
+                      className="text-xs bg-brand-soft/40 hover:bg-brand-hover-soft/60 disabled:opacity-40 text-brand border border-brand/20 px-2 py-1 rounded"
                     >
                       Download
                     </button>
                     <button
                       onClick={() => onVerifyIntegrity(row.archive_id)}
-                      className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 px-1.5 py-1 rounded"
+                      className="text-xs bg-subtle hover:bg-hover text-muted px-1.5 py-1 rounded"
                       title="Verify SHA-256 Hash"
                     >
                       Verify

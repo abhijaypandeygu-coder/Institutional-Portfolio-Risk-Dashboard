@@ -23,6 +23,13 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (initialPortfolioId && initialPortfolioId !== activePortfolioId) {
+      setActivePortfolioId(initialPortfolioId);
+      fetchOverview(initialPortfolioId);
+    }
+  }, [initialPortfolioId]);
+
   // 1. Fetch available portfolios on mount to resolve valid portfolio IDs dynamically
   useEffect(() => {
     let isMounted = true;
@@ -45,7 +52,7 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
     };
     fetchPortfolios();
     return () => { isMounted = false; };
-  }, [initialPortfolioId, apiBaseUrl]);
+  }, [apiBaseUrl]);
 
   const fetchOverview = async (targetId: string) => {
     if (!targetId) return;
@@ -72,8 +79,8 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
 
   if (isLoading && !data) {
     return (
-      <div className="p-8 text-center text-slate-500">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mb-2"></div>
+      <div className="p-8 text-center text-muted">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-line mb-2"></div>
         <p className="text-sm">Loading authoritative portfolio overview...</p>
       </div>
     );
@@ -81,7 +88,7 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
 
   if (error && !data) {
     return (
-      <div className="p-6 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 m-6">
+      <div className="p-6 bg-rose-50 border border-rose-200 rounded-lg text-negative m-6">
         <h3 className="font-semibold text-sm">Failed to Load Portfolio Overview</h3>
         <p className="text-xs mt-1">{error}</p>
         <div className="mt-3 flex gap-2">
@@ -95,7 +102,7 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
             <select
               value={activePortfolioId}
               onChange={(e) => handlePortfolioChange(e.target.value)}
-              className="text-xs border border-gray-300 rounded px-2 py-1 bg-white text-gray-800"
+              className="text-xs border border-line-strong rounded px-2 py-1 bg-white text-ink"
             >
               {availablePortfolios.map((p) => (
                 <option key={p.portfolio_id} value={p.portfolio_id}>
@@ -116,31 +123,31 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* 1. Header with Portfolio Context */}
-      <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white border border-line rounded-lg p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-bold text-slate-900">
+            <h1 className="text-xl font-bold text-ink">
               {data.portfolio.portfolio_name}
             </h1>
-            <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-medium">
+            <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-brand font-medium">
               {data.portfolio.portfolio_type}
             </span>
-            <span className="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">
+            <span className="text-xs px-2 py-0.5 rounded bg-subtle text-secondary font-medium">
               Base: {data.portfolio.base_currency}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            ID: <span className="font-mono">{data.portfolio.portfolio_id}</span> | Strategy:{' '}
+          <p className="text-xs text-muted mt-1">
+            ID: <span className="font-sans">{data.portfolio.portfolio_id}</span> | Strategy:{' '}
             {data.portfolio.strategy} | Benchmark: {data.portfolio.benchmark}
           </p>
         </div>
 
-        <div className="text-right text-xs text-slate-500 flex flex-col items-end gap-1">
+        <div className="text-right text-xs text-muted flex flex-col items-end gap-1">
           {availablePortfolios.length > 0 && (
             <select
               value={activePortfolioId}
               onChange={(e) => handlePortfolioChange(e.target.value)}
-              className="text-xs border border-gray-300 rounded px-2 py-1 bg-white text-gray-800"
+              className="text-xs border border-line-strong rounded px-2 py-1 bg-white text-ink"
             >
               {availablePortfolios.map((p) => (
                 <option key={p.portfolio_id} value={p.portfolio_id}>
@@ -150,7 +157,7 @@ export const PortfolioOverviewPage: React.FC<PortfolioOverviewPageProps> = ({
             </select>
           )}
           <div>Valuation As of: {formatUtcTimestamp(data.total_nav.as_of)}</div>
-          <div className="text-[11px] text-slate-400">Generated: {formatUtcTimestamp(data.generated_at)}</div>
+          <div className="text-[11px] text-muted">Generated: {formatUtcTimestamp(data.generated_at)}</div>
         </div>
       </div>
 

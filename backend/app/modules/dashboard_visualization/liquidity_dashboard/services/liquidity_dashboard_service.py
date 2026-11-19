@@ -20,8 +20,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, or_, desc
 
 from backend.app.modules.instrument_reference_data.instrument_master.models import Instrument
-from backend.app.modules.portfolio_management.position_management.models import PositionBook, PositionSnapshot
+from backend.app.modules.portfolio_management.portfolio_creation.models import Portfolio
+from .presentation import market_context, volume_context, native_currency
+from backend.app.modules.portfolio_management.position_management.models import PositionBook, PositionSnapshot, PositionStatus
 from backend.app.modules.portfolio_management.position_valuation.models import PositionValuation
+from backend.app.modules.portfolio_management.portfolio_history.models import PortfolioBookSnapshot
 from backend.app.modules.market_microstructure.bid_ask_spread.models import SpreadObservation
 from backend.app.modules.market_microstructure.order_book_depth.models import (
     OrderBookDepthSnapshot,
@@ -84,11 +87,65 @@ class LiquidityDashboardService:
 
     def __init__(self, db: AsyncSession):
         self.db = db
+        self._quotes = {}
+        self._scores = {}
+        self._contexts = {}
+
+    async def _latest_valuations(self, portfolio_id):
+        rows = (await self.db.execute(select(PositionValuation).where(
+            PositionValuation.portfolio_id == portfolio_id
+        ).order_by(desc(PositionValuation.calculated_at), desc(PositionValuation.id)))).scalars().all()
+        latest = {}
+        closed = (await self.db.execute(select(PositionBook).where(PositionBook.portfolio_id == portfolio_id, PositionBook.position_status == PositionStatus.CLOSED))).scalars().all()
+        closed_keys = {(b.account_id, b.instrument_id, b.listing_id) for b in closed}
+        for row in rows:
+            if (row.account_id, row.instrument_id, row.listing_id) in closed_keys:
+                continue
+            latest.setdefault((row.account_id, row.instrument_id, row.listing_id, row.position_side), row)
+        return list(latest.values())
 
     # ---------------------------------------------------------------------------
     # 1. Spread Intelligence & Quotes
     # ---------------------------------------------------------------------------
     async def get_current_quote(self, instrument_id: str) -> CurrentQuoteItem:
+        if instrument_id not in self._quotes:
+            self._quotes[instrument_id] = await self._read_current_quote(instrument_id)
+        return self._quotes[instrument_id]
+
+    async def get_market_context(self, instrument_id: str) -> dict:
+        if instrument_id not in self._contexts:
+            quote = await self.get_current_quote(instrument_id)
+            self._contexts[instrument_id] = await market_context(self.db, instrument_id, quote.symbol)
+        return self._contexts[instrument_id]
+
+    async def get_depth_history(self, instrument_id: str, levels: int = 5, hours: int = 24) -> dict:
+        snapshots = (await self.db.execute(select(OrderBookDepthSnapshot).where(
+            OrderBookDepthSnapshot.instrument_id == instrument_id,
+            OrderBookDepthSnapshot.event_timestamp >= utc_now() - timedelta(hours=hours),
+            OrderBookDepthSnapshot.depth_quality_status.in_(["VALID", "ELIGIBLE"]),
+        ).order_by(desc(OrderBookDepthSnapshot.event_timestamp)).limit(500))).scalars().all()
+        # Explicit test/demo sources must never appear as observed market history.
+        snapshots = [s for s in snapshots if not any(t in (s.source_feed_id or "").upper() for t in ("SIMULATED", "DEMO", "TEST"))]
+        identifiers = [s.depth_snapshot_id for s in snapshots]
+        rows = (await self.db.execute(select(OrderBookDepthLevel).where(
+            OrderBookDepthLevel.depth_snapshot_id.in_(identifiers),
+            OrderBookDepthLevel.level_index <= levels,
+        ))).scalars().all() if identifiers else []
+        sums = {}
+        for row in rows:
+            side = "bid" if row.side == "BID" else "ask" if row.side == "ASK" else None
+            if side:
+                entry = sums.setdefault(row.depth_snapshot_id, {"bid": Decimal(0), "ask": Decimal(0)})
+                entry[side] += row.displayed_notional
+        quote = await self.get_current_quote(instrument_id)
+        return {"instrument_id": instrument_id, "levels": levels, "currency": quote.currency,
+                "source": "Recorded eligible depth snapshots", "points": [
+                    {"timestamp": to_utc(s.event_timestamp).isoformat(),
+                     "bid": float(sums[s.depth_snapshot_id]["bid"]), "ask": float(sums[s.depth_snapshot_id]["ask"])}
+                    for s in reversed(snapshots) if s.depth_snapshot_id in sums
+                ]}
+
+    async def _read_current_quote(self, instrument_id: str) -> CurrentQuoteItem:
         """
         Retrieves the latest quote & spread metrics from M09.01 SpreadObservation or falls back gracefully.
         Detects locked (bid == ask) and crossed (bid > ask) books.
@@ -121,10 +178,11 @@ class LiquidityDashboardService:
                     spread_abs=live["spread_abs"],
                     spread_rel=live["spread_rel"],
                     spread_bps=live["spread_bps"],
-                    spread_in_ticks=Decimal("1.0"),
-                    tick_size=Decimal("0.01"),
+                    spread_in_ticks=None,
+                    tick_size=None,
                     quote_condition=live["quote_condition"],
                     observation_timestamp=live["observation_timestamp"],
+                    source_timestamp=live.get("source_timestamp"), timestamp_basis=live.get("timestamp_basis", "Unavailable"), source_kind=live.get("source_kind", "UNKNOWN"),
                     venue=live["venue"],
                     currency=live.get("currency", "USD"),
                 )
@@ -174,6 +232,7 @@ class LiquidityDashboardService:
             bid_timestamp=obs.bid_timestamp,
             ask_timestamp=obs.ask_timestamp,
             observation_timestamp=obs.book_timestamp,
+            source_timestamp=obs.book_timestamp, timestamp_basis="Recorded quote book timestamp", source_kind="RECORDED",
             venue=obs.venue or "PRIMARY",
             currency=curr,
         )
@@ -224,16 +283,7 @@ class LiquidityDashboardService:
         min_bps: Optional[Decimal] = min(bps_values) if bps_values else None
         max_bps: Optional[Decimal] = max(bps_values) if bps_values else None
 
-        # Fallback to yfinance historical series if no database high-frequency observations exist
-        if not observations or not bps_values:
-            symbol_to_use = quote.symbol or instrument_id
-            y_hist = await YFinanceMarketDataAdapter.get_historical_spread_series(symbol_to_use, lookback_days=lookback_days)
-            if y_hist:
-                avg_bps = y_hist["avg_bps"]
-                min_bps = y_hist["min_bps"]
-                max_bps = y_hist["max_bps"]
-                history_points = [HistoricalSpreadPoint(**pt) for pt in y_hist["points"]]
-                bps_values = y_hist["bps_values"]
+        # Daily OHLC ranges are not historical bid/ask spreads; absent observations stay unavailable.
 
         percentile = None
         if quote.spread_bps is not None and bps_values:
@@ -315,7 +365,7 @@ class LiquidityDashboardService:
                     total_ask_notional=total_ask_notional,
                     depth_imbalance=imbalance,
                     imbalance_status="BALANCED",
-                    is_stale=False,
+                    is_stale=True, currency=live_depth.get("currency"), venue="SIMULATED", quality_status="SIMULATED", source_kind="SIMULATED",
                 )
 
             return OrderBookDepthLadder(
@@ -405,13 +455,32 @@ class LiquidityDashboardService:
             cumulative_ask_notional=cum_ask_notional,
             depth_imbalance=imbalance,
             imbalance_status=imbalance_status,
-            is_stale=is_stale,
+            is_stale=is_stale, currency=native_currency(symbol), venue=snapshot.venue,
+            source_timestamp=snapshot.event_timestamp,
+            quality_status=snapshot.depth_quality_status, source_kind="RECORDED",
+            is_locked_crossed=(snapshot.best_bid_price >= snapshot.best_ask_price) if snapshot.best_bid_price is not None and snapshot.best_ask_price is not None else None,
         )
 
     # ---------------------------------------------------------------------------
     # 3. Composite Liquidity Score & Component Breakdown
     # ---------------------------------------------------------------------------
     async def get_instrument_liquidity_score(self, instrument_id: str) -> InstrumentLiquidityScore:
+        if instrument_id not in self._scores:
+            score = await self._read_instrument_liquidity_score(instrument_id)
+            quote = await self.get_current_quote(instrument_id)
+            currency = quote.currency or native_currency(quote.symbol)
+            volume = await volume_context(self.db, instrument_id, quote.symbol, currency)
+            score.adv_shares_20d = volume['adv_shares']
+            score.adtv_native_20d = volume['adtv_native']
+            score.adtv_usd_20d = volume['adtv_native'] if currency == 'USD' else None
+            score.currency = currency
+            score.volume_observations = volume['observation_count']
+            score.volume_source = volume['source']
+            score.volume_as_of = volume['as_of']
+            self._scores[instrument_id] = score
+        return self._scores[instrument_id]
+
+    async def _read_instrument_liquidity_score(self, instrument_id: str) -> InstrumentLiquidityScore:
         """
         Retrieves the latest authoritative composite liquidity score (M09.03) and decomposes its subscores.
         """
@@ -454,23 +523,9 @@ class LiquidityDashboardService:
             spread_bps_float = float(quote.spread_bps) if quote and quote.spread_bps is not None else 25.0
             price_float = float(quote.mid_price) if quote and quote.mid_price is not None else 150.0
 
-            # Derive real volume and turnover from yfinance if available
-            adv_float = 25000000.0
-            adtv_float = adv_float * price_float
-            try:
-                import yfinance as yf
-                t_info = yf.Ticker(symbol).info
-                v_cand = t_info.get("averageVolume") or t_info.get("regularMarketVolume")
-                if v_cand and float(v_cand) > 0:
-                    adv_float = float(v_cand)
-                    adtv_float = adv_float * price_float
-            except Exception:
-                pass
-
-            if vol_agg and vol_agg.traded_volume is not None:
-                adv_float = float(vol_agg.traded_volume)
-            if to_agg and to_agg.traded_turnover is not None:
-                adtv_float = float(to_agg.traded_turnover)
+            volume_info = await volume_context(self.db, instrument_id, symbol, quote.currency or native_currency(symbol))
+            adv_float = float(volume_info['adv_shares'] or 0)
+            adtv_float = float(volume_info['adtv_native'] or 0)
 
             # Mathematical scoring functions (0 - 100)
             # Lower spread is better
@@ -524,7 +579,7 @@ class LiquidityDashboardService:
                 adv_shares_20d=Decimal(str(round(adv_float, 2))),
                 adtv_usd_20d=Decimal(str(round(adtv_float, 2))),
                 turnover_ratio=Decimal("0.025"),
-                data_quality_coverage=Decimal("1.0"),
+                data_quality_coverage=Decimal("1.0") if volume_info["observation_count"] >= 20 else Decimal("0.5") if volume_info["observation_count"] else Decimal("0"),
                 calculated_at=utc_now(),
             )
 
@@ -603,29 +658,21 @@ class LiquidityDashboardService:
         inst = inst_res.scalar_one_or_none()
         symbol = inst.short_name if inst and hasattr(inst, "short_name") and inst.short_name else (inst.canonical_name if inst and hasattr(inst, "canonical_name") and inst.canonical_name else instrument_id)
 
-        # Look up position in portfolio
+        quote = await self.get_current_quote(instrument_id)
+        cost_currency = quote.currency or native_currency(symbol)
+        context = await self.get_market_context(instrument_id)
+        session_minutes = Decimal(str(context['session_minutes']))
         pos_shares = Decimal("0")
         pos_notional = Decimal("0")
+        is_member = False
         if portfolio_id:
-            pos_stmt = (
-                select(PositionValuation)
-                .where(
-                    and_(
-                        PositionValuation.portfolio_id == portfolio_id,
-                        or_(
-                            PositionValuation.instrument_id == instrument_id,
-                            PositionValuation.instrument_id == symbol,
-                        ),
-                    )
-                )
-                .order_by(desc(PositionValuation.calculated_at))
-                .limit(1)
-            )
-            pos_res = await self.db.execute(pos_stmt)
-            pos_val = pos_res.scalar_one_or_none()
-            if pos_val:
-                pos_shares = pos_val.signed_quantity
-                pos_notional = abs(pos_val.signed_market_value_base)
+            vals = [v for v in await self._latest_valuations(portfolio_id) if v.instrument_id in (instrument_id, symbol)]
+            if vals:
+                is_member = True
+                pos_shares = sum((v.signed_quantity for v in vals), Decimal(0))
+                pos_notional = abs(sum((v.signed_market_value_base for v in vals), Decimal(0)))
+                portfolio = (await self.db.execute(select(Portfolio).where(Portfolio.portfolio_id == portfolio_id))).scalar_one_or_none()
+                cost_currency = portfolio.base_currency if portfolio else cost_currency
             else:
                 # Query authoritative PositionBook and latest PositionSnapshot
                 book_stmt = (
@@ -633,6 +680,7 @@ class LiquidityDashboardService:
                     .where(
                         and_(
                             PositionBook.portfolio_id == portfolio_id,
+                            PositionBook.position_status != PositionStatus.CLOSED,
                             or_(
                                 PositionBook.instrument_id == instrument_id,
                                 PositionBook.instrument_id == symbol,
@@ -644,6 +692,7 @@ class LiquidityDashboardService:
                 book_res = await self.db.execute(book_stmt)
                 book = book_res.scalar_one_or_none()
                 if book:
+                    is_member = True
                     snap_stmt = (
                         select(PositionSnapshot)
                         .where(PositionSnapshot.position_id == book.position_id)
@@ -655,11 +704,11 @@ class LiquidityDashboardService:
                     if snap and snap.net_signed_quantity is not None:
                         pos_shares = snap.net_signed_quantity
                     else:
-                        pos_shares = Decimal("100.0")
+                        pos_shares = Decimal("0")
                     
                     # Compute realistic notional using live quote or price
                     quote = await self.get_current_quote(instrument_id)
-                    price = quote.mid_price or Decimal("150.0")
+                    price = quote.mid_price or Decimal("0")
                     pos_notional = abs(pos_shares * price)
 
         # Determine direction
@@ -679,16 +728,25 @@ class LiquidityDashboardService:
 
         # Get current quote for baseline spread
         quote = await self.get_current_quote(instrument_id)
-        half_spread_bps = (quote.spread_bps / Decimal("2.0")) if quote.spread_bps else Decimal("2.5")
+        half_spread_bps = (quote.spread_bps / Decimal("2.0")) if quote.spread_bps is not None else Decimal("2.5")
 
-        # Assume ADV in shares for capacity simulation (or default 250,000 shares)
+        # Use observed average daily volume for execution capacity.
         score_info = await self.get_instrument_liquidity_score(instrument_id)
-        adv_shares = score_info.adv_shares_20d or Decimal("250000.0")
+        adv_shares = score_info.adv_shares_20d
 
         # Standard institutional percentage reduction targets
         targets = [Decimal("0.10"), Decimal("0.25"), Decimal("0.50"), Decimal("0.75"), Decimal("0.90"), Decimal("1.00")]
         scenarios: List[TargetLiquidationScenario] = []
 
+        if abs_shares > 0 and (adv_shares is None or adv_shares <= 0):
+            return InstrumentLiquidationProfile(
+                instrument_id=instrument_id, symbol=symbol, current_position_shares=pos_shares,
+                current_position_notional=pos_notional, position_direction=position_direction,
+                liquidation_direction=liquidation_direction, base_participation_rate=participation_rate,
+                currency=cost_currency, is_portfolio_holding=is_member, session_minutes=session_minutes,
+                calendar_description=f"{context['exchange']} · {context['regular_hours']} {context['timezone']} · {context['calendar_basis']}",
+                model_status="INSUFFICIENT_ADV", calculated_at=utc_now(), scenarios=[],
+            )
         if abs_shares == Decimal("0"):
             # When position is FLAT, scenario costs and horizon are zero
             for tgt in targets:
@@ -719,7 +777,7 @@ class LiquidityDashboardService:
                 # Participation execution capacity: ADV * participation_rate per day (375 trading minutes per standard session)
                 daily_capacity_shares = adv_shares * participation_rate
                 trading_days = (tgt_shares / daily_capacity_shares) if daily_capacity_shares > Decimal("0") else Decimal("1.0")
-                raw_duration_minutes = trading_days * Decimal("375.0")
+                raw_duration_minutes = trading_days * session_minutes
                 duration_minutes = raw_duration_minutes.quantize(Decimal("0.1")) if raw_duration_minutes >= Decimal("0.1") else Decimal("0.1")
                 capacity_pct = ((tgt_shares / adv_shares) * Decimal("100.0")).quantize(Decimal("0.01"))
 
@@ -753,7 +811,7 @@ class LiquidityDashboardService:
                         total_cost_bps=total_cost_bps,
                         total_cost_usd=total_cost_usd,
                         estimated_duration_minutes=duration_minutes,
-                        estimated_trading_days=trading_days.quantize(Decimal("0.01")),
+                        estimated_trading_days=trading_days.quantize(Decimal("0.00000001")),
                         capacity_exhaustion_pct=capacity_pct,
                         risk_haircut_bps=(total_cost_bps * Decimal("1.25")).quantize(Decimal("0.01")),
                     )
@@ -767,37 +825,42 @@ class LiquidityDashboardService:
             position_direction=position_direction,
             liquidation_direction=liquidation_direction,
             base_participation_rate=participation_rate,
-            scenarios=scenarios,
+            currency=cost_currency, is_portfolio_holding=is_member, session_minutes=session_minutes,
+            calendar_description=f"{context['exchange']} · {context['regular_hours']} {context['timezone']} · {context['calendar_basis']}",
+            model_status="ESTIMATE", calculated_at=utc_now(), scenarios=scenarios,
         )
 
     # ---------------------------------------------------------------------------
     # 5. Portfolio Liquidity Overview & Concentration
     # ---------------------------------------------------------------------------
     async def get_portfolio_liquidity_overview(
-        self, portfolio_id: str
+        self, portfolio_id: str, participation_rate: Decimal = Decimal("0.10")
     ) -> PortfolioLiquidityDashboardResponse:
         """
         Consolidates portfolio holdings with individual spread, score, depth imbalance,
         and liquidation costs, producing weighted portfolio summaries.
         """
         # Fetch current active positions from valuations or books
-        val_stmt = (
-            select(PositionValuation)
-            .where(PositionValuation.portfolio_id == portfolio_id)
-        )
-        val_res = await self.db.execute(val_stmt)
-        valuations = val_res.scalars().all()
-
+        valuations = await self._latest_valuations(portfolio_id)
+        portfolio = (await self.db.execute(select(Portfolio).where(Portfolio.portfolio_id == portfolio_id))).scalar_one_or_none()
+        base_currency = portfolio.base_currency if portfolio else "USD"
+        authoritative_nav = (await self.db.execute(select(PortfolioBookSnapshot).where(
+            PortfolioBookSnapshot.portfolio_id == portfolio_id
+        ).order_by(desc(PortfolioBookSnapshot.effective_as_of)).limit(1))).scalar_one_or_none()
+        costs_complete = True
         total_nav = Decimal("0")
         holdings: List[HoldingLiquiditySummary] = []
 
         instrument_list: List[Tuple[str, Decimal]] = []
         if valuations:
-            instrument_list = [(v.instrument_id, v.signed_quantity) for v in valuations if v.signed_quantity != Decimal("0")]
+            quantities = {}
+            for v in valuations:
+                quantities[v.instrument_id] = quantities.get(v.instrument_id, Decimal(0)) + v.signed_quantity
+            instrument_list = [(i, q) for i, q in quantities.items() if q != 0]
         else:
             pos_stmt = (
                 select(PositionBook)
-                .where(PositionBook.portfolio_id == portfolio_id)
+                .where(PositionBook.portfolio_id == portfolio_id, PositionBook.position_status != PositionStatus.CLOSED)
             )
             pos_res = await self.db.execute(pos_stmt)
             positions = pos_res.scalars().all()
@@ -810,15 +873,8 @@ class LiquidityDashboardService:
                 )
                 snap_res = await self.db.execute(snap_stmt)
                 snap = snap_res.scalar_one_or_none()
-                real_qty = snap.net_signed_quantity if (snap and snap.net_signed_quantity is not None) else Decimal("100.0")
+                real_qty = snap.net_signed_quantity if (snap and snap.net_signed_quantity is not None) else Decimal("0")
                 instrument_list.append((p.instrument_id, real_qty))
-
-        if not instrument_list:
-            # Fallback to standard universe instruments
-            inst_stmt = select(Instrument).limit(5)
-            inst_res = await self.db.execute(inst_stmt)
-            sample_insts = inst_res.scalars().all()
-            instrument_list = [(inst.instrument_id, Decimal("100.0")) for inst in sample_insts]
 
         # Calculate valuations and holdings summaries
         for inst_id, qty in instrument_list:
@@ -831,13 +887,27 @@ class LiquidityDashboardService:
             quote = await self.get_current_quote(inst_id)
             score_info = await self.get_instrument_liquidity_score(inst_id)
             depth_info = await self.get_order_book_depth_ladder(inst_id, levels_count=5)
-            liq_profile = await self.get_instrument_liquidation_profile(inst_id, portfolio_id=portfolio_id)
+            liq_profile = await self.get_instrument_liquidation_profile(inst_id, portfolio_id=portfolio_id, participation_rate=participation_rate)
 
             full_liq = liq_profile.scenarios[-1] if liq_profile.scenarios else None
-            notional = full_liq.notional_value if full_liq else (abs(qty) * Decimal("100.0"))
+            notional = liq_profile.current_position_notional if liq_profile.currency == base_currency else Decimal(0)
+            if not full_liq or liq_profile.currency != base_currency:
+                costs_complete = False
+            if liq_profile.currency != base_currency:
+                full_liq = None
             total_nav += notional
 
             pos_dir = "LONG" if qty > Decimal("0") else ("SHORT" if qty < Decimal("0") else "FLAT")
+
+            # Determine market region: Indian vs US vs Other Global
+            market_region = "OTHER_GLOBAL"
+            sym_upper = symbol.upper()
+            if sym_upper.endswith(".NS") or sym_upper.endswith(".BO") or sym_upper in ("RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK", "SBIN", "BHARTIARTL", "KOTAKBANK", "ITC", "LT"):
+                market_region = "INDIAN_MARKET"
+            elif any(sym_upper == us_sym or sym_upper.startswith(us_sym + ".") for us_sym in ("AAPL", "MSFT", "NVDA", "AMZN", "TSLA", "GOOGL", "GOOG", "META", "JPM", "SPY", "QQQ", "VOO", "IWM")):
+                market_region = "US_MARKET"
+            elif not "." in sym_upper:
+                market_region = "US_MARKET"
 
             holdings.append(
                 HoldingLiquiditySummary(
@@ -856,11 +926,18 @@ class LiquidityDashboardService:
                     full_liquidation_cost_bps=full_liq.total_cost_bps if full_liq else None,
                     full_liquidation_cost_usd=full_liq.total_cost_usd if full_liq else None,
                     full_liquidation_days=full_liq.estimated_trading_days if full_liq else None,
+                    full_liquidation_minutes=full_liq.estimated_duration_minutes if full_liq else None,
+                    calendar_description=liq_profile.calendar_description,
+                    market_region=market_region,
                 )
             )
 
-        if total_nav == Decimal("0"):
-            total_nav = Decimal("1.0")
+        weight_basis = "Absolute position value; NAV unavailable"
+        if authoritative_nav and authoritative_nav.total_nav_base > 0:
+            total_nav = authoritative_nav.total_nav_base
+            weight_basis = "Portfolio NAV"
+        # Keep zero NAV as unavailable instead of inventing a one-unit portfolio.
+
 
         # Compute weights and weighted portfolio averages
         weighted_score = Decimal("0")
@@ -872,7 +949,7 @@ class LiquidityDashboardService:
         severe_imbalance_count = 0
 
         for h in holdings:
-            w = (h.position_notional / total_nav) * Decimal("100.0")
+            w = (h.position_notional / total_nav) * Decimal("100.0") if total_nav > 0 else Decimal(0)
             h.weight_pct = w.quantize(Decimal("0.01"))
 
             if h.composite_score is not None:
@@ -893,8 +970,8 @@ class LiquidityDashboardService:
             if h.depth_imbalance is not None and abs(h.depth_imbalance) > Decimal("0.5"):
                 severe_imbalance_count += 1
 
-        low_liq_pct = ((low_liquidity_nav / total_nav) * Decimal("100.0")).quantize(Decimal("0.01"))
-        portfolio_liq_cost_bps = ((total_liq_cost_usd / total_nav) * Decimal("10000.0")).quantize(Decimal("0.01"))
+        low_liq_pct = ((low_liquidity_nav / total_nav) * Decimal("100.0")).quantize(Decimal("0.01")) if total_nav > 0 else Decimal(0)
+        portfolio_liq_cost_bps = ((total_liq_cost_usd / total_nav) * Decimal("10000.0")).quantize(Decimal("0.01")) if total_nav > 0 else Decimal(0)
 
         return PortfolioLiquidityDashboardResponse(
             portfolio_id=portfolio_id,
@@ -909,7 +986,10 @@ class LiquidityDashboardService:
             low_liquidity_capital_pct=low_liq_pct,
             locked_or_crossed_instruments_count=locked_crossed_count,
             severe_imbalance_count=severe_imbalance_count,
-            holdings=holdings,
+            holdings=holdings, reporting_currency=base_currency, participation_rate=participation_rate,
+            max_duration_minutes=max((h.full_liquidation_minutes or Decimal(0) for h in holdings), default=Decimal(0)),
+            calendar_description="Instrument-specific sessions; see each holding", costs_complete=costs_complete,
+            weight_basis=weight_basis,
         )
 
     # ---------------------------------------------------------------------------

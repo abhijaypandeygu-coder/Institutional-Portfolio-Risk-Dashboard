@@ -105,6 +105,16 @@ async def get_monte_carlo_distribution(
     return await svc.get_monte_carlo_distribution(calculation_id=calculation_id)
 
 
+@router.post("/simulation/run-visualizer", response_model=MonteCarloDistributionResponse)
+async def run_portfolio_visualizer_simulation(
+    config: dict = Body(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """Executes interactive Portfolio Visualizer Monte Carlo simulation model."""
+    svc = StressDashboardService(db)
+    return await svc.run_portfolio_visualizer_simulation(config=config)
+
+
 # ---------------------------------------------------------------------------
 # 4. Scenario Comparison
 # ---------------------------------------------------------------------------

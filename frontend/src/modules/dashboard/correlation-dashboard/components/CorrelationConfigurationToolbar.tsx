@@ -42,16 +42,16 @@ export const CorrelationConfigurationToolbar: React.FC<CorrelationConfigurationT
   isLoading,
 }) => {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-6 shadow-sm">
+    <div className="bg-surface border border-line rounded-lg p-4 mb-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Left: Universe, Lookback, Frequency */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-400 font-semibold uppercase">Universe:</label>
+            <label className="text-xs text-muted font-semibold uppercase">Universe:</label>
             <select
               value={universeType}
               onChange={(e) => onUniverseTypeChange(e.target.value as CorrelationUniverseType)}
-              className="bg-slate-800 border border-slate-700 text-xs rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+              className="bg-subtle border border-line-strong text-xs rounded px-2.5 py-1.5 text-secondary focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
             >
               <option value="PORTFOLIO_HOLDINGS">Portfolio Open Holdings</option>
               <option value="CUSTOM_SECURITIES">Selected Custom Securities</option>
@@ -60,11 +60,11 @@ export const CorrelationConfigurationToolbar: React.FC<CorrelationConfigurationT
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-400 font-semibold uppercase">Lookback:</label>
+            <label className="text-xs text-muted font-semibold uppercase">Lookback:</label>
             <select
               value={lookbackDays}
               onChange={(e) => onLookbackDaysChange(Number(e.target.value))}
-              className="bg-slate-800 border border-slate-700 text-xs rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+              className="bg-subtle border border-line-strong text-xs rounded px-2.5 py-1.5 text-secondary focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
             >
               <option value={15}>15 Trading Days (Short)</option>
               <option value={30}>30 Trading Days (1 Mo)</option>
@@ -76,11 +76,11 @@ export const CorrelationConfigurationToolbar: React.FC<CorrelationConfigurationT
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-400 font-semibold uppercase">Freq:</label>
+            <label className="text-xs text-muted font-semibold uppercase">Freq:</label>
             <select
               value={frequency}
               onChange={(e) => onFrequencyChange(e.target.value as CorrelationSamplingFrequency)}
-              className="bg-slate-800 border border-slate-700 text-xs rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+              className="bg-subtle border border-line-strong text-xs rounded px-2.5 py-1.5 text-secondary focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
             >
               <option value="DAILY">Daily Close</option>
               <option value="WEEKLY">Weekly Close</option>
@@ -89,11 +89,11 @@ export const CorrelationConfigurationToolbar: React.FC<CorrelationConfigurationT
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-400 font-semibold uppercase">Method:</label>
+            <label className="text-xs text-muted font-semibold uppercase">Method:</label>
             <select
               value={estimator}
               onChange={(e) => onEstimatorChange(e.target.value as CorrelationEstimatorType)}
-              className="bg-slate-800 border border-slate-700 text-xs rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+              className="bg-subtle border border-line-strong text-xs rounded px-2.5 py-1.5 text-secondary focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
             >
               <option value="PEARSON">Pearson (Standard Linear)</option>
               <option value="SPEARMAN">Spearman (Rank Correlation)</option>
@@ -102,11 +102,11 @@ export const CorrelationConfigurationToolbar: React.FC<CorrelationConfigurationT
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-400 font-semibold uppercase">Order:</label>
+            <label className="text-xs text-muted font-semibold uppercase">Order:</label>
             <select
               value={sortOrder}
               onChange={(e) => onSortOrderChange(e.target.value as CorrelationMatrixSortOrder)}
-              className="bg-slate-800 border border-slate-700 text-xs rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+              className="bg-subtle border border-line-strong text-xs rounded px-2.5 py-1.5 text-secondary focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
             >
               <option value="ORIGINAL">Original Universe Order</option>
               <option value="ALPHABETICAL">Alphabetical</option>
@@ -123,8 +123,8 @@ export const CorrelationConfigurationToolbar: React.FC<CorrelationConfigurationT
             onClick={onToggleCompareMode}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
               isCompareMode
-                ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
-                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                ? 'bg-amber-600 text-ink border-amber-500 shadow-sm'
+                : 'bg-subtle text-secondary border-line-strong hover:bg-hover'
             }`}
           >
             {isCompareMode ? 'Exit Period Comparison' : 'Compare Previous Period'}
@@ -134,7 +134,7 @@ export const CorrelationConfigurationToolbar: React.FC<CorrelationConfigurationT
             type="button"
             onClick={onRefresh}
             disabled={isLoading}
-            className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
           >
             {isLoading ? (
               <>

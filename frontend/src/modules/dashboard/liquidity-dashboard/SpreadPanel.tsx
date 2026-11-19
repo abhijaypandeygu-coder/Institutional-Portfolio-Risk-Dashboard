@@ -20,7 +20,7 @@ export const SpreadPanel: React.FC<SpreadPanelProps> = ({
 }) => {
   if (!quote) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 text-slate-400 text-sm">
+      <div className="bg-surface border border-line rounded-lg p-5 text-muted text-sm">
         No active quote selected.
       </div>
     );
@@ -29,17 +29,26 @@ export const SpreadPanel: React.FC<SpreadPanelProps> = ({
   const getConditionBadge = (condition: string) => {
     switch (condition) {
       case 'NORMAL':
-        return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">NORMAL</span>;
+        return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-positive-soft text-positive border border-positive/20">NORMAL</span>;
       case 'WIDE':
-        return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-amber-950 text-amber-400 border border-amber-800">WIDE SPREAD</span>;
+        return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-warning-soft text-warning border border-warning/20">WIDE SPREAD</span>;
       case 'LOCKED':
-        return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-purple-950 text-purple-400 border border-purple-800">LOCKED (BID=ASK)</span>;
+        return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-info-soft text-info border border-info/20">LOCKED (BID=ASK)</span>;
       case 'CROSSED':
-        return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-rose-950 text-rose-400 border border-rose-800">CROSSED (BID&gt;ASK)</span>;
+        return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-negative-soft text-negative border border-negative/20">CROSSED (BID&gt;ASK)</span>;
       default:
-        return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-slate-800 text-slate-300">{condition}</span>;
+        return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-subtle text-secondary">{condition}</span>;
     }
   };
+
+  const getCurrencySymbol = () => {
+    const curr = quote.currency || (quote.symbol.endsWith('.NS') || quote.symbol.endsWith('.BO') ? 'INR' : 'USD');
+    if (curr === 'INR') return '₹';
+    if (curr === 'EUR') return '€';
+    if (curr === 'GBP') return '£';
+    return '$';
+  };
+  const currSym = getCurrencySymbol();
 
   const displaySpread = () => {
     if (spreadUnit === 'BPS') {
@@ -47,32 +56,31 @@ export const SpreadPanel: React.FC<SpreadPanelProps> = ({
     } else if (spreadUnit === 'RELATIVE') {
       return quote.spread_rel !== null && quote.spread_rel !== undefined ? `${(Number(quote.spread_rel) * 100).toFixed(4)}%` : '—';
     } else {
-      return quote.spread_abs !== null && quote.spread_abs !== undefined ? `$${Number(quote.spread_abs).toFixed(4)}` : '—';
+      return quote.spread_abs !== null && quote.spread_abs !== undefined ? `${currSym}${Number(quote.spread_abs).toFixed(4)}` : '—';
     }
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 shadow-lg flex flex-col gap-4">
+    <div className="bg-surface border border-line rounded-lg p-5 shadow-lg flex flex-col gap-4">
       {/* Header & Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-100 text-base">Top-of-Book Spread</span>
+          <span className="font-semibold text-ink text-base">Top-of-Book Spread</span>
           {getConditionBadge(quote.quote_condition)}
-          <span className="text-xs text-slate-400 font-mono">[{quote.venue || 'PRIMARY'}]</span>
+          <span className="text-xs text-muted font-sans">[{quote.venue || 'PRIMARY'}]</span>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Unit Toggle */}
-          <div className="inline-flex rounded-md shadow-sm border border-slate-700 bg-slate-950 p-0.5">
+          <div className="inline-flex rounded-md shadow-sm border border-line-strong bg-canvas p-0.5">
             {(['BPS', 'RELATIVE', 'ABSOLUTE'] as const).map((u) => (
               <button
                 key={u}
                 onClick={() => onUnitChange(u)}
-                className={`px-2.5 py-1 text-xs font-medium rounded ${
-                  spreadUnit === u
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
+                className={`px-2.5 py-1 text-xs font-medium rounded ${spreadUnit === u
+                    ? 'bg-brand text-white'
+                    : 'text-muted hover:text-secondary'
+                  }`}
               >
                 {u}
               </button>
@@ -81,46 +89,49 @@ export const SpreadPanel: React.FC<SpreadPanelProps> = ({
 
           {/* Lookback select */}
           <select
+            aria-label="Spread history lookback"
             value={lookbackDays}
             onChange={(e) => onLookbackChange(Number(e.target.value))}
-            className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="bg-canvas border border-line-strong text-secondary text-xs rounded px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
           >
             <option value={7}>7 Days</option>
             <option value={30}>30 Days</option>
             <option value={60}>60 Days</option>
             <option value={90}>90 Days</option>
+            <option value={180}>180 Days (6M)</option>
+            <option value={365}>365 Days (1Y)</option>
           </select>
         </div>
       </div>
 
       {/* Quote Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-slate-950 border border-slate-800 p-3 rounded flex flex-col">
-          <span className="text-xs text-slate-400">Best Bid</span>
-          <span className="text-lg font-bold text-emerald-400 font-mono">
-            {quote.best_bid !== null && quote.best_bid !== undefined ? `$${Number(quote.best_bid).toFixed(2)}` : '—'}
+        <div className="bg-canvas border border-line p-3 rounded flex flex-col">
+          <span className="text-xs text-muted">Best Bid</span>
+          <span className="text-lg font-bold text-positive font-sans">
+            {quote.best_bid !== null && quote.best_bid !== undefined ? `${currSym}${Number(quote.best_bid).toFixed(2)}` : '—'}
           </span>
         </div>
 
-        <div className="bg-slate-950 border border-slate-800 p-3 rounded flex flex-col">
-          <span className="text-xs text-slate-400">Midpoint Price</span>
-          <span className="text-lg font-bold text-slate-200 font-mono">
-            {quote.mid_price !== null && quote.mid_price !== undefined ? `$${Number(quote.mid_price).toFixed(3)}` : '—'}
+        <div className="bg-canvas border border-line p-3 rounded flex flex-col">
+          <span className="text-xs text-muted">Midpoint Price</span>
+          <span className="text-lg font-bold text-secondary font-sans">
+            {quote.mid_price !== null && quote.mid_price !== undefined ? `${currSym}${Number(quote.mid_price).toFixed(3)}` : '—'}
           </span>
         </div>
 
-        <div className="bg-slate-950 border border-slate-800 p-3 rounded flex flex-col">
-          <span className="text-xs text-slate-400">Best Ask</span>
-          <span className="text-lg font-bold text-rose-400 font-mono">
-            {quote.best_ask !== null && quote.best_ask !== undefined ? `$${Number(quote.best_ask).toFixed(2)}` : '—'}
+        <div className="bg-canvas border border-line p-3 rounded flex flex-col">
+          <span className="text-xs text-muted">Best Ask</span>
+          <span className="text-lg font-bold text-negative font-sans">
+            {quote.best_ask !== null && quote.best_ask !== undefined ? `${currSym}${Number(quote.best_ask).toFixed(2)}` : '—'}
           </span>
         </div>
 
-        <div className="bg-slate-950 border border-slate-800 p-3 rounded flex flex-col">
-          <span className="text-xs text-slate-400">Quoted Spread</span>
-          <span className="text-lg font-bold text-cyan-400 font-mono">{displaySpread()}</span>
+        <div className="bg-canvas border border-line p-3 rounded flex flex-col">
+          <span className="text-xs text-muted">Quoted Spread</span>
+          <span className="text-lg font-bold text-brand font-sans">{displaySpread()}</span>
           {quote.spread_in_ticks !== null && quote.spread_in_ticks !== undefined && (
-            <span className="text-[11px] text-slate-500 font-mono">
+            <span className="text-[11px] text-muted font-sans">
               {Number(quote.spread_in_ticks).toFixed(1)} ticks (tick={quote.tick_size})
             </span>
           )}
@@ -129,42 +140,70 @@ export const SpreadPanel: React.FC<SpreadPanelProps> = ({
 
       {/* Historical Statistics Bar */}
       {spreadDetail && (
-        <div className="bg-slate-950/70 border border-slate-800/80 rounded p-3 flex flex-wrap items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-4">
-            <span className="text-slate-400">
-              30d Mean:{' '}
-              <strong className="text-slate-200 font-mono">
-                {spreadDetail.avg_spread_bps_30d ? `${Number(spreadDetail.avg_spread_bps_30d).toFixed(2)} bps` : '—'}
-              </strong>
+        <div className="bg-canvas/70 border border-line/80 rounded p-3 flex flex-wrap items-center justify-between gap-4 text-xs">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="text-muted">
+              {lookbackDays}d Mean:{' '}
+              {spreadDetail.avg_spread_bps_30d != null ? (
+                <strong className="text-secondary font-sans">
+                  {Number(spreadDetail.avg_spread_bps_30d).toFixed(2)} bps
+                </strong>
+              ) : (
+                <span className="text-warning/90 font-sans text-[11px] bg-warning-soft/40 px-1.5 py-0.5 rounded border border-warning/20">
+                  N/A – insufficient history
+                </span>
+              )}
             </span>
-            <span className="text-slate-400">
+            <span className="text-muted">
               Min:{' '}
-              <strong className="text-emerald-400 font-mono">
-                {spreadDetail.min_spread_bps_30d ? `${Number(spreadDetail.min_spread_bps_30d).toFixed(2)} bps` : '—'}
-              </strong>
+              {spreadDetail.min_spread_bps_30d != null ? (
+                <strong className="text-positive font-sans">
+                  {Number(spreadDetail.min_spread_bps_30d).toFixed(2)} bps
+                </strong>
+              ) : (
+                <span className="text-warning/90 font-sans text-[11px] bg-warning-soft/40 px-1.5 py-0.5 rounded border border-warning/20">
+                  N/A – insufficient history
+                </span>
+              )}
             </span>
-            <span className="text-slate-400">
+            <span className="text-muted">
               Max:{' '}
-              <strong className="text-rose-400 font-mono">
-                {spreadDetail.max_spread_bps_30d ? `${Number(spreadDetail.max_spread_bps_30d).toFixed(2)} bps` : '—'}
-              </strong>
+              {spreadDetail.max_spread_bps_30d != null ? (
+                <strong className="text-negative font-sans">
+                  {Number(spreadDetail.max_spread_bps_30d).toFixed(2)} bps
+                </strong>
+              ) : (
+                <span className="text-warning/90 font-sans text-[11px] bg-warning-soft/40 px-1.5 py-0.5 rounded border border-warning/20">
+                  N/A – insufficient history
+                </span>
+              )}
             </span>
           </div>
 
-          {spreadDetail.spread_percentile !== null && spreadDetail.spread_percentile !== undefined && (
-            <div className="flex items-center gap-2">
-              <span className="text-slate-400">Current Percentile:</span>
-              <span className={`px-2 py-0.5 rounded font-mono font-semibold ${
-                Number(spreadDetail.spread_percentile) > 80
-                  ? 'bg-rose-950 text-rose-400 border border-rose-800'
-                  : Number(spreadDetail.spread_percentile) < 30
-                  ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                  : 'bg-slate-800 text-slate-200'
-              }`}>
-                {Number(spreadDetail.spread_percentile).toFixed(1)}%
-              </span>
+          <div className="flex items-center gap-3">
+            {spreadDetail.spread_percentile !== null && spreadDetail.spread_percentile !== undefined && (
+              <div className="flex items-center gap-2">
+                <span className="text-muted">Historical position:</span>
+                <span className={`px-2 py-0.5 rounded font-sans font-semibold ${Number(spreadDetail.spread_percentile) > 80
+                    ? 'bg-negative-soft text-negative border border-negative/20'
+                    : Number(spreadDetail.spread_percentile) < 30
+                      ? 'bg-positive-soft text-positive border border-positive/20'
+                      : 'bg-subtle text-secondary'
+                  }`}>
+                  {quote.spread_bps != null && spreadDetail.min_spread_bps_30d != null && Number(quote.spread_bps) < Number(spreadDetail.min_spread_bps_30d)
+                    ? `Below ${lookbackDays}-day observed range`
+                    : quote.spread_bps != null && spreadDetail.max_spread_bps_30d != null && Number(quote.spread_bps) > Number(spreadDetail.max_spread_bps_30d)
+                    ? `Above ${lookbackDays}-day observed range`
+                    : `${Number(spreadDetail.spread_percentile).toFixed(1)}th percentile`}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5 text-[11px] font-sans text-muted pl-2 border-l border-line">
+              <span>EXCHANGE: {quote.symbol.endsWith('.NS') ? 'NSE/INDIA' : (quote.symbol.endsWith('.BO') ? 'BSE/INDIA' : 'US/REGULAR')}</span>
+              <span>•</span>
+              <span>QUOTE: {quote.source_kind === 'ESTIMATED' ? 'ESTIMATED' : quote.source_kind === 'PROVIDER_REPORTED' ? 'PROVIDER SNAPSHOT' : 'RECORDED SNAPSHOT'}</span>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>

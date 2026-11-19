@@ -125,7 +125,7 @@ export const PortfolioPerformanceReportsPage: React.FC = () => {
   }, [selectedPortfolio, fetchArchiveRuns]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 space-y-6">
+    <div className="min-h-screen bg-canvas text-ink p-6 space-y-6">
       {/* Header Controls & Filter Parameters */}
       <PerformanceReportOverview
         report={report}
@@ -146,29 +146,29 @@ export const PortfolioPerformanceReportsPage: React.FC = () => {
       />
 
       {error && (
-        <div className="bg-rose-950/60 border border-rose-800 text-rose-300 px-4 py-3 rounded text-xs font-mono flex items-center justify-between">
+        <div className="bg-negative-soft/60 border border-negative/20 text-negative px-4 py-3 rounded text-xs font-sans flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-rose-400 hover:text-rose-200">
+          <button onClick={() => setError(null)} className="text-negative hover:text-negative">
             ✕
           </button>
         </div>
       )}
 
       {loading && (
-        <div className="text-center py-8 text-xs font-mono text-cyan-400 animate-pulse">
+        <div className="text-center py-8 text-xs font-sans text-brand ">
           Loading performance analytics record...
         </div>
       )}
 
       {!loading && !report && (
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-8 text-center">
-          <p className="text-slate-400 text-sm font-mono">
+        <div className="bg-surface border border-line rounded-lg p-8 text-center">
+          <p className="text-muted text-sm font-sans">
             No Performance Report currently loaded for {selectedPortfolio}.
           </p>
           <button
             onClick={() => handleGenerateReport(false)}
             disabled={generating}
-            className="mt-4 px-4 py-2 text-xs font-semibold rounded bg-cyan-600 hover:bg-cyan-500 text-white font-mono"
+            className="mt-4 px-4 py-2 text-xs font-semibold rounded bg-brand hover:bg-brand-hover text-white font-sans"
           >
             {generating ? "Generating..." : "Generate Performance Report Now"}
           </button>

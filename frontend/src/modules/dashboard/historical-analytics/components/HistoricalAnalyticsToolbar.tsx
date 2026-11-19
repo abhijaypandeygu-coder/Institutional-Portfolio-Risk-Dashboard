@@ -33,17 +33,17 @@ export const HistoricalAnalyticsToolbar: React.FC<HistoricalAnalyticsToolbarProp
   isLoading = false,
 }) => {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 flex flex-wrap items-center justify-between gap-4 mb-6 text-slate-100 shadow-sm">
+    <div className="bg-surface border border-line rounded-lg p-4 flex flex-wrap items-center justify-between gap-4 mb-6 text-ink shadow-sm">
       <div className="flex flex-wrap items-center gap-4">
         {/* Portfolio Selection */}
         <div>
-          <label className="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">
+          <label className="block text-xs uppercase  text-muted font-semibold mb-1">
             Portfolio
           </label>
           <select
             value={portfolioId}
             onChange={(e) => onPortfolioChange(e.target.value)}
-            className="bg-slate-800 border border-slate-700 text-slate-100 text-sm rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="bg-subtle border border-line-strong text-ink text-sm rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           >
             <option value="PORT-HIST-01">PORT-HIST-01 (Flagship US)</option>
             <option value="PORT-INDIA-01">PORT-INDIA-01 (India Core)</option>
@@ -53,10 +53,10 @@ export const HistoricalAnalyticsToolbar: React.FC<HistoricalAnalyticsToolbarProp
 
         {/* Lookback Horizon */}
         <div>
-          <label className="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">
+          <label className="block text-xs uppercase  text-muted font-semibold mb-1">
             Horizon
           </label>
-          <div className="flex bg-slate-800 border border-slate-700 rounded overflow-hidden">
+          <div className="flex bg-subtle border border-line-strong rounded overflow-hidden">
             {[
               { label: '30D', value: 30 },
               { label: '90D', value: 90 },
@@ -70,8 +70,8 @@ export const HistoricalAnalyticsToolbar: React.FC<HistoricalAnalyticsToolbarProp
                 onClick={() => onLookbackChange(option.value)}
                 className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                   lookbackDays === option.value
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                    ? 'bg-brand text-white'
+                    : 'text-muted hover:text-secondary hover:bg-hover'
                 }`}
               >
                 {option.label}
@@ -82,13 +82,13 @@ export const HistoricalAnalyticsToolbar: React.FC<HistoricalAnalyticsToolbarProp
 
         {/* Sampling Frequency */}
         <div>
-          <label className="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">
+          <label className="block text-xs uppercase  text-muted font-semibold mb-1">
             Frequency
           </label>
           <select
             value={frequency}
             onChange={(e) => onFrequencyChange(e.target.value)}
-            className="bg-slate-800 border border-slate-700 text-slate-100 text-sm rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="bg-subtle border border-line-strong text-ink text-sm rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           >
             <option value="DAILY">Daily Close (Authoritative)</option>
             <option value="WEEKLY">Weekly Aggregation</option>
@@ -97,7 +97,7 @@ export const HistoricalAnalyticsToolbar: React.FC<HistoricalAnalyticsToolbarProp
 
         {/* Historical Mode (Bitemporal) */}
         <div>
-          <label className="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">
+          <label className="block text-xs uppercase  text-muted font-semibold mb-1">
             Bitemporal Mode
           </label>
           <select
@@ -105,8 +105,8 @@ export const HistoricalAnalyticsToolbar: React.FC<HistoricalAnalyticsToolbarProp
             onChange={(e) => onHistoricalModeChange(e.target.value as HistoricalMode)}
             className={`border text-sm rounded px-3 py-1.5 focus:outline-none font-medium ${
               historicalMode === 'AS_KNOWN_AT_TIME'
-                ? 'bg-emerald-950/60 border-emerald-700 text-emerald-200'
-                : 'bg-amber-950/60 border-amber-700 text-amber-200'
+                ? 'bg-positive-soft/60 border-positive/20 text-positive'
+                : 'bg-warning-soft/60 border-warning/20 text-warning'
             }`}
           >
             <option value="AS_KNOWN_AT_TIME">As Known At Time (Point-in-Time Audit)</option>
@@ -118,12 +118,12 @@ export const HistoricalAnalyticsToolbar: React.FC<HistoricalAnalyticsToolbarProp
       {/* Action Controls */}
       <div className="flex items-center gap-3">
         {/* Toggle Event Overlays */}
-        <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-300">
+        <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-secondary">
           <input
             type="checkbox"
             checked={showEvents}
             onChange={(e) => onToggleEvents(e.target.checked)}
-            className="w-4 h-4 text-indigo-600 rounded bg-slate-800 border-slate-700 focus:ring-indigo-500"
+            className="w-4 h-4 text-brand rounded bg-subtle border-line-strong focus:ring-indigo-500"
           />
           Material Events
         </label>
@@ -132,7 +132,7 @@ export const HistoricalAnalyticsToolbar: React.FC<HistoricalAnalyticsToolbarProp
         <button
           onClick={onRefresh}
           disabled={isLoading}
-          className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white text-xs font-semibold rounded shadow transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-brand hover:bg-brand-hover disabled:bg-hover text-white text-xs font-semibold rounded shadow transition-colors"
         >
           {isLoading ? (
             <span className="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" />

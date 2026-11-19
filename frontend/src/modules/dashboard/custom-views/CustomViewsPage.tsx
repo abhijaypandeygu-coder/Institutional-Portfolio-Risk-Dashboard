@@ -167,17 +167,17 @@ export const CustomViewsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-slate-950 min-h-screen text-slate-100 space-y-6">
+    <div className="p-6 bg-canvas min-h-screen text-ink space-y-6">
       {/* Top Header & View Selector */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-50 flex items-center gap-2">
+          <h1 className="text-2xl font-bold  text-ink flex items-center gap-2">
             Custom Views & Layout Workspace
-            <span className="text-xs px-2.5 py-1 bg-indigo-950 text-indigo-300 border border-indigo-800 rounded font-semibold">
+            <span className="text-xs px-2.5 py-1 bg-brand-soft text-brand border border-brand/20 rounded font-semibold">
               M13.10
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-muted mt-1">
             Personalize, arrange, and share institutional analytics workspaces across M13 widgets
           </p>
         </div>
@@ -194,7 +194,7 @@ export const CustomViewsPage: React.FC = () => {
                 setHasUnsavedChanges(false);
               }
             }}
-            className="bg-slate-800 border border-slate-700 text-slate-100 text-xs rounded px-3 py-2 font-medium focus:ring-1 focus:ring-indigo-500"
+            className="bg-subtle border border-line-strong text-ink text-xs rounded px-3 py-2 font-medium focus:ring-1 focus:ring-indigo-500"
           >
             {views.map((v) => (
               <option key={v.view_id} value={v.view_id}>
@@ -205,25 +205,25 @@ export const CustomViewsPage: React.FC = () => {
 
           {/* New View Button */}
           <div className="relative group">
-            <button className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded border border-slate-700 transition-colors">
+            <button className="px-3 py-2 bg-subtle hover:bg-hover text-secondary text-xs font-semibold rounded border border-line-strong transition-colors">
               + New View
             </button>
-            <div className="hidden group-hover:block absolute right-0 mt-1 w-48 bg-slate-900 border border-slate-800 rounded shadow-xl z-20 py-1 text-xs">
+            <div className="hidden group-hover:block absolute right-0 mt-1 w-48 bg-surface border border-line rounded shadow-xl z-20 py-1 text-xs">
               <button
                 onClick={() => handleCreateNewView('PORTFOLIO_MONITORING')}
-                className="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300"
+                className="w-full text-left px-3 py-1.5 hover:bg-subtle text-secondary"
               >
                 Portfolio Monitoring Template
               </button>
               <button
                 onClick={() => handleCreateNewView('RISK_MONITORING')}
-                className="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300"
+                className="w-full text-left px-3 py-1.5 hover:bg-subtle text-secondary"
               >
                 Risk Monitoring Template
               </button>
               <button
                 onClick={() => handleCreateNewView(undefined)}
-                className="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 border-t border-slate-800 mt-1 pt-1"
+                className="w-full text-left px-3 py-1.5 hover:bg-subtle text-secondary border-t border-line mt-1 pt-1"
               >
                 Blank Dashboard
               </button>
@@ -233,7 +233,7 @@ export const CustomViewsPage: React.FC = () => {
           {/* Add Widget Button */}
           <button
             onClick={() => setIsCatalogueOpen(true)}
-            className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded shadow transition-colors flex items-center gap-1.5"
+            className="px-3 py-2 bg-brand hover:bg-brand-hover text-white text-xs font-semibold rounded shadow transition-colors flex items-center gap-1.5"
           >
             + Add Widget
           </button>
@@ -242,7 +242,7 @@ export const CustomViewsPage: React.FC = () => {
           {activeView && (
             <button
               onClick={() => setIsSharingOpen(true)}
-              className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded border border-slate-700 transition-colors"
+              className="px-3 py-2 bg-subtle hover:bg-hover text-secondary text-xs font-semibold rounded border border-line-strong transition-colors"
             >
               👥 Share
             </button>
@@ -252,7 +252,7 @@ export const CustomViewsPage: React.FC = () => {
           {hasUnsavedChanges && (
             <button
               onClick={handleSaveLayout}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded shadow transition-colors animate-pulse"
+              className="px-4 py-2 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded shadow transition-colors "
             >
               Save Layout
             </button>
@@ -286,13 +286,13 @@ export const CustomViewsPage: React.FC = () => {
 
       {/* Dashboard Canvas Grid (12-column layout) */}
       {!activeView || activeView.layout_config.widgets.length === 0 ? (
-        <div className="py-24 text-center border-2 border-dashed border-slate-800 rounded-xl">
-          <p className="text-sm text-slate-400 mb-3">
+        <div className="py-24 text-center border-2 border-dashed border-line rounded-xl">
+          <p className="text-sm text-muted mb-3">
             No widgets configured in this view canvas.
           </p>
           <button
             onClick={() => setIsCatalogueOpen(true)}
-            className="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded shadow hover:bg-indigo-500 transition-colors"
+            className="px-4 py-2 bg-brand text-white text-xs font-semibold rounded shadow hover:bg-brand-hover transition-colors"
           >
             Browse Widget Catalogue
           </button>
@@ -307,15 +307,15 @@ export const CustomViewsPage: React.FC = () => {
               <div
                 key={w.instance_id}
                 style={{ gridColumn: `span ${w.position.width} / span ${w.position.width}` }}
-                className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg p-4 shadow-sm flex flex-col justify-between transition-all"
+                className="bg-surface border border-line hover:border-line-strong rounded-lg p-4 shadow-sm flex flex-col justify-between transition-opacity"
               >
                 {/* Widget Header */}
-                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-3">
+                <div className="flex items-center justify-between border-b border-line/80 pb-2 mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-slate-100">
+                    <span className="text-xs font-semibold text-ink">
                       {w.title_override || def?.name || w.widget_id}
                     </span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-mono">
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-subtle text-muted font-sans">
                       {def?.owning_module}
                     </span>
                   </div>
@@ -323,14 +323,14 @@ export const CustomViewsPage: React.FC = () => {
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => setSelectedInstance(w)}
-                      className="text-xs p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded transition-colors"
+                      className="text-xs p-1 text-muted hover:text-secondary hover:bg-subtle rounded transition-colors"
                       title="Configure Widget"
                     >
                       ⚙️
                     </button>
                     <button
                       onClick={() => handleRemoveWidget(w.instance_id)}
-                      className="text-xs p-1 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded transition-colors"
+                      className="text-xs p-1 text-muted hover:text-negative hover:bg-subtle rounded transition-colors"
                       title="Remove Widget"
                     >
                       ✕
@@ -339,11 +339,11 @@ export const CustomViewsPage: React.FC = () => {
                 </div>
 
                 {/* Widget Content Placeholder / Live Embed */}
-                <div className="py-8 text-center text-xs text-slate-400 bg-slate-950/40 rounded border border-slate-800/50 flex flex-col items-center justify-center space-y-1">
-                  <span className="font-semibold text-slate-300">
+                <div className="py-8 text-center text-xs text-muted bg-canvas/40 rounded border border-line/50 flex flex-col items-center justify-center space-y-1">
+                  <span className="font-semibold text-secondary">
                     {w.visualization_type?.replace(/_/g, ' ').toUpperCase() || 'STANDARD VIEW'}
                   </span>
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-muted">
                     Authoritative calculation linked to {def?.owning_module}
                   </span>
                 </div>

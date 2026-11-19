@@ -37,6 +37,10 @@ class CurrentQuoteItem(BaseModel):
     ask_timestamp: Optional[datetime] = None
     observation_timestamp: Optional[datetime] = None
     venue: Optional[str] = "PRIMARY"
+    currency: Optional[str] = "USD"
+    source_timestamp: Optional[datetime] = None
+    timestamp_basis: str = "Unavailable"
+    source_kind: str = "UNKNOWN"
 
 
 class HistoricalSpreadPoint(BaseModel):
@@ -93,6 +97,12 @@ class OrderBookDepthLadder(BaseModel):
     depth_imbalance: Optional[Decimal] = None  # (Bid - Ask) / (Bid + Ask) [-1.0, +1.0]
     imbalance_status: str = "NEUTRAL"  # BID_HEAVY, ASK_HEAVY, NEUTRAL, BALANCED
     is_stale: bool = False
+    currency: Optional[str] = None
+    venue: Optional[str] = None
+    quality_status: str = "UNKNOWN"
+    source_kind: str = "UNKNOWN"
+    source_timestamp: Optional[datetime] = None
+    is_locked_crossed: Optional[bool] = None
 
 
 # ---------------------------------------------------------------------------
@@ -121,6 +131,12 @@ class InstrumentLiquidityScore(BaseModel):
     components: List[ScoreComponentBreakdown] = Field(default_factory=list)
     adv_shares_20d: Optional[Decimal] = None
     adtv_usd_20d: Optional[Decimal] = None
+    adtv_native_20d: Optional[Decimal] = None
+    currency: Optional[str] = None
+    volume_observations: int = 0
+    volume_source: str = "Unavailable"
+    volume_as_of: Optional[str] = None
+    fx_conversion: str = "No FX conversion applied; native turnover only"
     turnover_ratio: Optional[Decimal] = None
     data_quality_coverage: Optional[Decimal] = None
     calculated_at: datetime
@@ -164,6 +180,12 @@ class InstrumentLiquidationProfile(BaseModel):
     liquidation_direction: str  # SELL (for LONG), BUY (for SHORT), NONE
     base_participation_rate: Decimal
     scenarios: List[TargetLiquidationScenario] = Field(default_factory=list)
+    currency: str = "USD"
+    is_portfolio_holding: bool = False
+    session_minutes: Decimal = Decimal("390")
+    calendar_description: str = "Regular-session assumption"
+    model_status: str = "ESTIMATE"
+    calculated_at: Optional[datetime] = None
 
 
 # ---------------------------------------------------------------------------
@@ -190,6 +212,9 @@ class HoldingLiquiditySummary(BaseModel):
     full_liquidation_cost_bps: Optional[Decimal] = None
     full_liquidation_cost_usd: Optional[Decimal] = None
     full_liquidation_days: Optional[Decimal] = None
+    full_liquidation_minutes: Optional[Decimal] = None
+    calendar_description: Optional[str] = None
+    market_region: Optional[str] = None
 
 
 class PortfolioLiquidityDashboardResponse(BaseModel):
@@ -213,6 +238,12 @@ class PortfolioLiquidityDashboardResponse(BaseModel):
     severe_imbalance_count: int
     
     holdings: List[HoldingLiquiditySummary] = Field(default_factory=list)
+    reporting_currency: str = "USD"
+    participation_rate: Decimal = Decimal("0.10")
+    max_duration_minutes: Decimal = Decimal("0")
+    calendar_description: str = "Instrument-specific regular sessions"
+    costs_complete: bool = True
+    weight_basis: str = "Absolute position value; NAV unavailable"
 
 
 # ---------------------------------------------------------------------------

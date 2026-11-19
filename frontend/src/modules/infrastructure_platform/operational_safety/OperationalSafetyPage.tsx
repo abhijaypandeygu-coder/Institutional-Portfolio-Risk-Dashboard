@@ -121,20 +121,20 @@ export const OperationalSafetyPage: React.FC = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center bg-gray-900 border border-gray-800 p-6 rounded-xl shadow-lg">
+      <div className="flex justify-between items-center bg-surface border border-line p-6 rounded-xl shadow-lg">
         <div>
           <div className="flex items-center space-x-3">
-            <ShieldAlert className="h-8 w-8 text-rose-500" />
-            <h1 className="text-2xl font-bold text-white tracking-tight">M15.12 Operational Safety & Kill Switch</h1>
+            <ShieldAlert className="h-8 w-8 text-negative" />
+            <h1 className="text-2xl font-bold text-ink ">M15.12 Operational Safety & Kill Switch</h1>
           </div>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-muted mt-1">
             Fail-closed execution protection, emergency kill switches, incident logs, and operational runbooks.
           </p>
         </div>
         <button
           onClick={fetchSafetyData}
           disabled={loading}
-          className="flex items-center space-x-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-sm transition border border-gray-700"
+          className="flex items-center space-x-2 px-4 py-2 bg-subtle hover:bg-hover text-secondary rounded-lg text-sm transition border border-line-strong"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh Safety State</span>
@@ -144,20 +144,20 @@ export const OperationalSafetyPage: React.FC = () => {
       {/* Primary Emergency Banner */}
       <div className={`p-6 rounded-xl border flex flex-col md:flex-row justify-between items-center gap-6 ${
         safety?.global_execution_enabled
-          ? 'bg-gray-900/90 border-emerald-800/60 shadow-lg'
-          : 'bg-rose-950/40 border-rose-600 shadow-2xl animate-pulse'
+          ? 'bg-surface/90 border-positive/20 shadow-lg'
+          : 'bg-negative-soft/40 border-negative/20 shadow-2xl '
       }`}>
         <div className="flex items-center space-x-4">
           <div className={`p-3 rounded-full ${
-            safety?.global_execution_enabled ? 'bg-emerald-950 text-emerald-400' : 'bg-rose-950 text-rose-400'
+            safety?.global_execution_enabled ? 'bg-positive-soft text-positive' : 'bg-negative-soft text-negative'
           }`}>
             <Power className="h-8 w-8" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-xl font-bold text-ink">
               {safety?.global_execution_enabled ? 'Live Execution Active (Normal)' : 'EMERGENCY HALT: Global Kill Switch ACTIVE'}
             </h2>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-muted mt-1">
               {safety?.global_execution_enabled
                 ? 'Pre-trade safety gateway is verifying limit checks and market data freshness.'
                 : 'All live-capable order routes and submissions are completely blocked fail-closed.'}
@@ -173,12 +173,12 @@ export const OperationalSafetyPage: React.FC = () => {
                 placeholder="Reason for emergency shutdown..."
                 value={actionReason}
                 onChange={(e) => setActionReason(e.target.value)}
-                className="bg-gray-950 border border-gray-700 text-white text-xs rounded-lg px-3 py-2 w-full sm:w-64 focus:outline-none focus:border-rose-500"
+                className="bg-canvas border border-line-strong text-ink text-xs rounded-lg px-3 py-2 w-full sm:w-64 focus:outline-none focus:border-rose-500"
               />
               <button
                 onClick={() => handleToggleGlobalKillSwitch(true)}
                 disabled={loading}
-                className="w-full sm:w-auto px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-xs uppercase tracking-wider shadow-lg flex items-center justify-center space-x-2 transition"
+                className="w-full sm:w-auto px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-xs uppercase  shadow-lg flex items-center justify-center space-x-2 transition"
               >
                 <Lock className="h-4 w-4" />
                 <span>HALT EXECUTION</span>
@@ -188,7 +188,7 @@ export const OperationalSafetyPage: React.FC = () => {
             <button
               onClick={() => handleToggleGlobalKillSwitch(false)}
               disabled={loading}
-              className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs uppercase tracking-wider shadow-lg flex items-center justify-center space-x-2 transition"
+              className="w-full sm:w-auto px-5 py-2.5 bg-brand hover:bg-brand-hover text-white font-bold rounded-lg text-xs uppercase  shadow-lg flex items-center justify-center space-x-2 transition"
             >
               <Unlock className="h-4 w-4" />
               <span>RESTORE EXECUTION</span>
@@ -198,47 +198,47 @@ export const OperationalSafetyPage: React.FC = () => {
       </div>
 
       {actionMessage && (
-        <div className="p-3 bg-gray-950 border border-gray-800 rounded-lg text-xs font-mono text-cyan-300">
+        <div className="p-3 bg-canvas border border-line rounded-lg text-xs font-sans text-brand">
           {actionMessage}
         </div>
       )}
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gray-900 border border-gray-800 p-5 rounded-xl">
-          <div className="text-xs uppercase tracking-wider text-gray-400 font-semibold">Safety State</div>
-          <div className="text-2xl font-bold text-white mt-2">{safety?.overall_safety_state || 'NORMAL'}</div>
-          <div className="text-xs text-gray-400 mt-1">Platform policy v1.0.0</div>
+        <div className="bg-surface border border-line p-5 rounded-xl">
+          <div className="text-xs uppercase  text-muted font-semibold">Safety State</div>
+          <div className="text-2xl font-bold text-ink mt-2">{safety?.overall_safety_state || 'NORMAL'}</div>
+          <div className="text-xs text-muted mt-1">Platform policy v1.0.0</div>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 p-5 rounded-xl">
-          <div className="text-xs uppercase tracking-wider text-gray-400 font-semibold">Active Switches</div>
-          <div className="text-2xl font-bold text-rose-400 mt-2">{safety?.active_kill_switches_count || 0}</div>
-          <div className="text-xs text-gray-400 mt-1">Global & scoped restrictions</div>
+        <div className="bg-surface border border-line p-5 rounded-xl">
+          <div className="text-xs uppercase  text-muted font-semibold">Active Switches</div>
+          <div className="text-2xl font-bold text-negative mt-2">{safety?.active_kill_switches_count || 0}</div>
+          <div className="text-xs text-muted mt-1">Global & scoped restrictions</div>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 p-5 rounded-xl">
-          <div className="text-xs uppercase tracking-wider text-gray-400 font-semibold">Active Incidents</div>
-          <div className="text-2xl font-bold text-amber-400 mt-2">{safety?.active_incidents_count || 0}</div>
-          <div className="text-xs text-gray-400 mt-1">Operational containment</div>
+        <div className="bg-surface border border-line p-5 rounded-xl">
+          <div className="text-xs uppercase  text-muted font-semibold">Active Incidents</div>
+          <div className="text-2xl font-bold text-warning mt-2">{safety?.active_incidents_count || 0}</div>
+          <div className="text-xs text-muted mt-1">Operational containment</div>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 p-5 rounded-xl">
-          <div className="text-xs uppercase tracking-wider text-gray-400 font-semibold">Runbooks Ready</div>
-          <div className="text-2xl font-bold text-indigo-400 mt-2">{runbooks.length} Available</div>
-          <div className="text-xs text-gray-400 mt-1">Verified recovery checklists</div>
+        <div className="bg-surface border border-line p-5 rounded-xl">
+          <div className="text-xs uppercase  text-muted font-semibold">Runbooks Ready</div>
+          <div className="text-2xl font-bold text-brand mt-2">{runbooks.length} Available</div>
+          <div className="text-xs text-muted mt-1">Verified recovery checklists</div>
         </div>
       </div>
 
       {/* Kill Switches Table */}
-      <div className="bg-gray-900 border border-gray-800 p-6 rounded-xl">
-        <h2 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-          <Power className="h-5 w-5 text-rose-400" />
+      <div className="bg-surface border border-line p-6 rounded-xl">
+        <h2 className="text-lg font-semibold text-ink mb-4 flex items-center space-x-2">
+          <Power className="h-5 w-5 text-negative" />
           <span>Kill Switch Registry</span>
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-gray-950 text-gray-400 uppercase tracking-wider">
+            <thead className="bg-canvas text-muted uppercase ">
               <tr>
                 <th className="p-3">Switch Name</th>
                 <th className="p-3">Scope</th>
@@ -247,22 +247,22 @@ export const OperationalSafetyPage: React.FC = () => {
                 <th className="p-3">Last Activation Detail</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800 text-gray-300">
+            <tbody className="divide-y divide-gray-800 text-secondary">
               {safety?.kill_switches.map((sw) => (
-                <tr key={sw.switch_code} className="hover:bg-gray-800/40">
-                  <td className="p-3 font-semibold text-white">{sw.switch_name}</td>
-                  <td className="p-3 text-gray-400 font-mono">{sw.scope_type}</td>
+                <tr key={sw.switch_code} className="hover:bg-subtle/40">
+                  <td className="p-3 font-semibold text-ink">{sw.switch_name}</td>
+                  <td className="p-3 text-muted font-sans">{sw.scope_type}</td>
                   <td className="p-3">
                     <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
                       sw.state === 'ACTIVE'
-                        ? 'bg-rose-950/80 text-rose-400 border border-rose-800'
-                        : 'bg-emerald-950/80 text-emerald-400 border border-emerald-800'
+                        ? 'bg-negative-soft/80 text-negative border border-negative/20'
+                        : 'bg-positive-soft/80 text-positive border border-positive/20'
                     }`}>
                       {sw.state}
                     </span>
                   </td>
-                  <td className="p-3 font-mono text-gray-400">rev.{sw.revision}</td>
-                  <td className="p-3 text-gray-400">
+                  <td className="p-3 font-sans text-muted">rev.{sw.revision}</td>
+                  <td className="p-3 text-muted">
                     {sw.activation_reason ? `${sw.activation_reason} (by ${sw.activated_by})` : 'Nominal'}
                   </td>
                 </tr>
@@ -275,42 +275,42 @@ export const OperationalSafetyPage: React.FC = () => {
       {/* Incident & Runbooks Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Incidents */}
-        <div className="bg-gray-900 border border-gray-800 p-6 rounded-xl">
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-            <Activity className="h-5 w-5 text-amber-400" />
+        <div className="bg-surface border border-line p-6 rounded-xl">
+          <h2 className="text-lg font-semibold text-ink mb-4 flex items-center space-x-2">
+            <Activity className="h-5 w-5 text-warning" />
             <span>Incident Log</span>
           </h2>
           <div className="space-y-3">
             {safety?.incidents.map((inc) => (
-              <div key={inc.incident_reference} className="p-3 bg-gray-950 border border-gray-800 rounded-lg text-xs space-y-1">
+              <div key={inc.incident_reference} className="p-3 bg-canvas border border-line rounded-lg text-xs space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-white">{inc.title}</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-amber-950/60 text-amber-300 border border-amber-800">
+                  <span className="font-semibold text-ink">{inc.title}</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] bg-warning-soft/60 text-warning border border-warning/20">
                     {inc.severity}
                   </span>
                 </div>
-                <div className="text-gray-400">{inc.description}</div>
-                <div className="text-gray-500 text-[10px] font-mono">Ref: {inc.incident_reference} • Scope: {inc.affected_scope}</div>
+                <div className="text-muted">{inc.description}</div>
+                <div className="text-muted text-[10px] font-sans">Ref: {inc.incident_reference} • Scope: {inc.affected_scope}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Runbooks */}
-        <div className="bg-gray-900 border border-gray-800 p-6 rounded-xl">
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-            <BookOpen className="h-5 w-5 text-indigo-400" />
+        <div className="bg-surface border border-line p-6 rounded-xl">
+          <h2 className="text-lg font-semibold text-ink mb-4 flex items-center space-x-2">
+            <BookOpen className="h-5 w-5 text-brand" />
             <span>Operational Runbooks & Checklists</span>
           </h2>
           <div className="space-y-4">
             {runbooks.map((rb) => (
-              <div key={rb.runbook_code} className="p-3 bg-gray-950 border border-gray-800 rounded-lg text-xs space-y-2">
+              <div key={rb.runbook_code} className="p-3 bg-canvas border border-line rounded-lg text-xs space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-white">{rb.title}</span>
-                  <span className="text-[10px] font-mono text-indigo-400">{rb.runbook_code}</span>
+                  <span className="font-semibold text-ink">{rb.title}</span>
+                  <span className="text-[10px] font-sans text-brand">{rb.runbook_code}</span>
                 </div>
-                <p className="text-gray-400">{rb.summary}</p>
-                <div className="pl-3 border-l border-gray-800 space-y-1 text-gray-300 font-mono text-[11px]">
+                <p className="text-muted">{rb.summary}</p>
+                <div className="pl-3 border-l border-line space-y-1 text-secondary font-sans text-[11px]">
                   {rb.steps.map((st: string, idx: number) => (
                     <div key={idx}>{st}</div>
                   ))}

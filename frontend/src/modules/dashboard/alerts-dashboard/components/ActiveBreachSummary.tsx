@@ -1,4 +1,13 @@
 import React from 'react';
+import { 
+  ShieldAlert, 
+  AlertOctagon, 
+  AlertTriangle, 
+  Zap, 
+  Mail, 
+  ArrowUpRight, 
+  Clock 
+} from 'lucide-react';
 import { ActiveBreachSummaryResponse } from '../../../../types/dashboard';
 
 interface ActiveBreachSummaryProps {
@@ -11,7 +20,7 @@ export const ActiveBreachSummary: React.FC<ActiveBreachSummaryProps> = ({ summar
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
         {[...Array(7)].map((_, i) => (
-          <div key={i} className="bg-slate-900 border border-slate-800 rounded-lg p-4 animate-pulse h-24" />
+          <div key={i} className="bg-surface border border-line rounded-lg p-4  h-24" />
         ))}
       </div>
     );
@@ -29,75 +38,78 @@ export const ActiveBreachSummary: React.FC<ActiveBreachSummaryProps> = ({ summar
     {
       label: 'Total Active',
       value: totalActive,
-      color: 'text-slate-100',
-      bgColor: 'bg-slate-900/80',
-      border: 'border-slate-800',
-      icon: '🛡️',
+      color: 'text-ink',
+      bgColor: 'bg-surface/80',
+      border: 'border-line',
+      icon: ShieldAlert,
     },
     {
       label: 'Emergency (L3)',
       value: emergency,
-      color: 'text-red-400 font-bold',
-      bgColor: emergency > 0 ? 'bg-red-950/40' : 'bg-slate-900/80',
-      border: emergency > 0 ? 'border-red-800' : 'border-slate-800',
-      icon: '🚨',
+      color: 'text-negative font-bold',
+      bgColor: emergency > 0 ? 'bg-negative-soft/40' : 'bg-surface/80',
+      border: emergency > 0 ? 'border-negative/20' : 'border-line',
+      icon: AlertOctagon,
     },
     {
       label: 'Critical (L2)',
       value: critical,
       color: 'text-orange-400 font-bold',
-      bgColor: critical > 0 ? 'bg-orange-950/40' : 'bg-slate-900/80',
-      border: critical > 0 ? 'border-orange-800' : 'border-slate-800',
-      icon: '⚠️',
+      bgColor: critical > 0 ? 'bg-orange-950/40' : 'bg-surface/80',
+      border: critical > 0 ? 'border-orange-800' : 'border-line',
+      icon: AlertTriangle,
     },
     {
       label: 'Warning (L1)',
       value: warning,
       color: 'text-yellow-400 font-semibold',
-      bgColor: 'bg-slate-900/80',
-      border: 'border-slate-800',
-      icon: '⚡',
+      bgColor: 'bg-surface/80',
+      border: 'border-line',
+      icon: Zap,
     },
     {
       label: 'Unacknowledged',
       value: unacknowledged,
-      color: unacknowledged > 0 ? 'text-amber-400 font-bold' : 'text-slate-200',
-      bgColor: unacknowledged > 0 ? 'bg-amber-950/30' : 'bg-slate-900/80',
-      border: unacknowledged > 0 ? 'border-amber-800/60' : 'border-slate-800',
-      icon: '📬',
+      color: unacknowledged > 0 ? 'text-warning font-bold' : 'text-secondary',
+      bgColor: unacknowledged > 0 ? 'bg-warning-soft/30' : 'bg-surface/80',
+      border: unacknowledged > 0 ? 'border-warning/20' : 'border-line',
+      icon: Mail,
     },
     {
       label: 'Awaiting Remediation',
       value: escalated,
-      color: 'text-purple-400 font-semibold',
-      bgColor: 'bg-slate-900/80',
-      border: 'border-slate-800',
-      icon: '🔺',
+      color: 'text-info font-semibold',
+      bgColor: 'bg-surface/80',
+      border: 'border-line',
+      icon: ArrowUpRight,
     },
     {
       label: 'Overdue SLA',
       value: overdueSla,
-      color: overdueSla > 0 ? 'text-rose-400 font-bold' : 'text-slate-400',
-      bgColor: overdueSla > 0 ? 'bg-rose-950/40 animate-pulse' : 'bg-slate-900/80',
-      border: overdueSla > 0 ? 'border-rose-700' : 'border-slate-800',
-      icon: '⏱️',
+      color: overdueSla > 0 ? 'text-negative font-bold' : 'text-muted',
+      bgColor: overdueSla > 0 ? 'bg-negative-soft/40 ' : 'bg-surface/80',
+      border: overdueSla > 0 ? 'border-negative/20' : 'border-line',
+      icon: Clock,
     },
   ];
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
-      {cards.map((c, idx) => (
-        <div
-          key={idx}
-          className={`${c.bgColor} ${c.border} border rounded-lg p-3 flex flex-col justify-between shadow-sm transition hover:border-slate-700`}
-        >
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>{c.label}</span>
-            <span>{c.icon}</span>
+      {cards.map((c, idx) => {
+        const Icon = c.icon;
+        return (
+          <div
+            key={idx}
+            className={`${c.bgColor} ${c.border} border rounded-lg p-3 flex flex-col justify-between shadow-sm transition hover:border-line-strong`}
+          >
+            <div className="flex items-center justify-between text-xs text-muted">
+              <span>{c.label}</span>
+              <Icon className="size-3.5 opacity-70" />
+            </div>
+            <div className={`text-2xl mt-2  ${c.color}`}>{c.value}</div>
           </div>
-          <div className={`text-2xl mt-2 tracking-tight ${c.color}`}>{c.value}</div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

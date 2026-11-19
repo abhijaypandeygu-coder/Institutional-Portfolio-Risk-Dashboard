@@ -119,7 +119,7 @@ export const StressTestingReportsPage: React.FC = () => {
   }, [portfolioId, reportingDate]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-canvas text-ink flex flex-col">
       {/* 1. Header */}
       <StressReportHeader
         portfolioId={portfolioId}

@@ -98,6 +98,17 @@ class ScenarioResultSummary(BaseModel):
     stressed_pnl: Decimal
     return_percentage: Decimal
     
+    # Expanded KPI & Attribution fields
+    percentage_loss: Optional[Decimal] = None
+    worst_performing_instrument: Optional[str] = None
+    best_performing_instrument: Optional[str] = None
+    number_of_affected_positions: Optional[int] = None
+    top_sector_contributors: List[Dict[str, Any]] = Field(default_factory=list)
+    long_loss_contribution: Optional[Decimal] = None
+    short_loss_contribution: Optional[Decimal] = None
+    data_coverage_status: Optional[str] = "FULL_COVERAGE"
+    scenario_assumptions: Dict[str, Any] = Field(default_factory=dict)
+
     # Coverage metrics
     eligible_holdings: int
     excluded_holdings: int = 0
@@ -135,6 +146,7 @@ class MonteCarloDistributionResponse(BaseModel):
     scenario_id: str
     calculation_id: str
     portfolio_id: str
+    scenario_name: Optional[str] = None
     horizon_days: int
     n_paths: int
     outcome_measure: str = "PORTFOLIO_PNL"  # PORTFOLIO_PNL, TERMINAL_NAV, RETURN_PCT
@@ -164,7 +176,69 @@ class MonteCarloDistributionResponse(BaseModel):
     matrix_was_repaired: bool = False
     random_seed: int
     histogram_bins: List[DistributionHistogramBin] = Field(default_factory=list)
+    simulation_paths: List[List[float]] = Field(default_factory=list)
+    benchmark_path: List[float] = Field(default_factory=list)
+    
+    # Simulation Reliability & Quality Indicators
+    valid_paths_count: Optional[int] = None
+    rejected_paths_count: Optional[int] = 0
+    standard_error: Optional[float] = None
+    tail_confidence_interval: Dict[str, float] = Field(default_factory=dict)
+    convergence_diagnostic: Optional[str] = "CONVERGED"
+    var_es_coincidence_reason: Optional[str] = None
+    dataset_version: Optional[str] = "v2.4.0"
+
+    # Portfolio Visualizer percentile curves & analytics
+    percentile_curves: Dict[str, List[float]] = Field(default_factory=dict)
+    summary_metrics: Dict[str, Any] = Field(default_factory=dict)
+    
     quality_status: str = "VALID"
+
+
+# ---------------------------------------------------------------------------
+# 7. Portfolio Visualizer Simulation Request Schema
+# ---------------------------------------------------------------------------
+class AssetAllocationItem(BaseModel):
+    asset_id: str
+    asset_name: str
+    allocation_pct: float
+
+class SimulationModelConfigRequest(BaseModel):
+    portfolio_mode: str = "PORTFOLIO_RISK"  # PORTFOLIO_RISK (Institutional) or WEALTH_PROJECTION (Multi-Asset)
+    portfolio_type: str = "Asset Classes"  # Asset Classes, Tickers
+    portfolio_id: Optional[str] = "Global Equity Long/Short"
+    position_selection: Optional[str] = "ALL_HOLDINGS"  # ALL_HOLDINGS, SELECTED_HOLDINGS
+    benchmark: Optional[str] = "SPY"  # SPY, NIFTY 50, CUSTOM
+    valuation_source: Optional[str] = "M05_VALUATION"
+    holding_period_days: Optional[int] = 1  # 1, 5, 10, 20, 252 (trading days)
+    lookback_period_days: Optional[int] = 252
+    return_frequency: Optional[str] = "DAILY"  # DAILY, WEEKLY, MONTHLY
+    random_seed: Optional[int] = 42
+    confidence_level: Optional[float] = 0.95  # 0.95, 0.99
+    
+    # Risk assumptions
+    volatility_model: Optional[str] = "STUDENT_T"  # HISTORICAL, PARAMETRIC, STUDENT_T, BOOTSTRAP
+    correlation_assumption: Optional[str] = "HISTORICAL"  # HISTORICAL, STRESSED_CORRELATION
+    factor_shock: Optional[str] = "NONE"
+    liquidity_shock: Optional[str] = "STANDARD"
+    transaction_cost_bps: Optional[float] = 5.0
+    market_regime: Optional[str] = "STANDARD"
+
+    initial_amount: float = 1000000.0
+    cashflows: str = "Withdraw fixed amount periodically"  # None, Contribute, Withdraw
+    withdrawal_amount: float = 45000.0
+    inflation_adjusted: bool = True
+    withdrawal_frequency: str = "Annually"  # Annually, Monthly
+    simulation_period_years: int = 30
+    tax_treatment: str = "Pre-tax Returns"
+    simulation_model: str = "Historical Returns"  # Historical Returns, Parametric, Regime Switching
+    use_full_history: bool = True
+    bootstrap_model: str = "Single Year"  # Single Year, Block
+    sequence_of_returns_risk: str = "No Adjustments"  # No Adjustments, Front-load Bad Years
+    inflation_model: str = "Historical Inflation"
+    rebalancing: str = "Rebalance annually"
+    intervals: str = "Defaults"
+    allocations: List[AssetAllocationItem] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------

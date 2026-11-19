@@ -12,21 +12,21 @@ export const FactorAttributionPanel: React.FC<FactorAttributionPanelProps> = ({
   modelVersion,
 }) => {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+    <div className="bg-surface border border-line rounded-xl overflow-hidden">
       {/* Header */}
-      <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+      <div className="p-5 border-b border-line flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold text-slate-100 flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-purple-400" />
+          <h2 className="text-base font-semibold text-ink flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-info" />
             Systematic Factor Risk Contribution
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             M08 Multi-Factor Covariance Decomposition (sigma_sys^2 = beta^T Sigma_F beta)
           </p>
         </div>
 
         {modelVersion && (
-          <span className="px-2.5 py-1 rounded bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono">
+          <span className="px-2.5 py-1 rounded bg-purple-500/10 border border-purple-500/20 text-info text-xs font-sans">
             {modelVersion}
           </span>
         )}
@@ -36,7 +36,7 @@ export const FactorAttributionPanel: React.FC<FactorAttributionPanelProps> = ({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider">
+            <tr className="bg-canvas/60 border-b border-line text-muted font-semibold uppercase ">
               <th className="py-3 px-4">Rank</th>
               <th className="py-3 px-4">Factor Name</th>
               <th className="py-3 px-4">Category</th>
@@ -46,28 +46,28 @@ export const FactorAttributionPanel: React.FC<FactorAttributionPanelProps> = ({
               <th className="py-3 px-4 text-right">Contribution %</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 font-mono">
+          <tbody className="divide-y divide-slate-800/60 font-sans">
             {factors.map((f) => (
-              <tr key={f.factor_id} className="hover:bg-slate-800/40 transition-colors">
-                <td className="py-3 px-4 font-sans text-slate-500">{f.factor_rank}</td>
-                <td className="py-3 px-4 font-sans font-semibold text-slate-200">
+              <tr key={f.factor_id} className="hover:bg-subtle/40 transition-colors">
+                <td className="py-3 px-4 font-sans text-muted">{f.factor_rank}</td>
+                <td className="py-3 px-4 font-sans font-semibold text-secondary">
                   {f.factor_name}
                 </td>
                 <td className="py-3 px-4 font-sans">
-                  <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">
+                  <span className="px-2 py-0.5 rounded bg-subtle text-secondary text-[10px]">
                     {f.factor_category}
                   </span>
                 </td>
-                <td className="py-3 px-4 text-right text-slate-300">
+                <td className="py-3 px-4 text-right text-secondary">
                   {f.factor_exposure.toFixed(2)}
                 </td>
-                <td className="py-3 px-4 text-right text-slate-300">
+                <td className="py-3 px-4 text-right text-secondary">
                   {(f.marginal_risk_contribution * 100).toFixed(2)}%
                 </td>
-                <td className="py-3 px-4 text-right font-semibold text-slate-100">
+                <td className="py-3 px-4 text-right font-semibold text-ink">
                   {(f.component_risk_contribution * 100).toFixed(3)}%
                 </td>
-                <td className="py-3 px-4 text-right font-semibold text-purple-300">
+                <td className="py-3 px-4 text-right font-semibold text-info">
                   {f.contribution_percentage.toFixed(2)}%
                 </td>
               </tr>

@@ -316,6 +316,11 @@ async def lifespan(app: FastAPI):
     setup_application_logging()
     await init_db()
     yield
+    # Close explicit broker monitoring tasks and sockets during shutdown.
+    from backend.app.modules.upstox_integration.router import monitor
+    from backend.app.modules.upstox_integration.stream import stream
+    await monitor.stop()
+    await stream.stop()
     # Shutdown logic (e.g. clean up pools, notify services)
 
 
@@ -337,7 +342,9 @@ app.add_middleware(
 
 # M15.01 Request Tracing and Security Headers
 from backend.app.modules.external_data.router import router as external_data_router
+from backend.app.modules.upstox_integration.router import router as upstox_integration_router
 app.include_router(external_data_router)
+app.include_router(upstox_integration_router)
 
 app.add_middleware(RequestTracingMiddleware)
 app.add_middleware(StructuredRequestLoggingMiddleware)
@@ -479,6 +486,9 @@ app.include_router(report_archive_router, tags=["M14.08 - Historical Report Arch
 
 
 @app.get("/health", tags=["System"])
+@app.get("/healthz", tags=["System"])
+@app.get("/api/v1/health", tags=["System"])
+@app.get("/api/v1/healthz", tags=["System"])
 async def root_health_check():
     return {
         "status": "healthy",

@@ -104,8 +104,13 @@ def calculate_ols_beta(
             t_stat = beta / se_beta
             p_val = float(2.0 * (1.0 - stats.t.cdf(abs(t_stat), df=df_resid)))
         else:
-            t_stat = 0.0
-            p_val = 1.0
+            # If residuals are virtually zero (perfect linear fit with non-zero beta)
+            if abs(beta) > 1e-12:
+                t_stat = math.copysign(float("inf"), beta)
+                p_val = 0.0
+            else:
+                t_stat = 0.0
+                p_val = 1.0
 
         # Confidence Interval
         crit_t = float(stats.t.ppf(0.5 + confidence_level / 2.0, df=df_resid)) if df_resid > 0 else 1.96
@@ -132,8 +137,16 @@ def calculate_ols_beta(
 
         s_err = math.sqrt(sse / df_resid)
         se_beta = s_err / math.sqrt(ss_xx) if ss_xx > 1e-12 else 0.0
-        t_stat = beta / se_beta if se_beta > 1e-12 else 0.0
-        p_val = float(2.0 * (1.0 - stats.t.cdf(abs(t_stat), df=df_resid))) if se_beta > 1e-12 else 1.0
+        if se_beta > 1e-12:
+            t_stat = beta / se_beta
+            p_val = float(2.0 * (1.0 - stats.t.cdf(abs(t_stat), df=df_resid)))
+        else:
+            if abs(beta) > 1e-12:
+                t_stat = math.copysign(float("inf"), beta)
+                p_val = 0.0
+            else:
+                t_stat = 0.0
+                p_val = 1.0
         crit_t = float(stats.t.ppf(0.5 + confidence_level / 2.0, df=df_resid))
         ci_low = beta - crit_t * se_beta
         ci_high = beta + crit_t * se_beta

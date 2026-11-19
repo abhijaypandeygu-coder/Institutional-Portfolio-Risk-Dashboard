@@ -1,0 +1,1 @@
+Company marks from Simple Icons 11.15.0, served locally. Source: https://github.com/simple-icons/simple-icons/tree/11.15.0/icons . Each mark remains the trademark of its owner. Unknown symbols display a text monogram.

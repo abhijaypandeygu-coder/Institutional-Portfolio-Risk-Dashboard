@@ -12,24 +12,24 @@ export const ExposureOverviewSection: React.FC<ExposureOverviewSectionProps> = (
   onNavigateDetail,
 }) => {
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-sm mb-6">
-      <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+    <div className="bg-white rounded-lg border border-line p-5 shadow-sm mb-6">
+      <div className="flex items-center justify-between mb-4 border-b border-line pb-3">
         <div>
-          <h3 className="text-base font-semibold text-slate-900">
+          <h3 className="text-base font-semibold text-ink">
             Portfolio Market Exposures (M06)
           </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             {exposure.directional_description}
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded bg-subtle text-secondary border border-line">
             {exposure.directional_status}
           </span>
           {onNavigateDetail && (
             <button
               onClick={() => onNavigateDetail('exposures')}
-              className="text-xs font-medium text-blue-600 hover:text-blue-800"
+              className="text-xs font-medium text-brand hover:text-brand"
             >
               Detailed Breakdown &rarr;
             </button>

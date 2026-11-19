@@ -1,4 +1,5 @@
 import React from 'react';
+import { Bell, Mail, Flame, Search } from 'lucide-react';
 import { RecentAlertSummaryResponse } from '../../../../types/dashboard';
 
 interface RecentAlertSummaryProps {
@@ -11,7 +12,7 @@ export const RecentAlertSummary: React.FC<RecentAlertSummaryProps> = ({ summary,
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-slate-900 border border-slate-800 rounded-lg p-4 animate-pulse h-20" />
+          <div key={i} className="bg-surface border border-line rounded-lg p-4  h-20" />
         ))}
       </div>
     );
@@ -26,51 +27,54 @@ export const RecentAlertSummary: React.FC<RecentAlertSummaryProps> = ({ summary,
     {
       label: 'Alerts (Last 24h)',
       value: totalAlerts,
-      color: 'text-slate-100',
-      bgColor: 'bg-slate-900/80',
-      border: 'border-slate-800',
-      icon: '🔔',
+      color: 'text-ink',
+      bgColor: 'bg-surface/80',
+      border: 'border-line',
+      icon: Bell,
     },
     {
       label: 'Unacknowledged',
       value: unacknowledged,
-      color: unacknowledged > 0 ? 'text-amber-400 font-bold' : 'text-slate-300',
-      bgColor: unacknowledged > 0 ? 'bg-amber-950/30' : 'bg-slate-900/80',
-      border: unacknowledged > 0 ? 'border-amber-800/60' : 'border-slate-800',
-      icon: '📬',
+      color: unacknowledged > 0 ? 'text-warning font-bold' : 'text-secondary',
+      bgColor: unacknowledged > 0 ? 'bg-warning-soft/30' : 'bg-surface/80',
+      border: unacknowledged > 0 ? 'border-warning/20' : 'border-line',
+      icon: Mail,
     },
     {
       label: 'High Priority (P≥75)',
       value: highPriority,
-      color: highPriority > 0 ? 'text-rose-400 font-bold' : 'text-slate-300',
-      bgColor: highPriority > 0 ? 'bg-rose-950/30' : 'bg-slate-900/80',
-      border: highPriority > 0 ? 'border-rose-800/60' : 'border-slate-800',
-      icon: '🔥',
+      color: highPriority > 0 ? 'text-negative font-bold' : 'text-secondary',
+      bgColor: highPriority > 0 ? 'bg-negative-soft/30' : 'bg-surface/80',
+      border: highPriority > 0 ? 'border-negative/20' : 'border-line',
+      icon: Flame,
     },
     {
       label: 'Under Investigation',
       value: underInvestigation,
-      color: 'text-indigo-400 font-semibold',
-      bgColor: 'bg-slate-900/80',
-      border: 'border-slate-800',
-      icon: '🔍',
+      color: 'text-brand font-semibold',
+      bgColor: 'bg-surface/80',
+      border: 'border-line',
+      icon: Search,
     },
   ];
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-      {cards.map((c, idx) => (
-        <div
-          key={idx}
-          className={`${c.bgColor} ${c.border} border rounded-lg p-3.5 flex flex-col justify-between shadow-sm transition hover:border-slate-700`}
-        >
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>{c.label}</span>
-            <span>{c.icon}</span>
+      {cards.map((c, idx) => {
+        const Icon = c.icon;
+        return (
+          <div
+            key={idx}
+            className={`${c.bgColor} ${c.border} border rounded-lg p-3.5 flex flex-col justify-between shadow-sm transition hover:border-line-strong`}
+          >
+            <div className="flex items-center justify-between text-xs text-muted">
+              <span>{c.label}</span>
+              <Icon className="size-3.5 opacity-70" />
+            </div>
+            <div className={`text-2xl mt-1  ${c.color}`}>{c.value}</div>
           </div>
-          <div className={`text-2xl mt-1 tracking-tight ${c.color}`}>{c.value}</div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

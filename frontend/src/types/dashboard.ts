@@ -887,6 +887,9 @@ export interface CorrelationInvestigationResponse {
 // ===========================================================================
 
 export interface CurrentQuoteItem {
+  source_timestamp?: string | null;
+  timestamp_basis?: string;
+  source_kind?: string;
   instrument_id: string;
   symbol: string;
   best_bid?: number | null;
@@ -902,6 +905,7 @@ export interface CurrentQuoteItem {
   ask_timestamp?: string | null;
   observation_timestamp?: string | null;
   venue?: string | null;
+  currency?: string | null;
 }
 
 export interface HistoricalSpreadPoint {
@@ -933,6 +937,10 @@ export interface DepthLevelItem {
 }
 
 export interface OrderBookDepthLadder {
+  currency?: string | null;
+  source_timestamp?: string | null;
+  source_kind?: string;
+  quality_status?: string;
   instrument_id: string;
   symbol: string;
   snapshot_timestamp: string;
@@ -947,6 +955,8 @@ export interface OrderBookDepthLadder {
   depth_imbalance?: number | null;
   imbalance_status: 'BID_HEAVY' | 'ASK_HEAVY' | 'NEUTRAL' | 'BALANCED';
   is_stale: boolean;
+  venue?: string | null;
+  is_locked_crossed?: boolean | null;
 }
 
 export interface ScoreComponentBreakdown {
@@ -960,6 +970,12 @@ export interface ScoreComponentBreakdown {
 }
 
 export interface InstrumentLiquidityScore {
+  currency?: string | null;
+  adtv_native_20d?: number | null;
+  volume_observations?: number;
+  volume_source?: string;
+  volume_as_of?: string | null;
+  fx_conversion?: string;
   instrument_id: string;
   symbol: string;
   composite_score: number;
@@ -992,6 +1008,12 @@ export interface TargetLiquidationScenario {
 }
 
 export interface InstrumentLiquidationProfile {
+  currency?: string;
+  is_portfolio_holding?: boolean;
+  session_minutes?: number;
+  calendar_description?: string;
+  model_status?: string;
+  calculated_at?: string;
   instrument_id: string;
   symbol: string;
   current_position_shares: number;
@@ -1003,6 +1025,8 @@ export interface InstrumentLiquidationProfile {
 }
 
 export interface HoldingLiquiditySummary {
+  full_liquidation_minutes?: number | null;
+  calendar_description?: string | null;
   instrument_id: string;
   symbol: string;
   sector?: string | null;
@@ -1018,9 +1042,16 @@ export interface HoldingLiquiditySummary {
   full_liquidation_cost_bps?: number | null;
   full_liquidation_cost_usd?: number | null;
   full_liquidation_days?: number | null;
+  market_region?: 'INDIAN_MARKET' | 'US_MARKET' | 'OTHER_GLOBAL';
 }
 
 export interface PortfolioLiquidityDashboardResponse {
+  reporting_currency?: string;
+  participation_rate?: number;
+  max_duration_minutes?: number;
+  calendar_description?: string;
+  costs_complete?: boolean;
+  weight_basis?: string;
   portfolio_id: string;
   as_of_date: string;
   total_nav: number;
@@ -1145,6 +1176,15 @@ export interface ScenarioResultSummary {
   stressed_nav: number;
   stressed_pnl: number;
   return_percentage: number;
+  percentage_loss?: number | null;
+  worst_performing_instrument?: string | null;
+  best_performing_instrument?: string | null;
+  number_of_affected_positions?: number | null;
+  top_sector_contributors?: Array<{ sector: string; pnl: number; pnl_loss_pct: number }>;
+  long_loss_contribution?: number | null;
+  short_loss_contribution?: number | null;
+  data_coverage_status?: string | null;
+  scenario_assumptions?: Record<string, any>;
   eligible_holdings: number;
   coverage_percentage: number;
   quality_status: string;
@@ -1159,12 +1199,16 @@ export interface ScenarioDetailResultResponse {
 
 export interface HistogramBin {
   bin_index: number;
-  bin_start: number;
-  bin_end: number;
-  frequency: number;
-  cumulative_frequency: number;
-  density: number;
-  is_tail_bin: boolean;
+  bin_start?: number;
+  bin_end?: number;
+  lower_bound?: number | string;
+  upper_bound?: number | string;
+  frequency?: number;
+  count?: number;
+  frequency_pct?: number | string;
+  cumulative_frequency?: number;
+  density?: number;
+  is_tail_bin?: boolean;
 }
 
 export interface MonteCarloDistributionResponse {
@@ -1193,6 +1237,17 @@ export interface MonteCarloDistributionResponse {
   matrix_was_repaired: boolean;
   random_seed: number;
   histogram_bins: HistogramBin[];
+  simulation_paths?: number[][];
+  benchmark_path?: number[];
+  valid_paths_count?: number;
+  rejected_paths_count?: number;
+  standard_error?: number;
+  tail_confidence_interval?: { lower_95: number; upper_95: number };
+  convergence_diagnostic?: string;
+  var_es_coincidence_reason?: string | null;
+  dataset_version?: string;
+  percentile_curves?: Record<string, number[]>;
+  summary_metrics?: Record<string, any>;
   quality_status: string;
 }
 

@@ -25,16 +25,16 @@ export const AuditFilterBar: React.FC<Props> = ({
   onRefresh,
 }) => {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6 text-slate-100 shadow-xl">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-4">
+    <div className="bg-surface border border-line rounded-xl p-5 mb-6 text-ink shadow-xl">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4 mb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-brand/20 text-positive border border-emerald-500/30">
               M14.07 AUDIT TRAIL
             </span>
-            <span className="text-xs text-slate-400">Cryptographically Chained Immutability</span>
+            <span className="text-xs text-muted">Cryptographically Chained Immutability</span>
           </div>
-          <h2 className="text-xl font-bold tracking-tight text-white mt-1">
+          <h2 className="text-xl font-bold  text-ink mt-1">
             Governance & Operational Audit Trail
           </h2>
         </div>
@@ -43,15 +43,15 @@ export const AuditFilterBar: React.FC<Props> = ({
           <button
             onClick={onVerifyIntegrity}
             disabled={isVerifying}
-            className={`px-4 py-2 rounded-lg text-xs font-bold tracking-wide transition-all border flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-lg text-xs font-bold  transition-opacity border flex items-center gap-2 ${
               isVerifying
-                ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
-                : 'bg-emerald-600/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-600/30'
+                ? 'bg-subtle text-muted border-line-strong cursor-not-allowed'
+                : 'bg-brand/20 text-positive border-emerald-500/40 hover:bg-brand-hover/30'
             }`}
           >
             {isVerifying ? (
               <>
-                <svg className="animate-spin h-3.5 w-3.5 text-emerald-400" viewBox="0 0 24 24">
+                <svg className="animate-spin h-3.5 w-3.5 text-positive" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
@@ -59,7 +59,7 @@ export const AuditFilterBar: React.FC<Props> = ({
               </>
             ) : (
               <>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400 " />
                 <span>Verify Chain Integrity</span>
               </>
             )}
@@ -67,7 +67,7 @@ export const AuditFilterBar: React.FC<Props> = ({
 
           <button
             onClick={onRefresh}
-            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-medium"
+            className="px-3 py-2 bg-subtle hover:bg-hover text-secondary border border-line-strong rounded-lg text-xs font-medium"
           >
             Refresh
           </button>
@@ -77,13 +77,13 @@ export const AuditFilterBar: React.FC<Props> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Category */}
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">
+          <label className="block text-xs font-medium text-muted mb-1.5 uppercase ">
             Event Category
           </label>
           <select
             value={selectedCategory}
             onChange={(e) => onSelectCategory(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-canvas border border-line-strong rounded-lg px-3 py-2 text-xs text-secondary focus:outline-none focus:border-emerald-500"
           >
             <option value="">All Categories</option>
             <option value="USER_ACTION">USER_ACTION</option>
@@ -97,13 +97,13 @@ export const AuditFilterBar: React.FC<Props> = ({
 
         {/* Module */}
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">
+          <label className="block text-xs font-medium text-muted mb-1.5 uppercase ">
             Source Module
           </label>
           <select
             value={selectedModule}
             onChange={(e) => onSelectModule(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-canvas border border-line-strong rounded-lg px-3 py-2 text-xs text-secondary focus:outline-none focus:border-emerald-500"
           >
             <option value="">All Modules (M01–M14)</option>
             <option value="M01">M01: Feed Registry</option>
@@ -118,7 +118,7 @@ export const AuditFilterBar: React.FC<Props> = ({
 
         {/* Correlation ID */}
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">
+          <label className="block text-xs font-medium text-muted mb-1.5 uppercase ">
             Correlation ID Search
           </label>
           <input
@@ -126,7 +126,7 @@ export const AuditFilterBar: React.FC<Props> = ({
             value={searchCorrelation}
             onChange={(e) => onCorrelationChange(e.target.value)}
             placeholder="e.g. WF-202611-001"
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono"
+            className="w-full bg-canvas border border-line-strong rounded-lg px-3 py-2 text-xs text-secondary focus:outline-none focus:border-emerald-500 font-sans"
           />
         </div>
       </div>

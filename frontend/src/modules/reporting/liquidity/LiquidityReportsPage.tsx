@@ -105,7 +105,7 @@ export const LiquidityReportsPage: React.FC = () => {
   }, [portfolioId]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
+    <div className="min-h-screen bg-canvas text-ink p-6">
       <LiquidityReportHeader
         portfolioId={portfolioId}
         onPortfolioChange={setPortfolioId}
@@ -143,7 +143,7 @@ export const LiquidityReportsPage: React.FC = () => {
           />
         </>
       ) : (
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-12 text-center text-slate-400">
+        <div className="bg-surface border border-line rounded-lg p-12 text-center text-muted">
           <p className="text-sm">No report loaded for portfolio {portfolioId}. Click "Generate Liquidity Report" to initiate analysis.</p>
         </div>
       )}

@@ -50,7 +50,7 @@ export const AuditTrailPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
+    <div className="min-h-screen bg-canvas text-ink p-6">
       <AuditFilterBar
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}

@@ -1,4 +1,14 @@
 import React from 'react';
+import { 
+  Zap, 
+  Mail, 
+  User, 
+  ArrowUpRight, 
+  CheckCircle2, 
+  Lock, 
+  RefreshCw, 
+  FileText 
+} from 'lucide-react';
 import { AlertTimelineEvent } from '../../../../types/dashboard';
 
 interface AlertHistoryTimelineProps {
@@ -8,60 +18,60 @@ interface AlertHistoryTimelineProps {
 
 export const AlertHistoryTimeline: React.FC<AlertHistoryTimelineProps> = ({ events, loading }) => {
   if (loading && events.length === 0) {
-    return <div className="text-xs text-slate-500 py-3">Loading history timeline...</div>;
+    return <div className="text-xs text-muted py-3">Loading history timeline...</div>;
   }
 
   if (events.length === 0) {
-    return <div className="text-xs text-slate-500 py-3">No lifecycle transitions recorded.</div>;
+    return <div className="text-xs text-muted py-3">No lifecycle transitions recorded.</div>;
   }
 
-  const getEventIcon = (type: string) => {
+  const renderEventIcon = (type: string) => {
     switch (type) {
       case 'TRIGGERED':
-        return '⚡';
+        return <Zap className="size-2.5 text-yellow-400" />;
       case 'ACKNOWLEDGED':
-        return '📬';
+        return <Mail className="size-2.5 text-brand" />;
       case 'ASSIGNED':
-        return '👤';
+        return <User className="size-2.5 text-info" />;
       case 'ESCALATED':
-        return '🔺';
+        return <ArrowUpRight className="size-2.5 text-negative" />;
       case 'RESOLVED':
-        return '✅';
+        return <CheckCircle2 className="size-2.5 text-positive" />;
       case 'CLOSED':
-        return '🔒';
+        return <Lock className="size-2.5 text-muted" />;
       case 'REOPENED':
-        return '🔄';
+        return <RefreshCw className="size-2.5 text-warning" />;
       default:
-        return '📝';
+        return <FileText className="size-2.5 text-muted" />;
     }
   };
 
   return (
-    <div className="relative pl-6 space-y-4 border-l-2 border-slate-800 ml-2 py-1">
+    <div className="relative pl-6 space-y-4 border-l-2 border-line ml-2 py-1">
       {events.map((ev) => (
         <div key={ev.event_id} className="relative group">
-          <div className="absolute -left-[31px] top-0 w-5 h-5 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-[10px]">
-            {getEventIcon(ev.event_type)}
+          <div className="absolute -left-[31px] top-0 w-5 h-5 rounded-full bg-surface border border-line-strong flex items-center justify-center">
+            {renderEventIcon(ev.event_type)}
           </div>
           <div>
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-200">
+              <span className="font-semibold text-secondary">
                 {ev.event_type}
                 {ev.from_status && ev.to_status && (
-                  <span className="text-[10px] text-slate-400 font-mono ml-2">
+                  <span className="text-[10px] text-muted font-sans ml-2">
                     ({ev.from_status} → {ev.to_status})
                   </span>
                 )}
               </span>
-              <span className="text-[10px] text-slate-500 font-mono">
+              <span className="text-[10px] text-muted font-sans">
                 {ev.occurred_at || ev.timestamp ? new Date(ev.occurred_at || ev.timestamp!).toLocaleString() : '—'}
               </span>
             </div>
-            <div className="text-[11px] text-slate-400 mt-0.5">
-              By: <span className="text-slate-300 font-mono">{ev.actor_id}</span>
+            <div className="text-[11px] text-muted mt-0.5">
+              By: <span className="text-secondary font-sans">{ev.actor_id}</span>
             </div>
             {ev.notes && (
-              <div className="mt-1 p-2 rounded bg-slate-950 border border-slate-800 text-[11px] text-slate-300 font-mono">
+              <div className="mt-1 p-2 rounded bg-canvas border border-line text-[11px] text-secondary font-sans">
                 {ev.notes}
               </div>
             )}

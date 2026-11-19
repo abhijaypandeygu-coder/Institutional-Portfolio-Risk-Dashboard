@@ -1,0 +1,9 @@
+# source_module: M14
+# dataset_id: risk_limits_and_breaches
+# portfolio_id: PORT_STR_a74557
+# as_of_timestamp: 2026-11-18T08:23:31.674041+00:00
+# export_timestamp: 2026-11-18T08:23:31.674041+00:00
+# reporting_currency: INR
+limit_code,limit_name,metric_name,configured_threshold,current_value,utilization_pct,evaluation_status
+MAX_VAR_BPS,Max Daily VaR,VAR_99_1D,250.0,185.0,74.0,WITHIN_LIMIT
+MAX_STRESSED_LOSS,Max Stressed Drawdown,WORST_SCENARIO_LOSS,30.0,32.0,106.7,BREACH

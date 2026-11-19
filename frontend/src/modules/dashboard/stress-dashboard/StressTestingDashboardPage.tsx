@@ -1,4 +1,6 @@
+import { UpstoxBrokerPanel } from '../../../components/UpstoxBrokerPanel';
 import React, { useState, useEffect } from 'react';
+import { FolderOpen, Layers, BarChart3, RefreshCw, SlidersHorizontal, Activity } from 'lucide-react';
 import {
   ScenarioMetadataItem,
   ScenarioDetailResultResponse,
@@ -13,14 +15,26 @@ import { ScenarioResultsPanel } from './components/ScenarioResultsPanel';
 import { MonteCarloDistributionPanel } from './components/MonteCarloDistributionPanel';
 import { ScenarioComparisonPanel } from './components/ScenarioComparisonPanel';
 import { StressAttributionPanel } from './components/StressAttributionPanel';
+import { PortfolioVisualizerConfigPanel } from './components/PortfolioVisualizerConfigPanel';
+import { SimulationRunComparison, CompletedSimulation } from './components/SimulationRunComparison';
 
-export const StressTestingDashboardPage: React.FC = () => {
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>('');
+interface StressTestingDashboardPageProps {
+  portfolioId?: string;
+}
+
+export const StressTestingDashboardPage: React.FC<StressTestingDashboardPageProps> = ({ portfolioId }) => {
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>(portfolioId || '');
   const [availablePortfolios, setAvailablePortfolios] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
   const [scenarios, setScenarios] = useState<ScenarioMetadataItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
   const [selectedCalculationId, setSelectedCalculationId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (portfolioId) {
+      setSelectedPortfolioId(portfolioId);
+    }
+  }, [portfolioId]);
 
   // Fetch available portfolios dynamically
   useEffect(() => {
@@ -32,16 +46,16 @@ export const StressTestingDashboardPage: React.FC = () => {
           if (Array.isArray(list) && list.length > 0) {
             setAvailablePortfolios(list);
             if (!selectedPortfolioId) {
-              setSelectedPortfolioId(list[0].portfolio_id);
+              setSelectedPortfolioId(portfolioId || list[0].portfolio_id);
             }
           } else if (!selectedPortfolioId) {
-            setSelectedPortfolioId('PORT_DEFAULT');
+            setSelectedPortfolioId(portfolioId || 'PORT_DEFAULT');
           }
         }
       } catch (err) {
         console.error('Failed to load portfolio list for stress dashboard:', err);
         if (!selectedPortfolioId) {
-          setSelectedPortfolioId('PORT_DEFAULT');
+          setSelectedPortfolioId(portfolioId || 'PORT_DEFAULT');
         }
       }
     };
@@ -56,6 +70,17 @@ export const StressTestingDashboardPage: React.FC = () => {
   // Data states
   const [scenarioResult, setScenarioResult] = useState<ScenarioDetailResultResponse | null>(null);
   const [mcDistribution, setMcDistribution] = useState<MonteCarloDistributionResponse | null>(null);
+  const [completedSimulations, setCompletedSimulations] = useState<Array<CompletedSimulation & { portfolioId: string }>>([]);
+  const [showRunComparison, setShowRunComparison] = useState(false);
+  const portfolioRuns = completedSimulations.filter(run => run.portfolioId === selectedPortfolioId);
+  useEffect(() => { setShowRunComparison(false); }, [selectedPortfolioId]);
+  useEffect(() => {
+    if (showRunComparison) {
+      const heading = document.getElementById('simulation-comparison-heading');
+      heading?.focus({ preventScroll: true });
+      heading?.scrollIntoView({ block: 'start' });
+    }
+  }, [showRunComparison]);
   const [comparison, setComparison] = useState<ScenarioComparisonResponse | null>(null);
   const [attribution, setAttribution] = useState<StressAttributionResponse | null>(null);
 
@@ -67,6 +92,8 @@ export const StressTestingDashboardPage: React.FC = () => {
   // Loading states
   const [loadingScenarios, setLoadingScenarios] = useState<boolean>(false);
   const [loadingDetail, setLoadingDetail] = useState<boolean>(false);
+  const [isSimulatingPV, setIsSimulatingPV] = useState<boolean>(false);
+  const [showPvConfig, setShowPvConfig] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // 1. Fetch scenario library
@@ -154,8 +181,9 @@ export const StressTestingDashboardPage: React.FC = () => {
 
   // Run multi-scenario comparison
   const handleRunComparison = async () => {
+    // Collect up to 5 calculation IDs or fallback to scenario IDs
     const calcIds = scenarios
-      .map((s) => s.latest_calculation_id)
+      .map((s) => s.latest_calculation_id || s.scenario_id)
       .filter((id): id is string => Boolean(id))
       .slice(0, 5);
 
@@ -179,6 +207,38 @@ export const StressTestingDashboardPage: React.FC = () => {
       console.error('Error comparing scenarios', err);
     } finally {
       setLoadingDetail(false);
+    }
+  };
+
+  // Run Portfolio Visualizer simulation
+  const handleRunVisualizerSimulation = async (config: any) => {
+    setIsSimulatingPV(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch('/api/v1/dashboard/stress/simulation/run-visualizer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      });
+      if (res.ok) {
+        const data: MonteCarloDistributionResponse = await res.json();
+        setMcDistribution(data);
+        setCompletedSimulations(previous => [
+          ...previous.filter(run => run.portfolioId !== selectedPortfolioId),
+          ...previous.filter(run => run.portfolioId === selectedPortfolioId).slice(-1),
+          { result: data, config, completedAt: new Date().toISOString(), portfolioId: selectedPortfolioId },
+        ]);
+        setShowRunComparison(false);
+        setActiveTab('DISTRIBUTION');
+      } else {
+        const errText = await res.text();
+        setErrorMsg(`Simulation failed: ${errText || res.statusText}`);
+      }
+    } catch (err: any) {
+      console.error('Failed to run Portfolio Visualizer simulation', err);
+      setErrorMsg('Failed to run Portfolio Visualizer simulation. Please try again.');
+    } finally {
+      setIsSimulatingPV(false);
     }
   };
 
@@ -213,55 +273,50 @@ export const StressTestingDashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 space-y-6">
+    <div className="min-w-0 text-ink space-y-7">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-line">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-white tracking-tight">
-              Stress Testing Dashboard
+            <h1 className="text-3xl font-semibold text-ink ">
+              Stress Testing
             </h1>
-            <span className="px-2.5 py-0.5 text-xs font-semibold rounded bg-rose-950/80 text-rose-300 border border-rose-800/80">
-              M13.07 Production
-            </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Authoritative scenario evaluation, loss distributions, cross-model comparison, and risk decomposition.
+          <p className="text-xs text-muted mt-1">
+            Explore scenarios, compare outcomes, and understand your downside risk.
           </p>
         </div>
 
         {/* Global Action Bar */}
-        <div className="flex items-center gap-3">
-          {availablePortfolios.length > 0 && (
-            <select
-              value={selectedPortfolioId}
-              onChange={(e) => setSelectedPortfolioId(e.target.value)}
-              className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
-            >
-              {availablePortfolios.map((p) => (
-                <option key={p.portfolio_id} value={p.portfolio_id}>
-                  {p.portfolio_name ? `${p.portfolio_id} (${p.portfolio_name})` : p.portfolio_id}
-                </option>
-              ))}
-            </select>
-          )}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Active Portfolio Badge (Synced with Header) */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-line text-xs">
+            <FolderOpen className="size-3.5 text-muted" />
+            <span className="text-muted">Portfolio:</span>
+            <span className="font-medium text-secondary">
+              {availablePortfolios.find((p) => p.portfolio_id === selectedPortfolioId)?.portfolio_name || selectedPortfolioId}
+            </span>
+          </div>
+
           <button
+            type="button"
             onClick={handleRunComparison}
-            className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-surface hover:bg-subtle border border-line hover:border-line-strong text-secondary transition-colors"
           >
-            Compare Top Scenarios
+            <BarChart3 className="size-3.5 text-positive" />
+            <span>Compare Top Scenarios</span>
           </button>
         </div>
       </div>
 
       {/* Scenario Library Carousel / Grid */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-4">
+      <div className="bg-surface border border-line rounded-lg p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
+            <h2 className="text-sm font-semibold uppercase  text-secondary">
               Scenario Library
             </h2>
-            <span className="text-xs text-slate-500 font-mono">({scenarios.length} active)</span>
+            <span className="text-xs text-muted font-sans">({scenarios.length} active)</span>
           </div>
 
           {/* Filter Pills */}
@@ -272,8 +327,8 @@ export const StressTestingDashboardPage: React.FC = () => {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-2.5 py-1 rounded text-xs transition ${
                   selectedCategory === cat
-                    ? 'bg-slate-700 text-white font-semibold'
-                    : 'bg-slate-950 text-slate-400 hover:text-slate-200'
+                    ? 'bg-hover text-ink font-semibold'
+                    : 'bg-canvas text-muted hover:text-secondary'
                 }`}
               >
                 {cat}
@@ -284,9 +339,9 @@ export const StressTestingDashboardPage: React.FC = () => {
 
         {/* Scenario Cards */}
         {loadingScenarios ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 animate-pulse">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 ">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-20 bg-slate-800 rounded" />
+              <div key={i} className="h-20 bg-subtle rounded" />
             ))}
           </div>
         ) : (
@@ -294,30 +349,30 @@ export const StressTestingDashboardPage: React.FC = () => {
             {scenarios.map((scen) => {
               const isSelected = scen.scenario_id === selectedScenarioId;
               return (
-                <div
+                <button type="button" aria-pressed={isSelected}
                   key={scen.scenario_id}
                   onClick={() => handleSelectScenario(scen)}
-                  className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
+                  className={`text-left p-4 rounded-xl border cursor-pointer transition-opacity ${
                     isSelected
-                      ? 'bg-blue-950/40 border-blue-600 ring-1 ring-blue-500'
-                      : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+                      ? 'bg-brand-soft/40 border-brand/20 ring-1 ring-blue-500'
+                      : 'bg-canvas/60 border-line hover:border-line-strong'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                  <span className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-subtle text-secondary">
                       {scen.category}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="text-[10px] text-muted font-sans">
                       v{scen.version}
                     </span>
-                  </div>
-                  <div className="font-semibold text-xs text-white truncate">
+                  </span>
+                  <span className="block font-semibold text-xs text-ink truncate">
                     {scen.scenario_name}
-                  </div>
-                  <div className="text-[11px] text-slate-400 truncate mt-0.5">
+                  </span>
+                  <span className="block text-xs text-muted truncate mt-1">
                     {scen.description || scen.affected_markets || 'Global financial stress'}
-                  </div>
-                </div>
+                  </span>
+                </button>
               );
             })}
           </div>
@@ -325,37 +380,36 @@ export const StressTestingDashboardPage: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-800 space-x-6 text-sm">
+      <div className="flex max-w-full gap-5 overflow-x-auto border-b border-line text-sm">
         <button
           onClick={() => setActiveTab('RESULTS')}
           className={`pb-3 font-semibold transition border-b-2 ${
             activeTab === 'RESULTS'
-              ? 'border-blue-500 text-blue-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-blue-500 text-brand'
+              : 'border-transparent text-muted hover:text-secondary'
           }`}
         >
           Scenario Stressed Results
         </button>
 
-        {mcDistribution && (
-          <button
-            onClick={() => setActiveTab('DISTRIBUTION')}
-            className={`pb-3 font-semibold transition border-b-2 ${
-              activeTab === 'DISTRIBUTION'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Monte Carlo Distribution & Quantiles
-          </button>
-        )}
+        <button
+          onClick={() => setActiveTab('DISTRIBUTION')}
+          className={`pb-3 font-semibold transition border-b-2 flex items-center gap-1.5 ${
+            activeTab === 'DISTRIBUTION'
+              ? 'border-blue-500 text-brand'
+              : 'border-transparent text-muted hover:text-secondary'
+          }`}
+        >
+          <Activity className="size-4" />
+          Monte Carlo Simulation (Portfolio Visualizer)
+        </button>
 
         <button
           onClick={() => setActiveTab('ATTRIBUTION')}
           className={`pb-3 font-semibold transition border-b-2 ${
             activeTab === 'ATTRIBUTION'
-              ? 'border-blue-500 text-blue-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-blue-500 text-brand'
+              : 'border-transparent text-muted hover:text-secondary'
           }`}
         >
           Loss Attribution & Reconciliation
@@ -366,8 +420,8 @@ export const StressTestingDashboardPage: React.FC = () => {
             onClick={() => setActiveTab('COMPARISON')}
             className={`pb-3 font-semibold transition border-b-2 ${
               activeTab === 'COMPARISON'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-blue-500 text-brand'
+                : 'border-transparent text-muted hover:text-secondary'
             }`}
           >
             Scenario Comparison
@@ -376,7 +430,7 @@ export const StressTestingDashboardPage: React.FC = () => {
       </div>
 
       {errorMsg && (
-        <div className="bg-rose-950/30 border border-rose-800 p-4 rounded-lg text-rose-300 text-xs">
+        <div className="bg-negative-soft/30 border border-negative/20 p-4 rounded-lg text-negative text-xs">
           {errorMsg}
         </div>
       )}
@@ -394,10 +448,45 @@ export const StressTestingDashboardPage: React.FC = () => {
       )}
 
       {activeTab === 'DISTRIBUTION' && (
-        <MonteCarloDistributionPanel
-          distribution={mcDistribution}
-          loading={loadingDetail}
-        />
+        <div className="space-y-6">
+          {/* Portfolio Visualizer Configuration Form Collapsible */}
+          <div className="bg-surface border border-line rounded-lg overflow-hidden">
+            <div
+              className="px-6 py-4 flex items-center justify-between cursor-pointer bg-surface hover:bg-subtle border-b border-line transition"
+              onClick={() => setShowPvConfig(!showPvConfig)}
+            >
+              <div className="flex flex-wrap items-center gap-2.5">
+                <SlidersHorizontal className="size-4 text-brand" />
+                <span className="font-semibold text-sm text-ink">
+                  Simulation Model Configuration (Portfolio Visualizer Mode)
+                </span>
+                <span className="text-[11px] bg-brand/10 text-brand px-2 py-0.5 rounded border border-blue-500/20">
+                  Interactive Asset Allocation & Cashflow Engine
+                </span>
+              </div>
+              <span className="text-xs text-muted font-sans">
+                {showPvConfig ? 'Hide Settings ▲' : 'Show Settings ▼'}
+              </span>
+            </div>
+
+            {showPvConfig && (
+              <div className="p-4 sm:p-6 bg-canvas/40">
+                <PortfolioVisualizerConfigPanel
+                  onRunSimulation={handleRunVisualizerSimulation}
+                  onCompareResults={() => setShowRunComparison(true)}
+                  canCompareResults={portfolioRuns.length === 2}
+                  isRunning={isSimulatingPV}
+                />
+              </div>
+            )}
+          </div>
+
+          {showRunComparison && <SimulationRunComparison runs={portfolioRuns} onClose={() => setShowRunComparison(false)} />}
+          <MonteCarloDistributionPanel
+            distribution={mcDistribution}
+            loading={loadingDetail || isSimulatingPV}
+          />
+        </div>
       )}
 
       {activeTab === 'ATTRIBUTION' && (
@@ -422,31 +511,31 @@ export const StressTestingDashboardPage: React.FC = () => {
       )}
 
       {/* Annotations & Audit Sign-Off Section */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 space-y-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-200">
+      <div className="bg-surface border border-line rounded-lg p-6 space-y-4">
+        <h3 className="text-sm font-semibold uppercase  text-secondary">
           Risk Notes & Governance Sign-Offs
         </h3>
 
         {/* Existing Annotations List */}
         <div className="space-y-2">
           {annotations.length === 0 ? (
-            <div className="text-xs text-slate-500">No notes recorded for this scenario.</div>
+            <div className="text-xs text-muted">No notes recorded for this scenario.</div>
           ) : (
             annotations.map((a) => (
               <div
                 key={a.id}
-                className="bg-slate-950/60 p-3 rounded border border-slate-800/80 text-xs flex justify-between items-start"
+                className="bg-canvas/60 p-3 rounded border border-line/80 text-xs flex justify-between items-start"
               >
                 <div>
-                  <div className="font-semibold text-white flex items-center gap-2">
+                  <div className="font-semibold text-ink flex items-center gap-2">
                     <span>{a.title}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800/60">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-negative-soft text-negative border border-negative/20">
                       {a.severity}
                     </span>
                   </div>
-                  <div className="text-slate-300 mt-1">{a.notes}</div>
+                  <div className="text-secondary mt-1">{a.notes}</div>
                 </div>
-                <div className="text-[10px] text-slate-500 font-mono">
+                <div className="text-[10px] text-muted font-sans">
                   {new Date(a.created_at).toLocaleDateString()}
                 </div>
               </div>
@@ -455,29 +544,30 @@ export const StressTestingDashboardPage: React.FC = () => {
         </div>
 
         {/* Add Annotation Form */}
-        <div className="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row gap-3">
+        <div className="pt-3 border-t border-line/80 flex flex-col sm:flex-row gap-3">
           <input
             type="text"
-            placeholder="Sign-off title or alert topic..."
+            aria-label="Sign-off title" placeholder="Sign-off title or alert topic..."
             value={annotationTitle}
             onChange={(e) => setAnnotationTitle(e.target.value)}
-            className="flex-1 bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+            className="min-w-0 flex-1 bg-canvas border border-line rounded px-3 py-1.5 text-xs text-secondary focus:outline-none focus:border-blue-500"
           />
           <input
             type="text"
-            placeholder="Analytical rationale, mitigation notes..."
+            aria-label="Analytical rationale" placeholder="Analytical rationale, mitigation notes..."
             value={newAnnotationNote}
             onChange={(e) => setNewAnnotationNote(e.target.value)}
-            className="flex-2 bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+            className="min-w-0 min-w-0 flex-1 bg-canvas border border-line rounded px-3 py-1.5 text-xs text-secondary focus:outline-none focus:border-blue-500"
           />
           <button
             onClick={handleAddAnnotation}
-            className="px-4 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-700 transition"
+            className="px-4 py-1.5 text-xs font-semibold bg-subtle hover:bg-hover text-secondary rounded border border-line-strong transition"
           >
             Record Sign-Off
           </button>
         </div>
       </div>
+      <UpstoxBrokerPanel mode="stress" />
     </div>
   );
 };

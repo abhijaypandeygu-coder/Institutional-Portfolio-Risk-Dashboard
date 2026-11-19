@@ -1,155 +1,50 @@
 import React from 'react';
-import { InstrumentLiquidationProfile } from '../../../types/dashboard';
+import { InstrumentLiquidationProfile, PortfolioLiquidityDashboardResponse } from '../../../types/dashboard';
+import { money, duration } from '../../../utils/liquidityAnalytics';
 
 interface LiquidationPanelProps {
   liquidationProfile: InstrumentLiquidationProfile | null;
   participationRate: number;
   onParticipationRateChange: (rate: number) => void;
+  portfolioData?: PortfolioLiquidityDashboardResponse | null;
 }
 
-export const LiquidationPanel: React.FC<LiquidationPanelProps> = ({
-  liquidationProfile,
-  participationRate,
-  onParticipationRateChange,
-}) => {
-  if (!liquidationProfile) {
-    return (
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 text-slate-400 text-sm">
-        No liquidation scenario available.
-      </div>
-    );
-  }
-
-  const getDirectionBadge = () => {
-    if (liquidationProfile.liquidation_direction === 'SELL') {
-      return (
-        <span className="px-2 py-0.5 text-xs font-semibold rounded bg-rose-950 text-rose-400 border border-rose-800">
-          LONG SALE (Bid Depth Consumption)
-        </span>
-      );
-    } else if (liquidationProfile.liquidation_direction === 'BUY') {
-      return (
-        <span className="px-2 py-0.5 text-xs font-semibold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
-          SHORT COVERING (Ask Depth Consumption)
-        </span>
-      );
-    }
-    return <span className="px-2 py-0.5 text-xs font-semibold rounded bg-slate-800 text-slate-300">FLAT POSITION</span>;
-  };
-
-  return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 shadow-lg flex flex-col gap-4">
-      {/* Header & Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-100 text-base">Liquidation Scenarios & Cost Decomposition</span>
-          {getDirectionBadge()}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400">Participation Rate:</span>
-          <select
-            value={participationRate}
-            onChange={(e) => onParticipationRateChange(Number(e.target.value))}
-            className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option value={0.05}>5% of ADV (Conservative)</option>
-            <option value={0.10}>10% of ADV (Moderate)</option>
-            <option value={0.20}>20% of ADV (Aggressive)</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Position Summary Subheader */}
-      <div className="bg-slate-950/70 border border-slate-800/80 p-3 rounded flex flex-wrap items-center justify-between gap-4 text-xs">
-        <div>
-          <span className="text-slate-400">Current Position: </span>
-          <strong className="text-slate-200 font-mono">
-            {Number(liquidationProfile.current_position_shares).toLocaleString()} shares
-          </strong>
-        </div>
-        <div>
-          <span className="text-slate-400">Notional Exposure: </span>
-          <strong className="text-slate-200 font-mono">
-            ${(Number(liquidationProfile.current_position_notional) / 1000).toFixed(1)}k
-          </strong>
-        </div>
-        <div className="text-slate-500 text-[11px]">
-          *Zero double-counting: Spread + Market Impact + Slippage
-        </div>
-      </div>
-
-      {/* Scenarios Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr className="border-b border-slate-800 text-slate-400 uppercase text-[11px]">
-              <th className="py-2 px-3">Target %</th>
-              <th className="py-2 px-3">Shares</th>
-              <th className="py-2 px-3">Notional ($)</th>
-              <th className="py-2 px-3">Spread (bps)</th>
-              <th className="py-2 px-3">Impact (bps)</th>
-              <th className="py-2 px-3">Slippage (bps)</th>
-              <th className="py-2 px-3 font-semibold text-cyan-400">Total (bps)</th>
-              <th className="py-2 px-3 font-semibold text-rose-400">Est. Cost ($)</th>
-              <th className="py-2 px-3">Est. Horizon</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/60 font-mono">
-            {liquidationProfile.scenarios.map((scen) => {
-              const targetPct = Number(scen.target_percentage);
-              const shares = Number(scen.shares_to_liquidate);
-              const notional = Number(scen.notional_value);
-              const spreadBps = Number(scen.spread_cost_bps);
-              const impactBps = Number(scen.market_impact_cost_bps);
-              const slipBps = Number(scen.slippage_cost_bps);
-              const totalBps = Number(scen.total_cost_bps);
-              const totalUsd = Number(scen.total_cost_usd);
-              const estMins = Number(scen.estimated_duration_minutes);
-              const estDays = Number(scen.estimated_trading_days);
-
-              return (
-                <tr
-                  key={scen.target_percentage}
-                  className={`hover:bg-slate-800/40 transition-colors ${
-                    targetPct === 1.0 ? 'bg-slate-950/80 font-bold' : ''
-                  }`}
-                >
-                  <td className="py-2.5 px-3 text-slate-200 font-semibold">
-                    {(targetPct * 100).toFixed(0)}%
-                  </td>
-                  <td className="py-2.5 px-3 text-slate-300">
-                    {shares.toLocaleString()}
-                  </td>
-                  <td className="py-2.5 px-3 text-slate-300">
-                    ${(notional / 1000).toFixed(1)}k
-                  </td>
-                  <td className="py-2.5 px-3 text-slate-400">
-                    {spreadBps.toFixed(2)}
-                  </td>
-                  <td className="py-2.5 px-3 text-amber-400">
-                    {impactBps.toFixed(2)}
-                  </td>
-                  <td className="py-2.5 px-3 text-purple-400">
-                    {slipBps.toFixed(2)}
-                  </td>
-                  <td className="py-2.5 px-3 text-cyan-400 font-bold">
-                    {totalBps.toFixed(2)} bps
-                  </td>
-                  <td className="py-2.5 px-3 text-rose-400 font-bold">
-                    ${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
-                  <td className="py-2.5 px-3 text-slate-300">
-                    {estDays < 1
-                      ? `${estMins.toFixed(0)} mins`
-                      : `${estDays.toFixed(1)} days`}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
+export const LiquidationPanel: React.FC<LiquidationPanelProps> = ({ liquidationProfile: profile, participationRate, onParticipationRateChange, portfolioData }) => {
+  if (!profile) return <div className="rounded-lg border border-line bg-surface p-5 text-sm text-muted">No liquidation estimate available.</div>;
+  const currency = profile.currency || 'USD';
+  return <section aria-labelledby="liquidation-heading" className="min-w-0 rounded-xl border border-line bg-surface p-5 space-y-4">
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <h3 id="liquidation-heading" className="text-lg font-semibold">Liquidation scenarios &amp; execution costs</h3>
+      <label className="text-xs text-muted">Participation rate <select aria-label="Liquidation participation rate" value={participationRate} onChange={e => onParticipationRateChange(Number(e.target.value))} className="rounded border border-line bg-canvas p-2 text-secondary">
+        <option value={.05}>5% of daily ADV</option><option value={.10}>10% of daily ADV</option><option value={.20}>20% of daily ADV</option>
+      </select></label>
+    </div>
+    <div className="rounded-lg border border-line bg-canvas p-3 text-xs space-y-2">
+      <p><strong>{profile.symbol}</strong> · {profile.position_direction} · {Number(profile.current_position_shares).toLocaleString()} shares · {money(profile.current_position_notional, currency)}</p>
+      <p>{profile.liquidation_direction === 'SELL' ? 'Sell to liquidate a long position' : profile.liquidation_direction === 'BUY' ? 'Buy to cover a short position' : 'No position to liquidate'} · Single instrument estimate</p>
+      <p className="text-muted">Session: {profile.calendar_description || 'Unavailable'} · {profile.session_minutes ?? 'Unknown'} trading minutes/session.</p>
+      <p className="text-muted">Duration = shares ÷ (observed average daily volume × participation rate) × session minutes. Estimates count trading time, excluding nights, holidays and halts.</p>
+      <p>Portfolio aggregate ({Number(portfolioData?.participation_rate ?? participationRate) * 100}% participation): <strong>{portfolioData && portfolioData.costs_complete !== false ? money(portfolioData.total_full_liquidation_cost_usd, portfolioData.reporting_currency) : 'Unavailable / incomplete'}</strong> · {portfolioData ? new Date(portfolioData.as_of_date).toLocaleString() : 'No portfolio snapshot'}</p>
+      {profile.calculated_at && <p className="text-muted">Instrument estimate calculated {new Date(profile.calculated_at).toLocaleString()}. Amounts use {currency}; native quotes and base-currency valuations are not relabeled as USD.</p>}
+    </div>
+    {profile.is_portfolio_holding === false ? <p className="text-sm text-muted">External instrument: not held in the selected portfolio. No portfolio position is assumed.</p> : profile.scenarios.length === 0 ? <p role="status" className="text-sm text-warning">Estimate unavailable: {profile.model_status === 'INSUFFICIENT_ADV' ? 'observed daily volume is missing or zero.' : 'required inputs are unavailable.'}</p> : <>
+      <div className="hidden md:block">
+        <table className="w-full table-fixed text-left text-xs" aria-label="Liquidation cost scenarios">
+          <thead><tr className="border-b border-line text-muted"><th className="py-3">Target</th><th>Shares</th><th>Estimated cost</th><th>Notional ({currency})</th><th>Total bps</th><th className="hidden xl:table-cell">Spread bps</th><th className="hidden xl:table-cell">Impact bps</th><th className="hidden xl:table-cell">Slippage bps</th><th>Trading duration</th></tr></thead>
+          <tbody>{profile.scenarios.map(s => <tr key={s.target_percentage} className="border-b border-line">
+            <th scope="row" className="py-4">{(Number(s.target_percentage)*100).toFixed(0)}%</th><td>{Number(s.shares_to_liquidate).toLocaleString()}</td>
+            <td className="font-semibold text-negative break-words">{money(s.total_cost_usd, currency)}</td><td className="break-words">{money(s.notional_value, currency, true)}</td><td>{Number(s.total_cost_bps).toFixed(2)}</td>
+            <td className="hidden xl:table-cell">{Number(s.spread_cost_bps).toFixed(2)}</td><td className="hidden xl:table-cell">{Number(s.market_impact_cost_bps).toFixed(2)}</td><td className="hidden xl:table-cell">{Number(s.slippage_cost_bps).toFixed(2)}</td>
+            <td>{duration(s.estimated_duration_minutes)}<span className="block text-muted">{Number(s.estimated_trading_days).toFixed(4)} sessions</span></td>
+          </tr>)}</tbody>
         </table>
       </div>
-    </div>
-  );
+      <div className="space-y-3 md:hidden">{profile.scenarios.map(s => <article key={s.target_percentage} className="rounded-lg border border-line p-3 space-y-2 text-xs">
+        <div className="flex justify-between gap-3"><strong>{(Number(s.target_percentage)*100).toFixed(0)}% liquidation</strong><strong className="text-negative">{money(s.total_cost_usd, currency)}</strong></div>
+        <p>{Number(s.shares_to_liquidate).toLocaleString()} shares · {money(s.notional_value, currency)} · {duration(s.estimated_duration_minutes)}</p>
+        <p className="text-muted">Spread {Number(s.spread_cost_bps).toFixed(2)} + impact {Number(s.market_impact_cost_bps).toFixed(2)} + slippage {Number(s.slippage_cost_bps).toFixed(2)} = {Number(s.total_cost_bps).toFixed(2)} bps</p>
+      </article>)}</div>
+      <details className="text-xs text-muted"><summary className="cursor-pointer">Cost model and breakdown</summary><p>Estimated cost = notional × total bps ÷ 10,000. Total bps = half quoted spread + modeled impact + modeled slippage. These are execution estimates, not guaranteed fill prices.</p></details>
+    </>}
+  </section>;
 };

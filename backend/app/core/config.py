@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     FRED_API_KEY: Optional[str] = None
     FMP_API_KEY: Optional[str] = None
     UPSTOX_ACCESS_TOKEN: Optional[str] = None
+    UPSTOX_ALLOW_30_LEVEL: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env",

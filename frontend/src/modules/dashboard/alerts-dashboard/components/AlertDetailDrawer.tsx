@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X, AlertTriangle } from 'lucide-react';
 import { AlertDetailResponse, AlertTimelineEvent } from '../../../../types/dashboard';
 import { AlertHistoryTimeline } from './AlertHistoryTimeline';
 import { AlertActionModal } from './AlertActionModals';
@@ -71,87 +72,89 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-40 w-full max-w-xl bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col">
+    <div className="fixed inset-y-0 right-0 z-40 w-full max-w-xl bg-surface border-l border-line shadow-2xl flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+      <div className="p-4 border-b border-line flex items-center justify-between bg-canvas">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+            <span className="text-xs px-2 py-0.5 rounded bg-subtle text-secondary font-sans">
               {alertType}
             </span>
             {priorityScore !== null && priorityScore !== undefined && (
-              <span className="text-xs font-mono text-slate-400">P:{Number(priorityScore).toFixed(0)}</span>
+              <span className="text-xs font-sans text-muted">P:{Number(priorityScore).toFixed(0)}</span>
             )}
           </div>
-          <h2 className="text-sm font-bold text-slate-100 mt-1">{title}</h2>
+          <h2 className="text-sm font-bold text-ink mt-1">{title}</h2>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="text-slate-400 hover:text-slate-100 text-lg px-2"
+          className="text-muted hover:text-ink p-1 rounded-md hover:bg-subtle transition-colors"
+          aria-label="Close drawer"
         >
-          ✕
+          <X className="size-4" />
         </button>
       </div>
 
       {/* Linked Breach Callout if present */}
       {hasLinkedBreach && breachWarningNotice && (
-        <div className="p-3 bg-amber-950/70 border-b border-amber-800 text-amber-200 text-xs">
-          <div className="font-bold flex items-center gap-1">
-            <span>⚠️</span> RISK LIMIT BREACH LINKED ({linkedBreachId})
+        <div className="p-3 bg-warning-soft/70 border-b border-warning/20 text-warning text-xs">
+          <div className="font-bold flex items-center gap-1.5">
+            <AlertTriangle className="size-3.5 text-warning" />
+            <span>RISK LIMIT BREACH LINKED ({linkedBreachId})</span>
           </div>
           <div className="mt-1">{breachWarningNotice}</div>
         </div>
       )}
 
       {/* Content scroll area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5 text-xs text-slate-300">
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 text-xs text-secondary">
         {/* Core Attributes */}
-        <div className="grid grid-cols-2 gap-3 bg-slate-950/60 p-3 rounded border border-slate-800 font-mono">
+        <div className="grid grid-cols-2 gap-3 bg-canvas/60 p-3 rounded border border-line font-sans">
           <div>
-            <span className="text-slate-500 block text-[10px]">SEVERITY</span>
-            <span className="font-semibold text-slate-200">{severity}</span>
+            <span className="text-muted block text-[10px]">SEVERITY</span>
+            <span className="font-semibold text-secondary">{severity}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[10px]">STATUS</span>
-            <span className="font-semibold text-slate-200">{status}</span>
+            <span className="text-muted block text-[10px]">STATUS</span>
+            <span className="font-semibold text-secondary">{status}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[10px]">PORTFOLIO</span>
-            <span className="text-slate-200">{portfolioId || 'N/A'}</span>
+            <span className="text-muted block text-[10px]">PORTFOLIO</span>
+            <span className="text-secondary">{portfolioId || 'N/A'}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[10px]">INSTRUMENT</span>
-            <span className="text-slate-200">{instrumentId || 'N/A'}</span>
+            <span className="text-muted block text-[10px]">INSTRUMENT</span>
+            <span className="text-secondary">{instrumentId || 'N/A'}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[10px]">TRIGGERED AT</span>
-            <span className="text-slate-200">{new Date(triggeredAt).toLocaleString()}</span>
+            <span className="text-muted block text-[10px]">TRIGGERED AT</span>
+            <span className="text-secondary">{new Date(triggeredAt).toLocaleString()}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[10px]">ASSIGNED TO</span>
-            <span className="text-slate-200">{assignedTo || 'Unassigned'}</span>
+            <span className="text-muted block text-[10px]">ASSIGNED TO</span>
+            <span className="text-secondary">{assignedTo || 'Unassigned'}</span>
           </div>
         </div>
 
         {/* Trigger Condition & Values */}
         <div>
-          <h4 className="text-slate-400 font-semibold mb-1 uppercase tracking-wider text-[11px]">
+          <h4 className="text-muted font-semibold mb-1 uppercase  text-[11px]">
             Trigger Condition & Evidence
           </h4>
-          <div className="p-3 bg-slate-950 rounded border border-slate-800 font-mono space-y-1">
+          <div className="p-3 bg-canvas rounded border border-line font-sans space-y-1">
             <div>
-              <span className="text-slate-500">Condition:</span> {triggerCondition}
+              <span className="text-muted">Condition:</span> {triggerCondition}
             </div>
             {metricName && (
               <div>
-                <span className="text-slate-500">Metric:</span> {metricName}
+                <span className="text-muted">Metric:</span> {metricName}
               </div>
             )}
             {triggerVal !== null && triggerVal !== undefined && (
               <div>
-                <span className="text-slate-500">Trigger Value:</span>{' '}
-                <span className="text-amber-300">
+                <span className="text-muted">Trigger Value:</span>{' '}
+                <span className="text-warning">
                   {Number(triggerVal).toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
                   {unit}
                 </span>
@@ -159,8 +162,8 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
             )}
             {thresholdVal !== null && thresholdVal !== undefined && (
               <div>
-                <span className="text-slate-500">Threshold:</span>{' '}
-                <span className="text-slate-300">
+                <span className="text-muted">Threshold:</span>{' '}
+                <span className="text-secondary">
                   {Number(thresholdVal).toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
                   {unit}
                 </span>
@@ -172,10 +175,10 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
         {/* Evidence Payload */}
         {Object.keys(evidence).length > 0 && (
           <div>
-            <h4 className="text-slate-400 font-semibold mb-1 uppercase tracking-wider text-[11px]">
+            <h4 className="text-muted font-semibold mb-1 uppercase  text-[11px]">
               Snapshot Evidence Data
             </h4>
-            <pre className="p-3 bg-slate-950 rounded border border-slate-800 text-[11px] font-mono text-slate-300 overflow-x-auto max-h-48">
+            <pre className="p-3 bg-canvas rounded border border-line text-[11px] font-sans text-secondary overflow-x-auto max-h-48">
               {JSON.stringify(evidence, null, 2)}
             </pre>
           </div>
@@ -184,13 +187,13 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
         {/* Resolution Notes if closed */}
         {resolutionNotes && (
           <div>
-            <h4 className="text-slate-400 font-semibold mb-1 uppercase tracking-wider text-[11px]">
+            <h4 className="text-muted font-semibold mb-1 uppercase  text-[11px]">
               Resolution Rationale
             </h4>
-            <div className="p-3 bg-emerald-950/30 rounded border border-emerald-800/60 text-emerald-300 font-mono">
+            <div className="p-3 bg-positive-soft/30 rounded border border-positive/20 text-positive font-sans">
               {alert.resolution_notes}
               {alert.resolved_at && (
-                <div className="text-[10px] text-slate-500 mt-1">
+                <div className="text-[10px] text-muted mt-1">
                   Resolved at: {new Date(alert.resolved_at).toLocaleString()}
                 </div>
               )}
@@ -200,7 +203,7 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
 
         {/* Lifecycle Audit Timeline */}
         <div>
-          <h4 className="text-slate-400 font-semibold mb-2 uppercase tracking-wider text-[11px]">
+          <h4 className="text-muted font-semibold mb-2 uppercase  text-[11px]">
             Lifecycle Audit History
           </h4>
           <AlertHistoryTimeline events={historyEvents} loading={loading} />
@@ -208,13 +211,13 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
       </div>
 
       {/* Footer Actions */}
-      <div className="p-3 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-2">
+      <div className="p-3 border-t border-line bg-canvas flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {!alert.is_acknowledged && (
             <button
               type="button"
               onClick={() => setActiveModal('ack')}
-              className="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs transition"
+              className="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-ink font-semibold text-xs transition"
             >
               Acknowledge
             </button>
@@ -222,7 +225,7 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
           <button
             type="button"
             onClick={() => setActiveModal('assign')}
-            className="px-3 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition"
+            className="px-3 py-1.5 rounded bg-brand hover:bg-brand-hover text-white font-semibold text-xs transition"
           >
             Assign
           </button>
@@ -233,7 +236,7 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
             <button
               type="button"
               onClick={() => setActiveModal('reopen')}
-              className="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-white font-semibold text-xs transition"
+              className="px-3 py-1.5 rounded bg-hover hover:bg-line-strong text-ink font-semibold text-xs transition"
             >
               Reopen
             </button>
@@ -241,7 +244,7 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
             <button
               type="button"
               onClick={() => setActiveModal('close')}
-              className="px-3 py-1.5 rounded bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-xs transition"
+              className="px-3 py-1.5 rounded bg-emerald-700 hover:bg-brand-hover text-white font-semibold text-xs transition"
             >
               Close Alert
             </button>
@@ -264,7 +267,7 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
         isOpen={activeModal === 'assign'}
         title="Assign Alert"
         confirmLabel="Assign Alert"
-        confirmColorClass="bg-indigo-600 hover:bg-indigo-500"
+        confirmColorClass="bg-brand hover:bg-brand-hover"
         requiresAssignee
         onClose={() => setActiveModal(null)}
         onConfirm={handleAction}
@@ -275,7 +278,7 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
         isOpen={activeModal === 'close'}
         title="Close Alert"
         confirmLabel="Close Alert with Rationale"
-        confirmColorClass="bg-emerald-600 hover:bg-emerald-500"
+        confirmColorClass="bg-brand hover:bg-brand-hover"
         requiresRationale
         warningNotice={
           alert.has_linked_breach
@@ -291,7 +294,7 @@ export const AlertDetailDrawer: React.FC<AlertDetailDrawerProps> = ({
         isOpen={activeModal === 'reopen'}
         title="Reopen Alert"
         confirmLabel="Reopen Alert"
-        confirmColorClass="bg-slate-700 hover:bg-slate-600"
+        confirmColorClass="bg-hover hover:bg-line-strong"
         onClose={() => setActiveModal(null)}
         onConfirm={handleAction}
         loading={modalLoading}

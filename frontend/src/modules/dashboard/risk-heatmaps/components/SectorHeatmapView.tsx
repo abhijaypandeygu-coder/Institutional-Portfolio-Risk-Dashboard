@@ -23,19 +23,19 @@ export const SectorHeatmapView: React.FC<SectorHeatmapViewProps> = ({
   return (
     <div className="space-y-4">
       {/* Treemap Container */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 shadow-sm">
+      <div className="bg-surface border border-line rounded-lg p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-100 uppercase tracking-wide">
+            <h3 className="text-sm font-semibold text-ink uppercase ">
               Sector Risk & Exposure Treemap
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Area encodes <span className="text-slate-200 font-medium">{data.area_metric_id.replace(/_/g, ' ')}</span>,
-              Color encodes <span className="text-slate-200 font-medium">{data.color_metric.display_name}</span>. Click cell to inspect constituents.
+            <p className="text-xs text-muted mt-0.5">
+              Area encodes <span className="text-secondary font-medium">{data.area_metric_id.replace(/_/g, ' ')}</span>,
+              Color encodes <span className="text-secondary font-medium">{data.color_metric.display_name}</span>. Click cell to inspect constituents.
             </p>
           </div>
-          <div className="text-xs text-slate-400">
-            Total Exposure: <strong className="text-slate-100">{data.reporting_currency} {data.total_area_value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+          <div className="text-xs text-muted">
+            Total Exposure: <strong className="text-ink">{data.reporting_currency} {data.total_area_value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
           </div>
         </div>
 
@@ -54,17 +54,17 @@ export const SectorHeatmapView: React.FC<SectorHeatmapViewProps> = ({
                   backgroundColor: bgHex,
                   minHeight: `${Math.max(100, Math.min(200, (cell.area_weight_pct || 10) * 8))}px`,
                 }}
-                className={`p-3.5 rounded-lg cursor-pointer transition-all duration-150 transform hover:scale-[1.02] flex flex-col justify-between shadow-md relative overflow-hidden border ${
-                  isSelected ? 'ring-2 ring-blue-400 border-white' : 'border-slate-900/40 hover:border-slate-300'
+                className={`p-3.5 rounded-lg cursor-pointer transition-opacity duration-150 transform hover:scale-[1.02] flex flex-col justify-between shadow-md relative overflow-hidden border ${
+                  isSelected ? 'ring-2 ring-blue-400 border-white' : 'border-line/40 hover:border-line-strong'
                 }`}
               >
                 {/* Header: Label & Area Weight */}
                 <div>
-                  <div className="flex items-start justify-between gap-1 text-slate-950 font-bold">
+                  <div className="flex items-start justify-between gap-1 text-ink font-bold">
                     <span className="text-sm truncate" title={cell.label}>
                       {cell.label}
                     </span>
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-black/20 text-white backdrop-blur-sm">
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-black/20 text-ink ">
                       {cell.area_weight_pct?.toFixed(1) ?? '0.0'}%
                     </span>
                   </div>
@@ -75,10 +75,10 @@ export const SectorHeatmapView: React.FC<SectorHeatmapViewProps> = ({
 
                 {/* Primary Metric Value */}
                 <div className="mt-4 pt-2 border-t border-black/10">
-                  <div className="text-base font-extrabold text-slate-950 tracking-tight drop-shadow-sm">
+                  <div className="text-base font-extrabold text-ink  drop-shadow-sm">
                     {cell.formatted_value}
                   </div>
-                  <div className="text-[10px] text-slate-900/80 font-medium mt-0.5 flex justify-between">
+                  <div className="text-[10px] text-ink/80 font-medium mt-0.5 flex justify-between">
                     <span>Gross: {data.reporting_currency} {(cell.gross_exposure / 1000).toFixed(0)}k</span>
                     <span>Net: {data.reporting_currency} {(cell.net_exposure / 1000).toFixed(0)}k</span>
                   </div>

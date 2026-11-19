@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 interface ActionModalProps {
   isOpen: boolean;
@@ -17,7 +18,7 @@ export const AlertActionModal: React.FC<ActionModalProps> = ({
   isOpen,
   title,
   confirmLabel,
-  confirmColorClass = 'bg-blue-600 hover:bg-blue-500',
+  confirmColorClass = 'bg-brand hover:bg-brand-hover',
   warningNotice,
   requiresRationale = false,
   requiresAssignee = false,
@@ -44,14 +45,15 @@ export const AlertActionModal: React.FC<ActionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-      <div className="bg-slate-900 border border-slate-700 rounded-lg max-w-md w-full p-5 shadow-xl text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 ">
+      <div className="bg-surface border border-line-strong rounded-lg max-w-md w-full p-5 shadow-xl text-ink">
         <h3 className="text-base font-semibold mb-3">{title}</h3>
 
         {warningNotice && (
-          <div className="mb-4 p-3 rounded bg-amber-950/60 border border-amber-600/70 text-amber-200 text-xs">
-            <div className="font-bold mb-1 flex items-center gap-1">
-              <span>⚠️</span> CAUTION — INDEPENDENT CONTROL BOUNDARY
+          <div className="mb-4 p-3 rounded bg-warning-soft/60 border border-warning/20 text-warning text-xs">
+            <div className="font-bold mb-1 flex items-center gap-1.5">
+              <AlertTriangle className="size-3.5 text-warning" />
+              <span>CAUTION — INDEPENDENT CONTROL BOUNDARY</span>
             </div>
             <div>{warningNotice}</div>
           </div>
@@ -60,8 +62,8 @@ export const AlertActionModal: React.FC<ActionModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-3">
           {requiresAssignee && (
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">
-                Assignee User ID / Name <span className="text-red-400">*</span>
+              <label className="block text-xs font-medium text-muted mb-1">
+                Assignee User ID / Name <span className="text-negative">*</span>
               </label>
               <input
                 type="text"
@@ -69,15 +71,15 @@ export const AlertActionModal: React.FC<ActionModalProps> = ({
                 onChange={(e) => setAssignee(e.target.value)}
                 placeholder="e.g. risk_officer_1"
                 required
-                className="w-full px-3 py-1.5 bg-slate-950 border border-slate-700 rounded text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                className="w-full px-3 py-1.5 bg-canvas border border-line-strong rounded text-xs text-ink focus:outline-none focus:border-indigo-500 font-sans"
               />
             </div>
           )}
 
           {requiresRationale && (
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">
-                Mandatory Resolution Rationale <span className="text-red-400">*</span>
+              <label className="block text-xs font-medium text-muted mb-1">
+                Mandatory Resolution Rationale <span className="text-negative">*</span>
               </label>
               <textarea
                 value={rationale}
@@ -85,35 +87,35 @@ export const AlertActionModal: React.FC<ActionModalProps> = ({
                 placeholder="Provide detailed institutional reason for closing this risk alert..."
                 required
                 rows={3}
-                className="w-full px-3 py-1.5 bg-slate-950 border border-slate-700 rounded text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                className="w-full px-3 py-1.5 bg-canvas border border-line-strong rounded text-xs text-ink focus:outline-none focus:border-indigo-500 font-sans"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Operational Notes (Optional)</label>
+            <label className="block text-xs font-medium text-muted mb-1">Operational Notes (Optional)</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Audit log / contextual notes..."
               rows={2}
-              className="w-full px-3 py-1.5 bg-slate-950 border border-slate-700 rounded text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full px-3 py-1.5 bg-canvas border border-line-strong rounded text-xs text-ink focus:outline-none focus:border-indigo-500 font-sans"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-line">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-3 py-1.5 rounded text-xs text-slate-400 hover:text-slate-200 border border-slate-700 hover:bg-slate-800 transition"
+              className="px-3 py-1.5 rounded text-xs text-muted hover:text-secondary border border-line-strong hover:bg-subtle transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || (requiresRationale && !rationale.trim()) || (requiresAssignee && !assignee.trim())}
-              className={`px-3 py-1.5 rounded text-xs font-semibold text-white transition ${confirmColorClass} disabled:opacity-50`}
+              className={`px-3 py-1.5 rounded text-xs font-semibold text-ink transition ${confirmColorClass} disabled:opacity-50`}
             >
               {loading ? 'Processing...' : confirmLabel}
             </button>

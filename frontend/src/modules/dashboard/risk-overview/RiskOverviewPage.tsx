@@ -63,7 +63,7 @@ export const RiskOverviewPage: React.FC<RiskOverviewPageProps> = ({ portfolioId 
 
   if (isLoading && !data) {
     return (
-      <div className="flex items-center justify-center p-12 text-slate-400">
+      <div className="flex items-center justify-center p-12 text-muted">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
         <span>Retrieving authoritative risk metrics from M07 engine...</span>
       </div>
@@ -72,12 +72,12 @@ export const RiskOverviewPage: React.FC<RiskOverviewPageProps> = ({ portfolioId 
 
   if (error && !data) {
     return (
-      <div className="p-6 bg-rose-950/40 border border-rose-800 rounded-lg text-rose-300">
+      <div className="p-6 bg-negative-soft/40 border border-negative/20 rounded-lg text-negative">
         <h2 className="text-base font-semibold mb-1">Risk Overview Unavailable</h2>
         <p className="text-sm">{error}</p>
         <button
           onClick={fetchRiskOverview}
-          className="mt-4 px-3 py-1.5 bg-rose-800 hover:bg-rose-700 text-white rounded text-xs font-medium"
+          className="mt-4 px-3 py-1.5 bg-negative-soft hover:bg-rose-700 text-white rounded text-xs font-medium"
         >
           Retry Connection
         </button>
@@ -90,15 +90,15 @@ export const RiskOverviewPage: React.FC<RiskOverviewPageProps> = ({ portfolioId 
   return (
     <div className="space-y-6">
       {/* Header & Global Filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-line">
         <div>
           <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-bold tracking-tight text-white">M13.02 — Risk Overview</h1>
-            <span className="text-xs px-2 py-0.5 rounded bg-blue-950 border border-blue-800 text-blue-300 font-mono">
+            <h1 className="text-xl font-bold  text-ink">M13.02 — Risk Overview</h1>
+            <span className="text-xs px-2 py-0.5 rounded bg-brand-soft border border-brand/20 text-brand font-sans">
               {data.portfolio_id}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-muted mt-1">
             Consolidated daily monitoring of VaR, Expected Shortfall, Volatility, and Drawdown.
           </p>
         </div>
@@ -107,11 +107,11 @@ export const RiskOverviewPage: React.FC<RiskOverviewPageProps> = ({ portfolioId 
         <div className="flex flex-wrap items-center gap-3">
           {/* Confidence Selector */}
           <div className="flex flex-col">
-            <label className="text-[10px] text-slate-400 uppercase font-semibold">Confidence</label>
+            <label className="text-[10px] text-muted uppercase font-semibold">Confidence</label>
             <select
               value={confidenceLevel}
               onChange={(e) => setConfidenceLevel(parseFloat(e.target.value))}
-              className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded px-2.5 py-1.5 focus:border-blue-500"
+              className="bg-surface border border-line-strong text-secondary text-xs rounded px-2.5 py-1.5 focus:border-blue-500"
             >
               {data.available_confidence_levels.map((c) => (
                 <option key={c} value={c}>
@@ -123,11 +123,11 @@ export const RiskOverviewPage: React.FC<RiskOverviewPageProps> = ({ portfolioId 
 
           {/* Horizon Selector */}
           <div className="flex flex-col">
-            <label className="text-[10px] text-slate-400 uppercase font-semibold">Horizon</label>
+            <label className="text-[10px] text-muted uppercase font-semibold">Horizon</label>
             <select
               value={horizonDays}
               onChange={(e) => setHorizonDays(parseInt(e.target.value, 10))}
-              className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded px-2.5 py-1.5 focus:border-blue-500"
+              className="bg-surface border border-line-strong text-secondary text-xs rounded px-2.5 py-1.5 focus:border-blue-500"
             >
               {data.available_horizons_days.map((h) => (
                 <option key={h} value={h}>
@@ -139,11 +139,11 @@ export const RiskOverviewPage: React.FC<RiskOverviewPageProps> = ({ portfolioId 
 
           {/* VaR Methodology */}
           <div className="flex flex-col">
-            <label className="text-[10px] text-slate-400 uppercase font-semibold">VaR Model</label>
+            <label className="text-[10px] text-muted uppercase font-semibold">VaR Model</label>
             <select
               value={varMethodology}
               onChange={(e) => setVarMethodology(e.target.value)}
-              className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded px-2.5 py-1.5 focus:border-blue-500"
+              className="bg-surface border border-line-strong text-secondary text-xs rounded px-2.5 py-1.5 focus:border-blue-500"
             >
               {data.available_var_methodologies.map((m) => (
                 <option key={m} value={m}>
@@ -155,11 +155,11 @@ export const RiskOverviewPage: React.FC<RiskOverviewPageProps> = ({ portfolioId 
 
           {/* Volatility Lookback */}
           <div className="flex flex-col">
-            <label className="text-[10px] text-slate-400 uppercase font-semibold">Vol Lookback</label>
+            <label className="text-[10px] text-muted uppercase font-semibold">Vol Lookback</label>
             <select
               value={volatilityLookback}
               onChange={(e) => setVolatilityLookback(parseInt(e.target.value, 10))}
-              className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded px-2.5 py-1.5 focus:border-blue-500"
+              className="bg-surface border border-line-strong text-secondary text-xs rounded px-2.5 py-1.5 focus:border-blue-500"
             >
               {data.available_volatility_lookbacks.map((lb) => (
                 <option key={lb} value={lb}>
@@ -171,11 +171,11 @@ export const RiskOverviewPage: React.FC<RiskOverviewPageProps> = ({ portfolioId 
 
           {/* Drawdown Window */}
           <div className="flex flex-col">
-            <label className="text-[10px] text-slate-400 uppercase font-semibold">Drawdown Period</label>
+            <label className="text-[10px] text-muted uppercase font-semibold">Drawdown Period</label>
             <select
               value={drawdownPeriod}
               onChange={(e) => setDrawdownPeriod(e.target.value)}
-              className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded px-2.5 py-1.5 focus:border-blue-500"
+              className="bg-surface border border-line-strong text-secondary text-xs rounded px-2.5 py-1.5 focus:border-blue-500"
             >
               {data.available_drawdown_periods.map((p) => (
                 <option key={p} value={p}>
@@ -187,7 +187,7 @@ export const RiskOverviewPage: React.FC<RiskOverviewPageProps> = ({ portfolioId 
 
           <button
             onClick={fetchRiskOverview}
-            className="self-end px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-medium transition"
+            className="self-end px-3 py-1.5 bg-brand hover:bg-brand-hover text-white rounded text-xs font-medium transition"
           >
             Refresh
           </button>

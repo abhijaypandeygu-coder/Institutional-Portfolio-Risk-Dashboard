@@ -1,4 +1,6 @@
+import { UpstoxBrokerPanel } from '../../../components/UpstoxBrokerPanel';
 import React, { useState, useEffect, useCallback } from 'react';
+import { X } from 'lucide-react';
 import {
   ActiveBreachSummaryResponse,
   ActiveBreachItem,
@@ -15,15 +17,25 @@ import { RecentAlertSummary } from './components/RecentAlertSummary';
 import { RecentAlertFeed } from './components/RecentAlertFeed';
 import { AlertDetailDrawer } from './components/AlertDetailDrawer';
 
-export const AlertsDashboardPage: React.FC = () => {
+interface AlertsDashboardPageProps {
+  portfolioId?: string;
+}
+
+export const AlertsDashboardPage: React.FC<AlertsDashboardPageProps> = ({ portfolioId }) => {
   // Filters & Controls
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>('');
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>(portfolioId || '');
   const [availablePortfolios, setAvailablePortfolios] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
   const [severityFilter, setSeverityFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'all' | 'breaches' | 'alerts'>('all');
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [refreshInterval, setRefreshInterval] = useState<number>(10); // seconds
+
+  useEffect(() => {
+    if (portfolioId) {
+      setSelectedPortfolioId(portfolioId);
+    }
+  }, [portfolioId]);
 
   // Fetch available portfolios dynamically
   useEffect(() => {
@@ -237,16 +249,13 @@ export const AlertsDashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 space-y-6">
+    <div className="min-w-0 text-ink space-y-7">
       {/* Top Banner / Breadcrumb */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-800 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-line gap-4">
         <div>
-          <div className="text-xs uppercase tracking-wider text-slate-400 font-mono">
-            M13 Dashboard & Visualization Layer / M13.08
-          </div>
-          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Institutional Alerts Dashboard</h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time monitoring of active risk-limit breaches (M11) and dynamic risk alerts (M12).
+          <h1 className="text-3xl font-semibold text-ink ">Risk Alerts</h1>
+          <p className="text-xs text-muted mt-1">
+            Review active limit breaches, investigate alerts, and track resolution.
           </p>
         </div>
 
@@ -254,9 +263,9 @@ export const AlertsDashboardPage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2">
           {/* Portfolio filter */}
           <select
-            value={selectedPortfolioId}
+            aria-label="Filter alerts by portfolio" value={selectedPortfolioId}
             onChange={(e) => setSelectedPortfolioId(e.target.value)}
-            className="px-3 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 font-mono focus:outline-none focus:border-indigo-500"
+            className="max-w-full px-3 py-1.5 bg-surface border border-line-strong rounded text-xs text-secondary font-sans focus:outline-none focus:border-indigo-500"
           >
             <option value="">All Portfolios</option>
             {availablePortfolios.map((p) => (
@@ -270,7 +279,7 @@ export const AlertsDashboardPage: React.FC = () => {
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value)}
-            className="px-3 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 font-mono focus:outline-none focus:border-indigo-500"
+            className="max-w-full px-3 py-1.5 bg-surface border border-line-strong rounded text-xs text-secondary font-sans focus:outline-none focus:border-indigo-500"
           >
             <option value="">All Severities</option>
             <option value="EMERGENCY">Emergency (L3)</option>
@@ -283,7 +292,7 @@ export const AlertsDashboardPage: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 font-mono focus:outline-none focus:border-indigo-500"
+            className="max-w-full px-3 py-1.5 bg-surface border border-line-strong rounded text-xs text-secondary font-sans focus:outline-none focus:border-indigo-500"
           >
             <option value="">All Statuses</option>
             <option value="TRIGGERED">Triggered</option>
@@ -298,10 +307,10 @@ export const AlertsDashboardPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`px-3 py-1.5 rounded text-xs font-mono border transition ${
+            className={`px-3 py-1.5 rounded text-xs font-sans border transition ${
               autoRefresh
-                ? 'bg-emerald-950/60 border-emerald-700 text-emerald-300'
-                : 'bg-slate-900 border-slate-700 text-slate-400'
+                ? 'bg-positive-soft/60 border-positive/20 text-positive'
+                : 'bg-surface border-line-strong text-muted'
             }`}
           >
             Auto {autoRefresh ? `ON (${refreshInterval}s)` : 'OFF'}
@@ -310,7 +319,7 @@ export const AlertsDashboardPage: React.FC = () => {
           <button
             type="button"
             onClick={() => fetchData()}
-            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-semibold transition"
+            className="px-3 py-1.5 bg-brand hover:bg-brand-hover text-white rounded text-xs font-semibold transition"
           >
             Refresh
           </button>
@@ -322,32 +331,33 @@ export const AlertsDashboardPage: React.FC = () => {
         <div
           className={`p-3 rounded text-xs flex items-center justify-between border ${
             bannerMessage.type === 'warn'
-              ? 'bg-amber-950/70 border-amber-700 text-amber-200'
+              ? 'bg-warning-soft/70 border-warning/20 text-warning'
               : bannerMessage.type === 'info'
-              ? 'bg-blue-950/70 border-blue-700 text-blue-200'
-              : 'bg-emerald-950/70 border-emerald-700 text-emerald-200'
+              ? 'bg-brand-soft/70 border-brand/20 text-brand'
+              : 'bg-positive-soft/70 border-positive/20 text-positive'
           }`}
         >
           <span>{bannerMessage.text}</span>
           <button
             type="button"
             onClick={() => setBannerMessage(null)}
-            className="ml-4 text-xs font-mono hover:opacity-75"
+            className="ml-4 p-0.5 rounded hover:bg-subtle/50 text-muted hover:text-secondary"
+            aria-label="Dismiss message"
           >
-            ✕
+            <X className="size-3.5" />
           </button>
         </div>
       )}
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-slate-800 space-x-4 text-xs">
+      <div className="flex border-b border-line space-x-4 text-xs">
         <button
           type="button"
           onClick={() => setActiveTab('all')}
           className={`pb-2.5 font-medium transition ${
             activeTab === 'all'
-              ? 'border-b-2 border-indigo-500 text-indigo-400 font-bold'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'border-b-2 border-indigo-500 text-brand font-bold'
+              : 'text-muted hover:text-secondary'
           }`}
         >
           All Activity & Metrics
@@ -357,13 +367,13 @@ export const AlertsDashboardPage: React.FC = () => {
           onClick={() => setActiveTab('breaches')}
           className={`pb-2.5 font-medium transition flex items-center gap-1.5 ${
             activeTab === 'breaches'
-              ? 'border-b-2 border-indigo-500 text-indigo-400 font-bold'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'border-b-2 border-indigo-500 text-brand font-bold'
+              : 'text-muted hover:text-secondary'
           }`}
         >
           <span>Active Limit Breaches</span>
           {(breachSummary?.total_active_breaches || 0) > 0 && (
-            <span className="px-1.5 py-0.2 bg-red-900 text-red-200 rounded-full text-[10px] font-mono">
+            <span className="px-1.5 py-0.2 bg-negative-soft text-negative rounded-full text-[10px] font-sans">
               {breachSummary?.total_active_breaches}
             </span>
           )}
@@ -373,13 +383,13 @@ export const AlertsDashboardPage: React.FC = () => {
           onClick={() => setActiveTab('alerts')}
           className={`pb-2.5 font-medium transition flex items-center gap-1.5 ${
             activeTab === 'alerts'
-              ? 'border-b-2 border-indigo-500 text-indigo-400 font-bold'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'border-b-2 border-indigo-500 text-brand font-bold'
+              : 'text-muted hover:text-secondary'
           }`}
         >
           <span>Alerts Feed</span>
           {(alertSummary?.unacknowledged_alerts || 0) > 0 && (
-            <span className="px-1.5 py-0.2 bg-amber-900 text-amber-200 rounded-full text-[10px] font-mono">
+            <span className="px-1.5 py-0.2 bg-warning-soft text-warning rounded-full text-[10px] font-sans">
               {alertSummary?.unacknowledged_alerts}
             </span>
           )}
@@ -390,8 +400,8 @@ export const AlertsDashboardPage: React.FC = () => {
       {(activeTab === 'all' || activeTab === 'breaches') && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs uppercase font-mono tracking-wider text-slate-400">
-              Risk Limits & Control Framework (M11 Authoritative Breaches)
+            <h2 className="text-xs uppercase font-sans  text-muted">
+              Active limit breaches
             </h2>
           </div>
           <ActiveBreachSummary summary={breachSummary} loading={loading} />
@@ -399,7 +409,14 @@ export const AlertsDashboardPage: React.FC = () => {
             breaches={breaches}
             loading={loading}
             onSelectBreach={(b) => {
-              const utilText = b.utilization_pct !== undefined ? `${b.utilization_pct.toFixed(1)}%` : (b.utilization ? `${Number(b.utilization).toFixed(1)}%` : '—');
+              let utilNum: number = 0;
+              if (b.utilization_pct !== undefined && b.utilization_pct !== null) {
+                utilNum = b.utilization_pct;
+              } else if (b.utilization !== undefined && b.utilization !== null) {
+                const raw = Number(b.utilization);
+                utilNum = raw <= 5.0 ? raw * 100 : raw;
+              }
+              const utilText = utilNum ? `${utilNum.toFixed(1)}%` : '—';
               setBannerMessage({
                 text: `Selected Breach: ${b.rule_name || b.risk_limit_id || b.breach_id} (${b.breach_id}) — Utilization: ${utilText}`,
                 type: 'info',
@@ -413,8 +430,8 @@ export const AlertsDashboardPage: React.FC = () => {
       {(activeTab === 'all' || activeTab === 'alerts') && (
         <section className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs uppercase font-mono tracking-wider text-slate-400">
-              Risk Alerts & Notification Subsystem (M12 Activity Stream)
+            <h2 className="text-xs uppercase font-sans  text-muted">
+              Recent alerts
             </h2>
           </div>
           <RecentAlertSummary summary={alertSummary} loading={loading} />
@@ -427,6 +444,8 @@ export const AlertsDashboardPage: React.FC = () => {
           />
         </section>
       )}
+
+      <UpstoxBrokerPanel mode="risk" />
 
       {/* Detail Drawer */}
       <AlertDetailDrawer

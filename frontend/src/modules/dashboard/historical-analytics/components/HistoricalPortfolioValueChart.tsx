@@ -12,7 +12,7 @@ export const HistoricalPortfolioValueChart: React.FC<HistoricalPortfolioValueCha
 }) => {
   if (!data || !data.observations || data.observations.length === 0) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center text-slate-400">
+      <div className="bg-surface border border-line rounded-lg p-6 text-center text-muted">
         No authoritative historical portfolio snapshot records found for the selected horizon.
       </div>
     );
@@ -25,16 +25,16 @@ export const HistoricalPortfolioValueChart: React.FC<HistoricalPortfolioValueCha
   const range = maxVal - minVal > 0 ? maxVal - minVal : 1;
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 shadow-sm text-slate-100">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4 border-b border-slate-800 pb-3">
+    <div className="bg-surface border border-line rounded-lg p-5 shadow-sm text-ink">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-4 border-b border-line pb-3">
         <div>
-          <h3 className="text-base font-semibold text-slate-100 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-ink flex items-center gap-2">
             Historical Portfolio Valuation (NAV)
-            <span className="text-xs font-normal px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+            <span className="text-xs font-normal px-2 py-0.5 rounded bg-subtle text-secondary">
               Source: M05.07 / M05.03
             </span>
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             Preserved historical valuations without interpolation or forward-filling
           </p>
         </div>
@@ -42,22 +42,22 @@ export const HistoricalPortfolioValueChart: React.FC<HistoricalPortfolioValueCha
         {/* KPI Strip */}
         <div className="flex items-center gap-6 text-right">
           <div>
-            <div className="text-xs text-slate-400">Starting NAV</div>
-            <div className="text-sm font-semibold text-slate-200">
+            <div className="text-xs text-muted">Starting NAV</div>
+            <div className="text-sm font-semibold text-secondary">
               {summary_kpis.starting_nav.toLocaleString(undefined, { minimumFractionDigits: 2 })} {base_currency}
             </div>
           </div>
           <div>
-            <div className="text-xs text-slate-400">Ending NAV</div>
-            <div className="text-sm font-semibold text-slate-200">
+            <div className="text-xs text-muted">Ending NAV</div>
+            <div className="text-sm font-semibold text-secondary">
               {summary_kpis.ending_nav.toLocaleString(undefined, { minimumFractionDigits: 2 })} {base_currency}
             </div>
           </div>
           <div>
-            <div className="text-xs text-slate-400">Total Return</div>
+            <div className="text-xs text-muted">Total Return</div>
             <div
               className={`text-sm font-semibold ${
-                summary_kpis.total_return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                summary_kpis.total_return_pct >= 0 ? 'text-positive' : 'text-negative'
               }`}
             >
               {summary_kpis.total_return_pct >= 0 ? '+' : ''}
@@ -71,9 +71,9 @@ export const HistoricalPortfolioValueChart: React.FC<HistoricalPortfolioValueCha
       <div className="relative h-64 w-full pt-4 pb-2">
         <svg className="w-full h-full overflow-visible" viewBox="0 0 1000 200" preserveAspectRatio="none">
           {/* Grid lines */}
-          <line x1="0" y1="20" x2="1000" y2="20" stroke="#334155" strokeDasharray="3 3" />
-          <line x1="0" y1="100" x2="1000" y2="100" stroke="#334155" strokeDasharray="3 3" />
-          <line x1="0" y1="180" x2="1000" y2="180" stroke="#334155" strokeDasharray="3 3" />
+          <line x1="0" y1="20" x2="1000" y2="20" stroke="#d2d2d7" strokeDasharray="3 3" />
+          <line x1="0" y1="100" x2="1000" y2="100" stroke="#d2d2d7" strokeDasharray="3 3" />
+          <line x1="0" y1="180" x2="1000" y2="180" stroke="#d2d2d7" strokeDasharray="3 3" />
 
           {/* Value Area / Polyline */}
           <polyline
@@ -116,7 +116,7 @@ export const HistoricalPortfolioValueChart: React.FC<HistoricalPortfolioValueCha
       </div>
 
       {/* Timeline Labels */}
-      <div className="flex justify-between text-xs text-slate-500 mt-2 px-1">
+      <div className="flex justify-between text-xs text-muted mt-2 px-1">
         <span>{new Date(observations[0].effective_at).toLocaleDateString()}</span>
         <span>Click any observation node to inspect Point-in-Time State</span>
         <span>{new Date(observations[observations.length - 1].effective_at).toLocaleDateString()}</span>

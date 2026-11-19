@@ -1,0 +1,9 @@
+# source_module: M14
+# dataset_id: portfolio_performance_series
+# portfolio_id: PORT_STR_a74557
+# as_of_timestamp: 2026-11-18T08:23:31.610437+00:00
+# export_timestamp: 2026-11-18T08:23:31.610437+00:00
+# reporting_currency: INR
+date,portfolio_nav,daily_pnl,daily_return_pct,cumulative_return_pct,benchmark_return_pct,external_cash_flow
+,,,,,,
+,,,,,,

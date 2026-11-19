@@ -465,6 +465,43 @@ async def test_stress_dashboard_persistence_and_api():
         annos = await svc.list_annotations(scenario_id=scen_id)
         assert len(annos) == 1
 
+        # Seed minimal replay run for calc_id so it can be retrieved via results API
+        from datetime import datetime, timezone, timedelta
+        from backend.app.modules.scenario_analysis.historical_scenarios.models.scenario_models import (
+            HistoricalScenarioEvent,
+            HistoricalScenarioReplayRun,
+        )
+        now_dt = datetime.now(timezone.utc)
+        scen_ev = HistoricalScenarioEvent(
+            id=scen_id,
+            event_code=f"EV_{scen_id}",
+            event_name="API Test Event",
+            category="HISTORICAL",
+            start_date=now_dt - timedelta(days=60),
+            end_date=now_dt - timedelta(days=30),
+            created_by=user_id,
+        )
+        session.add(scen_ev)
+        replay_run = HistoricalScenarioReplayRun(
+            id=calc_id,
+            replay_code=f"REP_{calc_id}",
+            scenario_event_id=scen_id,
+            portfolio_id=port_id,
+            portfolio_snapshot_id=f"snap_{uuid.uuid4().hex[:6]}",
+            base_currency="USD",
+            baseline_nav=Decimal("10000000.00"),
+            scenario_nav=Decimal("9350000.00"),
+            scenario_pnl=Decimal("-650000.00"),
+            scenario_return=Decimal("-0.065"),
+            replay_status="COMPLETED",
+            started_at=now_dt,
+            completed_at=now_dt,
+            direct_coverage=Decimal("1.0"),
+            proxy_coverage=Decimal("0.0"),
+        )
+        session.add(replay_run)
+        await session.commit()
+
     # 4. HTTP API Endpoints via AsyncClient
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -506,11 +543,59 @@ async def test_stress_dashboard_persistence_and_api():
         comp_data = resp.json()
         assert "scenarios" in comp_data
 
+        # Run visualizer direct test
+        pv_res = await svc.run_portfolio_visualizer_simulation(config={
+            "initial_amount": 1000000.0,
+            "withdrawal_amount": 45000.0,
+            "simulation_period_years": 30,
+            "allocations": [
+                {"asset_name": "US Stock Market", "allocation_pct": 60.0},
+                {"asset_name": "10-year Treasury", "allocation_pct": 40.0},
+            ],
+            "tax_treatment": "Pre-tax Returns",
+        })
+        assert pv_res.scenario_name.startswith("Portfolio Visualizer")
+        assert len(pv_res.histogram_bins) == 15
+        assert sum(b.count for b in pv_res.histogram_bins) == 2000
+
+        # Run visualizer with taxes and custom withdrawal
+        pv_res_tax = await svc.run_portfolio_visualizer_simulation(config={
+            "initial_amount": 500000.0,
+            "withdrawal_amount": 25000.0,
+            "simulation_period_years": 20,
+            "withdrawal_frequency": "Monthly",
+            "tax_treatment": "After-tax Returns",
+            "allocations": [
+                {"asset_name": "US Stock Market", "allocation_pct": 100.0},
+            ],
+        })
+        assert pv_res_tax.scenario_name.startswith("Portfolio Visualizer")
+        assert sum(b.count for b in pv_res_tax.histogram_bins) == 2000
+
         # Attribution endpoint
         resp = await ac.get(f"/api/v1/dashboard/stress/attribution/{calc_id}")
         assert resp.status_code == 200
         attr_data = resp.json()
         assert "position_contributors" in attr_data
+
+        # Portfolio Visualizer live API endpoint
+        resp = await ac.post(
+            "/api/v1/dashboard/stress/simulation/run-visualizer",
+            json={
+                "initial_amount": 1000000.0,
+                "withdrawal_amount": 45000.0,
+                "simulation_period_years": 30,
+                "allocations": [
+                    {"asset_name": "US Stock Market", "allocation_pct": 60.0},
+                    {"asset_name": "10-year Treasury", "allocation_pct": 40.0},
+                ],
+            },
+        )
+        assert resp.status_code == 200
+        api_pv_data = resp.json()
+        assert api_pv_data["scenario_name"].startswith("Portfolio Visualizer")
+        assert len(api_pv_data["histogram_bins"]) == 15
+        assert sum(b["count"] for b in api_pv_data["histogram_bins"]) == 2000
 
         # Preferences API
         resp = await ac.get(

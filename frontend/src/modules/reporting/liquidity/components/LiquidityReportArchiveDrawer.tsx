@@ -31,40 +31,40 @@ export const LiquidityReportArchiveDrawer: React.FC<Props> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-96 bg-slate-900 border-l border-slate-800 shadow-2xl p-5 z-50 overflow-y-auto flex flex-col justify-between">
+    <div className="fixed inset-y-0 right-0 w-96 bg-surface border-l border-line shadow-2xl p-5 z-50 overflow-y-auto flex flex-col justify-between">
       <div>
-        <div className="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+        <div className="flex justify-between items-center pb-3 border-b border-line mb-4">
           <div className="flex items-center gap-2">
-            <span className="text-base font-bold text-slate-100">Report Lineage & Archive</span>
-            <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+            <span className="text-base font-bold text-ink">Report Lineage & Archive</span>
+            <span className="text-xs px-2 py-0.5 rounded bg-subtle text-muted font-sans">
               {reports.length}
             </span>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 text-lg leading-none p-1"
+            className="text-muted hover:text-secondary text-lg leading-none p-1"
           >
             &times;
           </button>
         </div>
 
         {/* Artifact Export & SHA-256 Verification Section */}
-        <div className="bg-slate-950 p-4 rounded border border-slate-800 mb-5">
-          <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wide mb-2 flex items-center justify-between">
+        <div className="bg-canvas p-4 rounded border border-line mb-5">
+          <h3 className="text-xs font-semibold text-secondary uppercase  mb-2 flex items-center justify-between">
             <span>Finalized Artifacts</span>
-            <span className="text-[10px] text-emerald-400 font-mono">SHA-256 Verified</span>
+            <span className="text-[10px] text-positive font-sans">SHA-256 Verified</span>
           </h3>
 
           <div className="space-y-2 mb-3">
             {artifacts.map((art) => (
-              <div key={art.artifact_type} className="flex justify-between items-center text-xs p-1.5 rounded bg-slate-900 border border-slate-800">
-                <span className="font-semibold text-slate-200">{art.artifact_type}</span>
-                <span className="text-[10px] text-slate-500 font-mono">
+              <div key={art.artifact_type} className="flex justify-between items-center text-xs p-1.5 rounded bg-surface border border-line">
+                <span className="font-semibold text-secondary">{art.artifact_type}</span>
+                <span className="text-[10px] text-muted font-sans">
                   {art.file_hash.substring(0, 12)}...
                 </span>
                 <button
                   onClick={() => onVerifyHash(art.artifact_type)}
-                  className="px-2 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-900"
+                  className="px-2 py-0.5 rounded text-[10px] bg-subtle hover:bg-hover text-brand border border-brand/20"
                 >
                   {verifiedStatus[art.artifact_type] ? '✓ Valid' : 'Verify'}
                 </button>
@@ -77,14 +77,14 @@ export const LiquidityReportArchiveDrawer: React.FC<Props> = ({
               onClick={() => {
                 alert(`Exporting ${selectedFormat} artifact for current report.`);
               }}
-              className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded text-xs transition-colors"
+              className="flex-1 py-1.5 bg-brand hover:bg-brand-hover text-white font-semibold rounded text-xs transition-colors"
             >
               Download {selectedFormat}
             </button>
             <select
               value={selectedFormat}
               onChange={(e) => setSelectedFormat(e.target.value as LiquidityArtifactType)}
-              className="bg-slate-900 border border-slate-700 rounded px-2 text-xs text-slate-200"
+              className="bg-surface border border-line-strong rounded px-2 text-xs text-secondary"
             >
               <option value="CSV">CSV</option>
               <option value="HTML">HTML</option>
@@ -94,7 +94,7 @@ export const LiquidityReportArchiveDrawer: React.FC<Props> = ({
         </div>
 
         {/* Historical Version Lineage */}
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">
+        <h3 className="text-xs font-semibold text-muted uppercase  mb-3">
           Historical Report Versions
         </h3>
         <div className="space-y-2">
@@ -104,21 +104,21 @@ export const LiquidityReportArchiveDrawer: React.FC<Props> = ({
               onClick={() => onSelectReport(r.report_id)}
               className={`p-3 rounded border cursor-pointer transition-colors ${
                 r.report_id === currentReportId
-                  ? 'bg-emerald-950/40 border-emerald-600'
-                  : 'bg-slate-950 border-slate-800 hover:bg-slate-800/60'
+                  ? 'bg-positive-soft/40 border-positive/20'
+                  : 'bg-canvas border-line hover:bg-subtle/60'
               }`}
             >
               <div className="flex justify-between items-start mb-1">
-                <span className="text-xs font-bold text-slate-200">{r.report_code}</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                <span className="text-xs font-bold text-secondary">{r.report_code}</span>
+                <span className="text-[10px] font-sans px-1.5 py-0.5 rounded bg-subtle text-secondary">
                   v{r.report_version}
                 </span>
               </div>
-              <div className="text-[11px] text-slate-400 flex justify-between items-center">
+              <div className="text-[11px] text-muted flex justify-between items-center">
                 <span>{new Date(r.as_of_timestamp).toLocaleDateString()}</span>
                 <span
                   className={`text-[10px] font-semibold ${
-                    r.reconciliation_status === 'RECONCILED' ? 'text-emerald-400' : 'text-amber-400'
+                    r.reconciliation_status === 'RECONCILED' ? 'text-positive' : 'text-warning'
                   }`}
                 >
                   {r.reconciliation_status}
@@ -129,7 +129,7 @@ export const LiquidityReportArchiveDrawer: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="pt-4 border-t border-slate-800 text-[10px] text-slate-500 text-center">
+      <div className="pt-4 border-t border-line text-[10px] text-muted text-center">
         Immutable Audit & Version Lineage Engine | M14.05
       </div>
     </div>

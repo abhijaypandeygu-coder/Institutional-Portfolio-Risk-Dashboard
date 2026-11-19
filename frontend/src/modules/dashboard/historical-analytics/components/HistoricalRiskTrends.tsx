@@ -15,22 +15,22 @@ export const HistoricalRiskTrends: React.FC<HistoricalRiskTrendsProps> = ({
   onSelectTimestamp,
 }) => {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 shadow-sm text-slate-100">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4 border-b border-slate-800 pb-3">
+    <div className="bg-surface border border-line rounded-lg p-5 shadow-sm text-ink">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-4 border-b border-line pb-3">
         <div>
-          <h3 className="text-base font-semibold text-slate-100 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-ink flex items-center gap-2">
             Quantitative Risk Evolution
-            <span className="text-xs font-normal px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+            <span className="text-xs font-normal px-2 py-0.5 rounded bg-subtle text-secondary">
               Source: M07 Risk Engine
             </span>
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             Model parameters and confidence horizons preserved from authoritative runs
           </p>
         </div>
 
         {/* Metric Selector */}
-        <div className="flex bg-slate-800 border border-slate-700 rounded overflow-hidden">
+        <div className="flex bg-subtle border border-line-strong rounded overflow-hidden">
           {[
             { label: 'VaR (99%)', value: 'VAR' },
             { label: 'Expected Shortfall', value: 'ES' },
@@ -44,7 +44,7 @@ export const HistoricalRiskTrends: React.FC<HistoricalRiskTrendsProps> = ({
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                 selectedMetric === m.value
                   ? 'bg-rose-600 text-white'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                  : 'text-muted hover:text-secondary hover:bg-hover'
               }`}
             >
               {m.label}
@@ -54,37 +54,37 @@ export const HistoricalRiskTrends: React.FC<HistoricalRiskTrendsProps> = ({
       </div>
 
       {!data || !data.observations || data.observations.length === 0 ? (
-        <div className="py-12 text-center text-slate-400 text-sm">
+        <div className="py-12 text-center text-muted text-sm">
           No authoritative risk observations recorded for {selectedMetric} in this window.
         </div>
       ) : (
         <div>
           {/* Summary Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            <div className="bg-slate-950/50 p-2.5 rounded border border-slate-800/80">
-              <span className="text-xs text-slate-400">Latest</span>
-              <div className="text-sm font-semibold text-rose-400">
+            <div className="bg-canvas/50 p-2.5 rounded border border-line/80">
+              <span className="text-xs text-muted">Latest</span>
+              <div className="text-sm font-semibold text-negative">
                 {data.summary_statistics.latest_value.toLocaleString(undefined, { minimumFractionDigits: 2 })}{' '}
                 {data.unit === 'PERCENTAGE' ? '%' : data.currency}
               </div>
             </div>
-            <div className="bg-slate-950/50 p-2.5 rounded border border-slate-800/80">
-              <span className="text-xs text-slate-400">Peak Risk</span>
-              <div className="text-sm font-semibold text-rose-300">
+            <div className="bg-canvas/50 p-2.5 rounded border border-line/80">
+              <span className="text-xs text-muted">Peak Risk</span>
+              <div className="text-sm font-semibold text-negative">
                 {data.summary_statistics.max_value.toLocaleString(undefined, { minimumFractionDigits: 2 })}{' '}
                 {data.unit === 'PERCENTAGE' ? '%' : data.currency}
               </div>
             </div>
-            <div className="bg-slate-950/50 p-2.5 rounded border border-slate-800/80">
-              <span className="text-xs text-slate-400">Average</span>
-              <div className="text-sm font-semibold text-slate-300">
+            <div className="bg-canvas/50 p-2.5 rounded border border-line/80">
+              <span className="text-xs text-muted">Average</span>
+              <div className="text-sm font-semibold text-secondary">
                 {data.summary_statistics.mean_value.toLocaleString(undefined, { minimumFractionDigits: 2 })}{' '}
                 {data.unit === 'PERCENTAGE' ? '%' : data.currency}
               </div>
             </div>
-            <div className="bg-slate-950/50 p-2.5 rounded border border-slate-800/80">
-              <span className="text-xs text-slate-400">Trough Risk</span>
-              <div className="text-sm font-semibold text-slate-400">
+            <div className="bg-canvas/50 p-2.5 rounded border border-line/80">
+              <span className="text-xs text-muted">Trough Risk</span>
+              <div className="text-sm font-semibold text-muted">
                 {data.summary_statistics.min_value.toLocaleString(undefined, { minimumFractionDigits: 2 })}{' '}
                 {data.unit === 'PERCENTAGE' ? '%' : data.currency}
               </div>
@@ -94,9 +94,9 @@ export const HistoricalRiskTrends: React.FC<HistoricalRiskTrendsProps> = ({
           {/* SVG Trendline */}
           <div className="relative h-48 w-full pt-2 pb-2">
             <svg className="w-full h-full overflow-visible" viewBox="0 0 1000 160" preserveAspectRatio="none">
-              <line x1="0" y1="20" x2="1000" y2="20" stroke="#334155" strokeDasharray="3 3" />
-              <line x1="0" y1="80" x2="1000" y2="80" stroke="#334155" strokeDasharray="3 3" />
-              <line x1="0" y1="140" x2="1000" y2="140" stroke="#334155" strokeDasharray="3 3" />
+              <line x1="0" y1="20" x2="1000" y2="20" stroke="#d2d2d7" strokeDasharray="3 3" />
+              <line x1="0" y1="80" x2="1000" y2="80" stroke="#d2d2d7" strokeDasharray="3 3" />
+              <line x1="0" y1="140" x2="1000" y2="140" stroke="#d2d2d7" strokeDasharray="3 3" />
 
               <polyline
                 fill="none"

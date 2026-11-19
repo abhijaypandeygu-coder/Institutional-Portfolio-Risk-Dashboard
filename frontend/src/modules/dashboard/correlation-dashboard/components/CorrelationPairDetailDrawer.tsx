@@ -46,20 +46,20 @@ export const CorrelationPairDetailDrawer: React.FC<CorrelationPairDetailDrawerPr
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full max-w-xl bg-slate-900 border-l border-slate-800 shadow-2xl z-50 overflow-y-auto flex flex-col">
+    <div className="fixed inset-y-0 right-0 w-full max-w-xl bg-surface border-l border-line shadow-2xl z-50 overflow-y-auto flex flex-col">
       {/* Drawer Header */}
-      <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80 sticky top-0 backdrop-blur-md">
+      <div className="p-5 border-b border-line flex items-center justify-between bg-canvas/80 sticky top-0 ">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800">
+          <span className="text-[10px] font-bold uppercase  px-2 py-0.5 rounded bg-brand-soft text-brand border border-brand/20">
             RELATIONSHIP INSPECTION
           </span>
-          <h3 className="text-lg font-bold text-slate-100 mt-1">
+          <h3 className="text-lg font-bold text-ink mt-1">
             {detail ? `${detail.instrument_a_symbol} ↔ ${detail.instrument_b_symbol}` : 'Loading Pair...'}
           </h3>
         </div>
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-slate-200 p-2 rounded-lg hover:bg-slate-800 transition-colors"
+          className="text-muted hover:text-secondary p-2 rounded-lg hover:bg-subtle transition-colors"
         >
           ✕
         </button>
@@ -70,53 +70,53 @@ export const CorrelationPairDetailDrawer: React.FC<CorrelationPairDetailDrawerPr
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-48 space-y-3">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
-            <p className="text-xs text-slate-400">Retrieving pairwise statistics & return observations...</p>
+            <p className="text-xs text-muted">Retrieving pairwise statistics & return observations...</p>
           </div>
         ) : detail ? (
           <>
             {/* KPI Cards */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-slate-800/60 p-3 rounded-lg border border-slate-800">
-                <div className="text-[11px] text-slate-400">Correlation (ρ)</div>
-                <div className="text-base font-extrabold text-slate-100 mt-0.5">
+              <div className="bg-subtle/60 p-3 rounded-lg border border-line">
+                <div className="text-[11px] text-muted">Correlation (ρ)</div>
+                <div className="text-base font-extrabold text-ink mt-0.5">
                   {Number(detail.correlation).toFixed(4)}
                 </div>
               </div>
-              <div className="bg-slate-800/60 p-3 rounded-lg border border-slate-800">
-                <div className="text-[11px] text-slate-400">Sample Size</div>
-                <div className="text-base font-extrabold text-slate-100 mt-0.5">
+              <div className="bg-subtle/60 p-3 rounded-lg border border-line">
+                <div className="text-[11px] text-muted">Sample Size</div>
+                <div className="text-base font-extrabold text-ink mt-0.5">
                   {detail.sample_size} Days
                 </div>
               </div>
-              <div className="bg-slate-800/60 p-3 rounded-lg border border-slate-800">
-                <div className="text-[11px] text-slate-400">95% CI Range</div>
-                <div className="text-xs font-bold text-slate-200 mt-1">
+              <div className="bg-subtle/60 p-3 rounded-lg border border-line">
+                <div className="text-[11px] text-muted">95% CI Range</div>
+                <div className="text-xs font-bold text-secondary mt-1">
                   [{Number(detail.ci_lower_95 || 0).toFixed(2)}, {Number(detail.ci_upper_95 || 0).toFixed(2)}]
                 </div>
               </div>
             </div>
 
             {/* Statistical Diagnostics */}
-            <div className="bg-slate-800/40 border border-slate-800 rounded-lg p-3.5 space-y-1.5 text-slate-300">
-              <div className="font-semibold text-slate-200 border-b border-slate-700/60 pb-1 mb-2">
+            <div className="bg-subtle/40 border border-line rounded-lg p-3.5 space-y-1.5 text-secondary">
+              <div className="font-semibold text-secondary border-b border-line-strong/60 pb-1 mb-2">
                 Statistical Diagnostics & Covariance
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Covariance (σ_ab):</span>
+                <span className="text-muted">Covariance (σ_ab):</span>
                 <span>{detail.covariance !== null && detail.covariance !== undefined ? Number(detail.covariance).toFixed(6) : 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">t-Statistic / p-Value:</span>
+                <span className="text-muted">t-Statistic / p-Value:</span>
                 <span>{detail.t_statistic ? Number(detail.t_statistic).toFixed(2) : '—'} (p = {detail.p_value ? Number(detail.p_value).toFixed(4) : '—'})</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Standard Error (SE):</span>
+                <span className="text-muted">Standard Error (SE):</span>
                 <span>{detail.std_error ? Number(detail.std_error).toFixed(4) : '—'}</span>
               </div>
               {detail.least_squares_slope !== null && detail.least_squares_slope !== undefined && (
                 <div className="flex justify-between">
-                  <span className="text-slate-400">OLS Regression Slope (β):</span>
-                  <span className="font-semibold text-blue-400">{Number(detail.least_squares_slope).toFixed(3)}</span>
+                  <span className="text-muted">OLS Regression Slope (β):</span>
+                  <span className="font-semibold text-brand">{Number(detail.least_squares_slope).toFixed(3)}</span>
                 </div>
               )}
             </div>
@@ -124,29 +124,29 @@ export const CorrelationPairDetailDrawer: React.FC<CorrelationPairDetailDrawerPr
             {/* Return Scatter Plot Table */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold uppercase tracking-wider text-slate-400">
+                <h4 className="font-semibold uppercase  text-muted">
                   Paired Return Observations ({detail.scatter_points.length} Sessions)
                 </h4>
-                <span className="text-[10px] text-slate-500">Log Returns</span>
+                <span className="text-[10px] text-muted">Log Returns</span>
               </div>
 
-              <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-950/40 max-h-48 overflow-y-auto">
+              <div className="border border-line rounded-lg overflow-hidden bg-canvas/40 max-h-48 overflow-y-auto">
                 <table className="min-w-full divide-y divide-slate-800 text-[11px]">
-                  <thead className="bg-slate-900/60 text-slate-400">
+                  <thead className="bg-surface/60 text-muted">
                     <tr>
                       <th className="py-1.5 px-3 text-left">Trading Date</th>
                       <th className="py-1.5 px-3 text-right">{detail.instrument_a_symbol} Return</th>
                       <th className="py-1.5 px-3 text-right">{detail.instrument_b_symbol} Return</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800 text-slate-300">
+                  <tbody className="divide-y divide-slate-800 text-secondary">
                     {detail.scatter_points.map((pt, i) => (
-                      <tr key={i} className="hover:bg-slate-800/40">
-                        <td className="py-1 px-3 text-slate-400">{pt.observation_date}</td>
-                        <td className="py-1 px-3 text-right font-mono">
+                      <tr key={i} className="hover:bg-subtle/40">
+                        <td className="py-1 px-3 text-muted">{pt.observation_date}</td>
+                        <td className="py-1 px-3 text-right font-sans">
                           {Number(pt.return_a) > 0 ? '+' : ''}{(Number(pt.return_a) * 100).toFixed(2)}%
                         </td>
-                        <td className="py-1 px-3 text-right font-mono">
+                        <td className="py-1 px-3 text-right font-sans">
                           {Number(pt.return_b) > 0 ? '+' : ''}{(Number(pt.return_b) * 100).toFixed(2)}%
                         </td>
                       </tr>
@@ -157,24 +157,24 @@ export const CorrelationPairDetailDrawer: React.FC<CorrelationPairDetailDrawerPr
             </div>
 
             {/* Operational Investigation Note */}
-            <div className="bg-slate-950 border border-slate-800 rounded-lg p-3.5 space-y-2">
-              <div className="font-semibold text-slate-200">Record Operational Investigation Note</div>
+            <div className="bg-canvas border border-line rounded-lg p-3.5 space-y-2">
+              <div className="font-semibold text-secondary">Record Operational Investigation Note</div>
               <textarea
                 value={userNote}
                 onChange={(e) => setUserNote(e.target.value)}
                 placeholder="Document thesis, regime change context, or review notes..."
-                className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full bg-surface border border-line-strong rounded p-2 text-xs text-ink placeholder-muted focus:outline-none focus:ring-1 focus:ring-blue-500"
                 rows={3}
               />
               <div className="flex items-center justify-between">
                 <button
                   type="button"
                   onClick={handleSaveInvestigation}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded font-semibold text-xs transition-colors"
+                  className="px-3 py-1.5 bg-brand hover:bg-brand-hover text-white rounded font-semibold text-xs transition-colors"
                 >
                   Save Investigation
                 </button>
-                {saveStatus && <span className="text-[11px] text-emerald-400">{saveStatus}</span>}
+                {saveStatus && <span className="text-[11px] text-positive">{saveStatus}</span>}
               </div>
             </div>
           </>

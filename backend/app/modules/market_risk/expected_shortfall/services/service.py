@@ -177,15 +177,15 @@ class ExpectedShortfallService:
             )
             if as_of:
                 snap_stmt = snap_stmt.where(
-                    PortfolioBookSnapshot.snapshot_timestamp <= datetime.combine(as_of, datetime.max.time())
+                    PortfolioBookSnapshot.effective_as_of <= datetime.combine(as_of, datetime.max.time(), tzinfo=timezone.utc)
                 )
-            snap_stmt = snap_stmt.order_by(desc(PortfolioBookSnapshot.snapshot_timestamp)).limit(1)
+            snap_stmt = snap_stmt.order_by(desc(PortfolioBookSnapshot.effective_as_of)).limit(1)
             snap_res = await self.session.execute(snap_stmt)
             snap = snap_res.scalar_one_or_none()
-            if snap and snap.net_asset_value > Decimal("0.0"):
-                total_base = snap.net_asset_value
-                if snap.reporting_currency:
-                    reporting_currency = snap.reporting_currency
+            if snap and snap.total_nav_base > Decimal("0.0"):
+                total_base = snap.total_nav_base
+                if snap.base_currency:
+                    reporting_currency = snap.base_currency
             else:
                 total_base = Decimal("100000.00")  # Default standard institutional testing unit
 

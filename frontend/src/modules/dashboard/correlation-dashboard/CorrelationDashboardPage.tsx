@@ -161,15 +161,15 @@ export const CorrelationDashboardPage: React.FC<CorrelationDashboardPageProps> =
       {/* Title */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-100 tracking-tight">
+          <h1 className="text-xl font-bold text-ink ">
             M13.05 — Correlation Dashboard
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-muted mt-1">
             Pairwise return correlations, statistical clusters, lookback comparisons, and relationship outlier inspection.
           </p>
         </div>
-        <div className="text-xs text-slate-400">
-          Portfolio: <strong className="text-slate-200">{portfolioId}</strong>
+        <div className="text-xs text-muted">
+          Portfolio: <strong className="text-secondary">{portfolioId}</strong>
         </div>
       </div>
 
@@ -194,12 +194,12 @@ export const CorrelationDashboardPage: React.FC<CorrelationDashboardPageProps> =
 
       {/* Main Matrix */}
       {isLoading ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-16 flex flex-col items-center justify-center space-y-3">
+        <div className="bg-surface border border-line rounded-lg p-16 flex flex-col items-center justify-center space-y-3">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
-          <p className="text-xs text-slate-400">Loading authoritative correlation matrix from M07.05...</p>
+          <p className="text-xs text-muted">Loading authoritative correlation matrix from M07.05...</p>
         </div>
       ) : error ? (
-        <div className="bg-red-950/40 border border-red-800/80 rounded-lg p-6 text-center text-xs text-red-200">
+        <div className="bg-negative-soft/40 border border-negative/20 rounded-lg p-6 text-center text-xs text-negative">
           {error}
         </div>
       ) : matrixData ? (

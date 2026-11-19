@@ -64,7 +64,7 @@ export const ExposureDashboardPage: React.FC<ExposureDashboardPageProps> = ({ po
 
   if (isLoading && !data) {
     return (
-      <div className="flex items-center justify-center p-12 text-slate-400">
+      <div className="flex items-center justify-center p-12 text-muted">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
         <span>Retrieving authoritative exposure aggregations...</span>
       </div>
@@ -73,12 +73,12 @@ export const ExposureDashboardPage: React.FC<ExposureDashboardPageProps> = ({ po
 
   if (error && !data) {
     return (
-      <div className="p-6 bg-rose-950/40 border border-rose-800 rounded-lg text-rose-300">
+      <div className="p-6 bg-negative-soft/40 border border-negative/20 rounded-lg text-negative">
         <h2 className="text-base font-semibold mb-1">Exposure Dashboard Unavailable</h2>
         <p className="text-sm">{error}</p>
         <button
           onClick={fetchDashboard}
-          className="mt-4 px-3 py-1.5 bg-rose-800 hover:bg-rose-700 text-white rounded text-xs font-medium"
+          className="mt-4 px-3 py-1.5 bg-negative-soft hover:bg-rose-700 text-white rounded text-xs font-medium"
         >
           Retry Connection
         </button>
@@ -91,30 +91,30 @@ export const ExposureDashboardPage: React.FC<ExposureDashboardPageProps> = ({ po
   return (
     <div className="space-y-6">
       {/* Header & Global Filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-line">
         <div>
           <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-bold tracking-tight text-white">M13.03 — Exposure Dashboard</h1>
-            <span className="text-xs px-2 py-0.5 rounded bg-blue-950 border border-blue-800 text-blue-300 font-mono">
+            <h1 className="text-xl font-bold  text-ink">M13.03 — Exposure Dashboard</h1>
+            <span className="text-xs px-2 py-0.5 rounded bg-brand-soft border border-brand/20 text-brand font-sans">
               {data.portfolio_id}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-muted mt-1">
             Capital and risk allocation across sectors, ranked instruments, and cash balances.
           </p>
         </div>
 
         {/* Side Filter */}
         <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-1 bg-slate-900 border border-slate-800 p-1 rounded">
+          <div className="flex items-center space-x-1 bg-surface border border-line p-1 rounded">
             {(['ALL', 'LONG', 'SHORT'] as PositionSideFilter[]).map((side) => (
               <button
                 key={side}
                 onClick={() => setSideFilter(side)}
                 className={`px-3 py-1 rounded text-xs font-medium transition ${
                   sideFilter === side
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-brand text-white'
+                    : 'text-muted hover:text-secondary'
                 }`}
               >
                 {side}
@@ -123,7 +123,7 @@ export const ExposureDashboardPage: React.FC<ExposureDashboardPageProps> = ({ po
           </div>
           <button
             onClick={fetchDashboard}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-medium border border-slate-700"
+            className="px-3 py-1.5 bg-subtle hover:bg-hover text-secondary rounded text-xs font-medium border border-line-strong"
           >
             Refresh
           </button>
@@ -132,13 +132,13 @@ export const ExposureDashboardPage: React.FC<ExposureDashboardPageProps> = ({ po
 
       {/* Drill-down Breadcrumb Banner if active */}
       {drillData && (
-        <div className="p-3 bg-blue-950/40 border border-blue-800 rounded-lg flex items-center justify-between text-xs text-blue-200">
+        <div className="p-3 bg-brand-soft/40 border border-brand/20 rounded-lg flex items-center justify-between text-xs text-brand">
           <div className="flex items-center space-x-2">
-            <span className="font-semibold text-slate-300">Hierarchy:</span>
+            <span className="font-semibold text-secondary">Hierarchy:</span>
             {drillData.breadcrumbs.map((b, i) => (
               <React.Fragment key={b.id}>
                 {i > 0 && <span>&gt;</span>}
-                <span className={i === drillData.breadcrumbs.length - 1 ? 'font-bold text-white' : 'underline cursor-pointer'}>
+                <span className={i === drillData.breadcrumbs.length - 1 ? 'font-bold text-ink' : 'underline cursor-pointer'}>
                   {b.name}
                 </span>
               </React.Fragment>
@@ -146,7 +146,7 @@ export const ExposureDashboardPage: React.FC<ExposureDashboardPageProps> = ({ po
           </div>
           <button
             onClick={handleResetBreadcrumbs}
-            className="text-xs underline text-blue-400 hover:text-blue-300"
+            className="text-xs underline text-brand hover:text-brand"
           >
             Back to Full Portfolio View
           </button>

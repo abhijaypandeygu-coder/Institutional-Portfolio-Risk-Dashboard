@@ -6,7 +6,9 @@ from typing import Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, status
 
 from backend.app.modules.infrastructure_platform.realtime_api.gateway import gateway
+from backend.app.modules.infrastructure_platform.realtime_api.services.market_streamer import market_streamer
 from backend.app.modules.infrastructure_platform.realtime_api.schemas.message_schemas import (
+    RealtimeChannelType,
     ClientMessageType,
     ServerMessageType,
     ConnectionAckMessage,
@@ -85,6 +87,12 @@ async def websocket_realtime_endpoint(
                         connection_id=connection_id,
                         req=sub_req,
                     )
+                    # Trigger market streamer if subscribing to market channel
+                    if sub_req.channel == RealtimeChannelType.MARKET:
+                        depth_levels = int(sub_req.options.get("depth", 5))
+                        for res_id in sub_req.resource_ids:
+                            market_streamer.start_streaming_for_resource(res_id, levels_count=depth_levels)
+
                     ack = SubscriptionAckMessage(
                         request_id=req_id,
                         subscription_id=sub.subscription_id,

@@ -1,5 +1,7 @@
 import { UpstoxBrokerPanel } from '../../../components/UpstoxBrokerPanel';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { DepthPoint, MarketContext, mergeDepthPoints, simulated } from '../../../utils/liquidityAnalytics';
+import { LiquidityDistribution, DepthHistoryChart, MarketDataStatus } from './LiquidityInsights';
 import axios from 'axios';
 import { RefreshCw, FolderOpen, Layers } from 'lucide-react';
 import {
@@ -10,6 +12,7 @@ import {
   InstrumentLiquidityScore,
   InstrumentLiquidationProfile,
 } from '../../../types/dashboard';
+import { useMarketDataStream } from '../../../hooks/useMarketDataStream';
 import { SpreadPanel } from './SpreadPanel';
 import { OrderBookDepthPanel } from './OrderBookDepthPanel';
 import { LiquidityScorePanel } from './LiquidityScorePanel';
@@ -19,11 +22,15 @@ import { PortfolioLiquidityTable } from './PortfolioLiquidityTable';
 interface LiquidityDashboardPageProps {
   portfolioId?: string;
   defaultInstrumentId?: string;
+  onOpenOrderModal?: () => void;
+  onPortfolioUpdated?: (data: PortfolioLiquidityDashboardResponse) => void;
 }
 
 export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
   portfolioId,
   defaultInstrumentId,
+  onOpenOrderModal,
+  onPortfolioUpdated,
 }) => {
   const [currentPortfolioId, setCurrentPortfolioId] = useState<string>(portfolioId || '');
   const [availablePortfolios, setAvailablePortfolios] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
@@ -72,9 +79,15 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
   const [liquidityScore, setLiquidityScore] = useState<InstrumentLiquidityScore | null>(null);
   const [liquidationProfile, setLiquidationProfile] = useState<InstrumentLiquidationProfile | null>(null);
 
+  const [marketContext, setMarketContext] = useState<MarketContext | null>(null);
+  const [depthHistory, setDepthHistory] = useState<{ scope: string; points: DepthPoint[] }>({ scope: '', points: [] });
+  const portfolioRequest = useRef<AbortController | null>(null);
+  const instrumentRequest = useRef<AbortController | null>(null);
+
   // User controls
   const [spreadUnit, setSpreadUnit] = useState<'BPS' | 'RELATIVE' | 'ABSOLUTE'>('BPS');
   const [lookbackDays, setLookbackDays] = useState<number>(30);
+  const [positionRevision, setPositionRevision] = useState(0);
   const [depthLevels, setDepthLevels] = useState<number>(5);
   const [participationRate, setParticipationRate] = useState<number>(0.10);
   const [loading, setLoading] = useState<boolean>(true);
@@ -84,103 +97,98 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
   // Ref to track microstructure section for scrolling into view
   const microstructureRef = React.useRef<HTMLDivElement>(null);
 
-  // Fetch portfolio summary
+  // Live WebSocket market data streaming hook
+  const {
+    isConnected: isWsConnected,
+    streamingQuote,
+    streamingDepth,
+  } = useMarketDataStream({
+    instrumentId: selectedInstrumentId,
+    symbol: quote?.symbol,
+    levelsCount: depthLevels,
+    enabled: !!selectedInstrumentId,
+  });
+
+  // Effective live or snapshot data
+  const selectedQuote = quote?.instrument_id === selectedInstrumentId ? quote : null;
+  const streamQuoteMatches = streamingQuote && (streamingQuote.instrument_id === selectedInstrumentId || streamingQuote.symbol === selectedQuote?.symbol);
+  const streamDepthMatches = streamingDepth && (streamingDepth.instrument_id === selectedInstrumentId || streamingDepth.symbol === selectedQuote?.symbol);
+  const effectiveQuote = streamQuoteMatches && !simulated(streamingQuote) ? streamingQuote : selectedQuote;
+  const effectiveDepthLadder = streamDepthMatches && !simulated(streamingDepth) ? streamingDepth : depthLadder?.instrument_id === selectedInstrumentId ? depthLadder : null;
+  const isProviderStreaming = !!(streamDepthMatches && !simulated(streamingDepth));
+  const historyScope = `${currentPortfolioId}:${selectedInstrumentId}:${depthLevels}`;
+  const isHolding = portfolioData?.holdings.some(h => h.instrument_id === selectedInstrumentId || h.symbol === effectiveQuote?.symbol);
+
+  useEffect(() => {
+    const ladder = effectiveDepthLadder;
+    const stamp = ladder?.source_timestamp;
+    if (!ladder || simulated(ladder) || !stamp || !ladder.bids.length || !ladder.asks.length) return;
+    const point = { timestamp: stamp, bid: ladder.bids.slice(0, depthLevels).reduce((sum, l) => sum + Number(l.notional), 0), ask: ladder.asks.slice(0, depthLevels).reduce((sum, l) => sum + Number(l.notional), 0) };
+    setDepthHistory(old => ({ scope: historyScope, points: mergeDepthPoints(old.scope === historyScope ? old.points : [], [point]) }));
+  }, [effectiveDepthLadder, historyScope, depthLevels]);
+
+  const inspectInstrument = (id: string) => {
+    setSelectedInstrumentId(id);
+    requestAnimationFrame(() => {
+      const heading = document.getElementById('microstructure-heading');
+      heading?.focus({ preventScroll: true });
+      heading?.scrollIntoView({ block: 'start' });
+    });
+  };
+
+  // Bounded, abortable requests prevent previous instrument responses overwriting selection.
   const fetchPortfolioLiquidity = async () => {
     const targetId = currentPortfolioId || portfolioId;
     if (!targetId) return;
+    portfolioRequest.current?.abort();
+    const controller = new AbortController();
+    portfolioRequest.current = controller;
+    setLoading(true); setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const resp = await axios.get<PortfolioLiquidityDashboardResponse>(
-        `/api/v1/dashboard/liquidity/portfolio/${targetId}`
-      );
-      setPortfolioData(resp.data);
-      // Prioritize defaultInstrumentId or currently selected instrument
-      if (defaultInstrumentId) {
-        setSelectedInstrumentId(defaultInstrumentId);
-      } else if (selectedInstrumentId) {
-        // Keep current selected ticker even if it's external / searched
-      } else if (resp.data.holdings && resp.data.holdings.length > 0) {
-        setSelectedInstrumentId(resp.data.holdings[0].instrument_id);
-      }
+      const response = await axios.get<PortfolioLiquidityDashboardResponse>(`/api/v1/dashboard/liquidity/portfolio/${encodeURIComponent(targetId)}`, { signal: controller.signal, timeout: 30000, params: { participation_rate: participationRate } });
+      if (controller.signal.aborted) return;
+      setPortfolioData(response.data);
+      onPortfolioUpdated?.(response.data);
+      if (!selectedInstrumentId && response.data.holdings.length) setSelectedInstrumentId(response.data.holdings[0].instrument_id);
     } catch (err: any) {
-      setError(err?.response?.data?.detail || err.message || 'Failed to load portfolio liquidity overview.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch instrument specific microstructure
-  const fetchInstrumentMicrostructure = async (instId: string) => {
-    try {
-      setLoadingMicrostructure(true);
-      // Reset current instrument states so stale metrics from previously loaded stocks do not persist on errors
-      setSpreadDetail(null);
-      const portParam = currentPortfolioId ? `portfolio_id=${encodeURIComponent(currentPortfolioId)}&` : '';
-
-      const [quoteRes, spreadRes, depthRes, scoreRes, liqRes] = await Promise.allSettled([
-        axios.get<CurrentQuoteItem>(`/api/v1/dashboard/liquidity/instrument/${encodeURIComponent(instId)}/quote`),
-        axios.get<InstrumentSpreadDetail>(`/api/v1/dashboard/liquidity/instrument/${encodeURIComponent(instId)}/spread?lookback_days=${lookbackDays}`),
-        axios.get<OrderBookDepthLadder>(`/api/v1/dashboard/liquidity/instrument/${encodeURIComponent(instId)}/depth?levels=${depthLevels}`),
-        axios.get<InstrumentLiquidityScore>(`/api/v1/dashboard/liquidity/instrument/${encodeURIComponent(instId)}/score`),
-        axios.get<InstrumentLiquidationProfile>(
-          `/api/v1/dashboard/liquidity/instrument/${encodeURIComponent(instId)}/liquidation?${portParam}participation_rate=${participationRate}`
-        ),
-      ]);
-
-      if (quoteRes.status === 'fulfilled') {
-        setQuote(quoteRes.value.data);
-      } else {
-        console.warn('Quote fetch failed:', quoteRes.reason);
-      }
-
-      if (spreadRes.status === 'fulfilled') {
-        setSpreadDetail(spreadRes.value.data);
-      } else {
-        console.warn('Spread fetch failed:', spreadRes.reason);
-        setSpreadDetail(null);
-      }
-
-      if (depthRes.status === 'fulfilled') {
-        setDepthLadder(depthRes.value.data);
-      } else {
-        console.warn('Depth fetch failed:', depthRes.reason);
-      }
-
-      if (scoreRes.status === 'fulfilled') {
-        setLiquidityScore(scoreRes.value.data);
-      } else {
-        console.warn('Score fetch failed:', scoreRes.reason);
-      }
-
-      if (liqRes.status === 'fulfilled') {
-        setLiquidationProfile(liqRes.value.data);
-      } else {
-        console.warn('Liquidation fetch failed:', liqRes.reason);
-      }
-
-      // Auto-scroll down to the microstructure panel when an instrument is chosen
-      setTimeout(() => {
-        microstructureRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-    } catch (err: any) {
-      console.error('Error loading instrument details:', err);
-    } finally {
-      setLoadingMicrostructure(false);
-    }
+      if (!controller.signal.aborted) setError(err?.response?.data?.detail || 'Portfolio liquidity could not be refreshed. Retry when the provider is available.');
+    } finally { if (!controller.signal.aborted) setLoading(false); }
   };
 
   useEffect(() => {
-    if (currentPortfolioId || portfolioId) {
-      fetchPortfolioLiquidity();
-    }
-  }, [currentPortfolioId, portfolioId]);
+    setPortfolioData(null);
+    fetchPortfolioLiquidity();
+    return () => portfolioRequest.current?.abort();
+  }, [currentPortfolioId, portfolioId, participationRate]);
 
   useEffect(() => {
-    if (selectedInstrumentId) {
-      fetchInstrumentMicrostructure(selectedInstrumentId);
-    }
-  }, [selectedInstrumentId, lookbackDays, depthLevels, participationRate]);
+    if (!selectedInstrumentId) return;
+    instrumentRequest.current?.abort();
+    const controller = new AbortController(); instrumentRequest.current = controller;
+    setQuote(null); setSpreadDetail(null); setDepthLadder(null); setLiquidityScore(null); setLiquidationProfile(null); setMarketContext(null);
+    setDepthHistory({ scope: historyScope, points: [] });
+    setLoadingMicrostructure(true);
+    const root = `/api/v1/dashboard/liquidity/instrument/${encodeURIComponent(selectedInstrumentId)}`;
+    const options = { signal: controller.signal, timeout: 25000 };
+    const apply = <T,>(setter: (value: T) => void) => (response: { data: T }) => { if (!controller.signal.aborted) setter(response.data); };
+    const requests = [
+      axios.get<CurrentQuoteItem>(`${root}/quote`, options).then(apply(setQuote)),
+      axios.get<InstrumentSpreadDetail>(`${root}/spread?lookback_days=${lookbackDays}`, options).then(apply(setSpreadDetail)),
+      axios.get<OrderBookDepthLadder>(`${root}/depth?levels=${depthLevels}`, options).then(apply(setDepthLadder)),
+      axios.get<InstrumentLiquidityScore>(`${root}/score`, options).then(apply(setLiquidityScore)),
+      axios.get<InstrumentLiquidationProfile>(`${root}/liquidation`, { ...options, params: { portfolio_id: currentPortfolioId || undefined, participation_rate: participationRate } }).then(apply(setLiquidationProfile)),
+      axios.get<MarketContext>(`${root}/market-context`, options).then(apply(setMarketContext)),
+      axios.get<{ points: DepthPoint[] }>(`${root}/depth-history?levels=${depthLevels}`, options).then(response => { if (!controller.signal.aborted) setDepthHistory(old => ({ scope: historyScope, points: mergeDepthPoints(old.scope === historyScope ? old.points : [], response.data.points) })); }),
+    ];
+    Promise.allSettled(requests).then(results => {
+      if (!controller.signal.aborted) {
+        setLoadingMicrostructure(false);
+        if (results.some(r => r.status === 'rejected')) setError('Some instrument data is unavailable. Completed panels remain visible; missing data is not estimated silently.');
+      }
+    });
+    const refreshContext = setInterval(() => { axios.get<MarketContext>(`${root}/market-context`, options).then(apply(setMarketContext)).catch(() => {}); }, 60000);
+    return () => { controller.abort(); clearInterval(refreshContext); };
+  }, [selectedInstrumentId, currentPortfolioId, lookbackDays, depthLevels, participationRate, positionRevision]);
 
   return (
     <div className="flex min-w-0 flex-col gap-7 text-ink">
@@ -224,30 +232,35 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
         </div>
       )}
 
+      <LiquidityDistribution data={portfolioData} />
       {/* Portfolio Holdings Summary Table */}
       <PortfolioLiquidityTable
         portfolioData={portfolioData}
         selectedInstrumentId={selectedInstrumentId}
-        onSelectInstrument={(id) => setSelectedInstrumentId(id)}
+        onSelectInstrument={inspectInstrument}
+        onOpenOrderModal={onOpenOrderModal}
+        onPositionChange={() => { setPositionRevision(n => n + 1); void fetchPortfolioLiquidity(); }}
       />
 
       {/* Selected Instrument Microstructure Explorer */}
       {selectedInstrumentId && (
         <div ref={microstructureRef} className="flex flex-col gap-5 border-t border-line pt-5 scroll-mt-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-secondary flex items-center gap-2">
-              Holding Microstructure:{' '}
+            <h2 id="microstructure-heading" tabIndex={-1} className="text-lg font-bold text-secondary flex flex-wrap items-center gap-2">
+              Instrument Microstructure:{' '}
               <span className="text-brand font-sans">
-                {quote?.symbol || selectedInstrumentId}
+                {effectiveQuote?.symbol || selectedInstrumentId}
               </span>
               {loadingMicrostructure && (
                 <RefreshCw className="size-4 text-brand animate-spin" />
               )}
             </h2>
-            <span className="text-xs text-muted font-sans">ID: {selectedInstrumentId}</span>
+            <span className="text-xs text-muted">{portfolioData ? isHolding ? 'Portfolio holding' : 'External instrument · not held in this portfolio' : 'Portfolio membership not yet verified'}</span>
           </div>
 
-          {/* 2x2 Microstructure Panels Grid */}
+          <MarketDataStatus quote={effectiveQuote} ladder={effectiveDepthLadder} connected={isWsConnected} streaming={isProviderStreaming} context={marketContext} />
+          <DepthHistoryChart points={depthHistory.scope === historyScope ? depthHistory.points : []} levels={depthLevels} currency={effectiveDepthLadder?.currency || effectiveQuote?.currency || 'USD'} />
+          {/* Microstructure Panels */}
           <div className="relative">
             {loadingMicrostructure && !quote && (
               <div className="absolute inset-0 bg-canvas/70 z-10 flex items-center justify-center rounded-xl  min-h-[300px]">
@@ -259,7 +272,7 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
             )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <SpreadPanel
-                quote={quote}
+                quote={effectiveQuote}
                 spreadDetail={spreadDetail}
                 spreadUnit={spreadUnit}
                 onUnitChange={setSpreadUnit}
@@ -268,18 +281,20 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
               />
 
               <OrderBookDepthPanel
-                ladder={depthLadder}
+                ladder={effectiveDepthLadder}
                 levelsCount={depthLevels}
                 onLevelsCountChange={setDepthLevels}
+                isStreaming={isWsConnected && isProviderStreaming}
               />
 
-              <LiquidityScorePanel score={liquidityScore} />
+              <LiquidityScorePanel score={liquidityScore} currency={effectiveQuote?.currency} />
 
-              <LiquidationPanel
+              <div className="lg:col-span-2 min-w-0"><LiquidationPanel
+                portfolioData={portfolioData}
                 liquidationProfile={liquidationProfile}
                 participationRate={participationRate}
                 onParticipationRateChange={setParticipationRate}
-              />
+              /></div>
             </div>
           </div>
         </div>

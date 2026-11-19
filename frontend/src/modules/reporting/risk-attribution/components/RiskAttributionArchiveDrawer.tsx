@@ -44,21 +44,21 @@ export const RiskAttributionArchiveDrawer: React.FC<RiskAttributionArchiveDrawer
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/80 backdrop-blur-sm flex justify-end">
-      <div className="w-full max-w-xl bg-slate-900 border-l border-slate-800 h-full flex flex-col shadow-2xl">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-canvas/80  flex justify-end">
+      <div className="w-full max-w-xl bg-surface border-l border-line h-full flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-5 border-b border-line flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-slate-100">
+            <h2 className="text-base font-bold text-ink">
               Risk Attribution Archive & Integrity
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Historical version lineage, signed downloads, and cryptographic verification
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-muted hover:text-secondary hover:bg-subtle transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -68,7 +68,7 @@ export const RiskAttributionArchiveDrawer: React.FC<RiskAttributionArchiveDrawer
         <div className="flex-1 overflow-y-auto p-5 space-y-6">
           {/* Artifacts Download Section */}
           <div>
-            <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">
+            <h3 className="text-xs font-semibold text-secondary uppercase  mb-3">
               Signed Report Artifacts
             </h3>
             <div className="grid grid-cols-3 gap-3">
@@ -83,20 +83,20 @@ export const RiskAttributionArchiveDrawer: React.FC<RiskAttributionArchiveDrawer
                         : '#'
                     }
                     download
-                    className={`flex flex-col items-center justify-center p-3.5 rounded-xl border transition-all text-center ${
+                    className={`flex flex-col items-center justify-center p-3.5 rounded-xl border transition-opacity text-center ${
                       art
-                        ? 'bg-slate-950 border-slate-800 hover:border-indigo-500 hover:bg-slate-800/60 text-slate-200'
-                        : 'bg-slate-950/40 border-slate-800/40 text-slate-600 pointer-events-none'
+                        ? 'bg-canvas border-line hover:border-indigo-500 hover:bg-subtle/60 text-secondary'
+                        : 'bg-canvas/40 border-line/40 text-secondary pointer-events-none'
                     }`}
                   >
-                    {format === 'PDF' && <FileText className="w-5 h-5 mb-1.5 text-rose-400" />}
-                    {format === 'HTML' && <Globe className="w-5 h-5 mb-1.5 text-indigo-400" />}
+                    {format === 'PDF' && <FileText className="w-5 h-5 mb-1.5 text-negative" />}
+                    {format === 'HTML' && <Globe className="w-5 h-5 mb-1.5 text-brand" />}
                     {format === 'CSV' && (
-                      <FileSpreadsheet className="w-5 h-5 mb-1.5 text-emerald-400" />
+                      <FileSpreadsheet className="w-5 h-5 mb-1.5 text-positive" />
                     )}
                     <span className="text-xs font-medium">{format} Export</span>
                     {art && (
-                      <span className="text-[10px] text-slate-500 font-mono mt-1">
+                      <span className="text-[10px] text-muted font-sans mt-1">
                         {(art.file_size_bytes / 1024).toFixed(1)} KB
                       </span>
                     )}
@@ -107,18 +107,18 @@ export const RiskAttributionArchiveDrawer: React.FC<RiskAttributionArchiveDrawer
           </div>
 
           {/* Cryptographic SHA-256 Verification */}
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-4">
+          <div className="bg-canvas border border-line rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold text-slate-200">
+                <ShieldCheck className="w-4 h-4 text-positive" />
+                <span className="text-xs font-bold text-secondary">
                   Cryptographic Integrity (SHA-256)
                 </span>
               </div>
               <button
                 onClick={onVerifyIntegrity}
                 disabled={isVerifying || !activeRunId}
-                className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors disabled:opacity-50"
+                className="px-3 py-1 rounded bg-brand hover:bg-brand-hover text-white text-xs font-medium transition-colors disabled:opacity-50"
               >
                 {isVerifying ? 'Verifying...' : 'Verify Hashes'}
               </button>
@@ -128,14 +128,14 @@ export const RiskAttributionArchiveDrawer: React.FC<RiskAttributionArchiveDrawer
               <div
                 className={`mt-2 p-3 rounded-lg border text-xs flex items-start gap-2.5 ${
                   verificationResult.is_valid
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
-                    : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
+                    ? 'bg-brand/10 border-emerald-500/20 text-positive'
+                    : 'bg-rose-500/10 border-rose-500/20 text-negative'
                 }`}
               >
                 {verificationResult.is_valid ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-positive mt-0.5" />
                 ) : (
-                  <AlertTriangle className="w-4 h-4 text-rose-400 mt-0.5" />
+                  <AlertTriangle className="w-4 h-4 text-negative mt-0.5" />
                 )}
                 <div>
                   <div className="font-semibold">
@@ -143,7 +143,7 @@ export const RiskAttributionArchiveDrawer: React.FC<RiskAttributionArchiveDrawer
                       ? 'All Artifact Checksums Validated'
                       : 'Integrity Check Failed'}
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-1">
+                  <div className="text-[11px] text-muted mt-1">
                     SHA-256 signatures match database cryptographic ledger.
                   </div>
                 </div>
@@ -153,7 +153,7 @@ export const RiskAttributionArchiveDrawer: React.FC<RiskAttributionArchiveDrawer
 
           {/* Version Lineage History */}
           <div>
-            <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">
+            <h3 className="text-xs font-semibold text-secondary uppercase  mb-3">
               Historical Run Versions
             </h3>
             <div className="space-y-2">
@@ -163,27 +163,27 @@ export const RiskAttributionArchiveDrawer: React.FC<RiskAttributionArchiveDrawer
                   <div
                     key={r.id}
                     onClick={() => onSelectRun(r.id)}
-                    className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
+                    className={`p-3.5 rounded-lg border cursor-pointer transition-opacity ${
                       isActive
-                        ? 'bg-indigo-600/10 border-indigo-500 text-slate-100'
-                        : 'bg-slate-950 border-slate-800 hover:border-slate-700 text-slate-300'
+                        ? 'bg-brand/10 border-indigo-500 text-ink'
+                        : 'bg-canvas border-line hover:border-line-strong text-secondary'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold font-mono">
+                        <span className="text-xs font-bold font-sans">
                           v{r.report_version}
                         </span>
-                        <span className="text-xs text-slate-300 font-sans">
+                        <span className="text-xs text-secondary font-sans">
                           {r.reporting_date}
                         </span>
                       </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-subtle text-muted font-sans">
                         {r.reconciliation_status}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                    <div className="flex items-center justify-between text-[11px] text-muted font-sans">
                       <span>{r.risk_measure}</span>
                       <span>
                         {r.authoritative_risk_value !== undefined
