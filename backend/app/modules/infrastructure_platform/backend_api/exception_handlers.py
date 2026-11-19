@@ -24,9 +24,11 @@ def setup_exception_handlers(app: FastAPI):
 
         logger.warning(f"[{request_id}] Validation failure on {request.method} {request.url.path}: {details}")
 
+        detail_msg = "; ".join(d["message"] for d in details) if details else "Validation error"
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={
+                "detail": detail_msg,
                 "error": {
                     "code": "VALIDATION_ERROR",
                     "message": "The request contains invalid or unprocessable fields.",
@@ -60,6 +62,7 @@ def setup_exception_handlers(app: FastAPI):
         return JSONResponse(
             status_code=exc.status_code,
             content={
+                "detail": message,
                 "error": {
                     "code": err_code,
                     "message": message,

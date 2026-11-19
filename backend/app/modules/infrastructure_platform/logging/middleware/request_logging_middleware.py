@@ -19,7 +19,10 @@ class StructuredRequestLoggingMiddleware(BaseHTTPMiddleware):
         # 1. Extract or generate Correlation ID
         incoming_corr_id = request.headers.get("X-Correlation-ID") or request.headers.get("x-correlation-id")
         correlation_id = incoming_corr_id or f"corr-{uuid.uuid4().hex[:12]}"
-        request_id = f"req-{uuid.uuid4().hex[:12]}"
+        
+        # Respect client-supplied X-Request-ID or existing state request_id if present
+        incoming_req_id = request.headers.get("X-Request-ID") or request.headers.get("x-request-id")
+        request_id = incoming_req_id or getattr(request.state, "request_id", None) or f"req-{uuid.uuid4().hex[:12]}"
 
         # Bind to async context
         CorrelationContext.set_correlation_id(correlation_id)

@@ -9,6 +9,12 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
+        timeout: 60000,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.error('Proxy error:', err);
+          });
+        },
       },
       '/ws': {
         target: 'ws://127.0.0.1:8000',

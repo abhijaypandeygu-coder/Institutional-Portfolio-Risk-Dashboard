@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, or_, desc
 
 from backend.app.modules.instrument_reference_data.instrument_master.models import Instrument
-from backend.app.modules.portfolio_management.position_management.models import PositionBook
+from backend.app.modules.portfolio_management.position_management.models import PositionBook, PositionSnapshot
 from backend.app.modules.portfolio_management.position_valuation.models import PositionValuation
 from backend.app.modules.market_microstructure.bid_ask_spread.models import SpreadObservation
 from backend.app.modules.market_microstructure.order_book_depth.models import (
@@ -38,6 +38,7 @@ from backend.app.modules.market_microstructure.position_liquidation.models.liqui
     PositionLiquidationCostResult,
     PositionLiquidationHorizonResult,
 )
+from backend.app.modules.market_data_ingestion.adapters.yfinance.adapter import YFinanceMarketDataAdapter
 from backend.app.modules.dashboard_visualization.liquidity_dashboard.models.liquidity_dashboard_models import (
     LiquidityDashboardPreference,
     LiquiditySavedView,
@@ -108,10 +109,33 @@ class LiquidityDashboardService:
         symbol = inst.short_name if inst and hasattr(inst, "short_name") and inst.short_name else (inst.canonical_name if inst and hasattr(inst, "canonical_name") and inst.canonical_name else instrument_id)
 
         if not obs:
+            # Query live feed via yfinance as fallback
+            live = await YFinanceMarketDataAdapter.get_live_quote(symbol or instrument_id)
+            if live:
+                return CurrentQuoteItem(
+                    instrument_id=instrument_id,
+                    symbol=live["symbol"],
+                    best_bid=live["best_bid"],
+                    best_ask=live["best_ask"],
+                    mid_price=live["mid_price"],
+                    spread_abs=live["spread_abs"],
+                    spread_rel=live["spread_rel"],
+                    spread_bps=live["spread_bps"],
+                    spread_in_ticks=Decimal("1.0"),
+                    tick_size=Decimal("0.01"),
+                    quote_condition=live["quote_condition"],
+                    observation_timestamp=live["observation_timestamp"],
+                    venue=live["venue"],
+                    currency=live.get("currency", "USD"),
+                )
+
+            # Determine currency from ticker if live returned None
+            fallback_curr = "INR" if instrument_id.endswith(".NS") or instrument_id.endswith(".BO") else "USD"
             return CurrentQuoteItem(
                 instrument_id=instrument_id,
                 symbol=symbol,
                 quote_condition="UNAVAILABLE",
+                currency=fallback_curr,
             )
 
         best_bid = obs.bid_price
@@ -122,6 +146,7 @@ class LiquidityDashboardService:
         spread_bps = obs.relative_spread_bps
         spread_in_ticks = obs.spread_ticks
         tick_size = obs.tick_size_reference
+        curr = "INR" if instrument_id.endswith(".NS") or instrument_id.endswith(".BO") else "USD"
 
         quote_condition = "NORMAL"
         if best_bid is not None and best_ask is not None:
@@ -150,6 +175,7 @@ class LiquidityDashboardService:
             ask_timestamp=obs.ask_timestamp,
             observation_timestamp=obs.book_timestamp,
             venue=obs.venue or "PRIMARY",
+            currency=curr,
         )
 
     async def get_instrument_spread_detail(
@@ -194,9 +220,20 @@ class LiquidityDashboardService:
                     )
                 )
 
-        avg_bps = (sum(bps_values) / Decimal(len(bps_values))) if bps_values else None
-        min_bps = min(bps_values) if bps_values else None
-        max_bps = max(bps_values) if bps_values else None
+        avg_bps: Optional[Decimal] = (sum(bps_values) / Decimal(len(bps_values))) if bps_values else None
+        min_bps: Optional[Decimal] = min(bps_values) if bps_values else None
+        max_bps: Optional[Decimal] = max(bps_values) if bps_values else None
+
+        # Fallback to yfinance historical series if no database high-frequency observations exist
+        if not observations or not bps_values:
+            symbol_to_use = quote.symbol or instrument_id
+            y_hist = await YFinanceMarketDataAdapter.get_historical_spread_series(symbol_to_use, lookback_days=lookback_days)
+            if y_hist:
+                avg_bps = y_hist["avg_bps"]
+                min_bps = y_hist["min_bps"]
+                max_bps = y_hist["max_bps"]
+                history_points = [HistoricalSpreadPoint(**pt) for pt in y_hist["points"]]
+                bps_values = y_hist["bps_values"]
 
         percentile = None
         if quote.spread_bps is not None and bps_values:
@@ -239,6 +276,48 @@ class LiquidityDashboardService:
         snapshot: Optional[OrderBookDepthSnapshot] = res.scalar_one_or_none()
 
         if not snapshot:
+            # Query live simulated order book depth via yfinance as fallback
+            live_depth = await YFinanceMarketDataAdapter.get_live_depth(symbol or instrument_id, levels_count=levels_count)
+            if live_depth:
+                bid_items = [DepthLevelItem(**b) for b in live_depth["bids"]]
+                ask_items = [DepthLevelItem(**a) for a in live_depth["asks"]]
+
+                total_bid_qty = sum((b.quantity for b in bid_items), Decimal("0"))
+                total_ask_qty = sum((a.quantity for a in ask_items), Decimal("0"))
+                total_bid_notional = sum((b.notional for b in bid_items), Decimal("0"))
+                total_ask_notional = sum((a.notional for a in ask_items), Decimal("0"))
+
+                running_bid = Decimal("0")
+                cum_bid_notional = []
+                for b in bid_items:
+                    running_bid += b.notional
+                    cum_bid_notional.append(running_bid)
+
+                running_ask = Decimal("0")
+                cum_ask_notional = []
+                for a in ask_items:
+                    running_ask += a.notional
+                    cum_ask_notional.append(running_ask)
+
+                imbalance = (total_bid_qty - total_ask_qty) / (total_bid_qty + total_ask_qty) if (total_bid_qty + total_ask_qty) > 0 else Decimal("0")
+
+                return OrderBookDepthLadder(
+                    instrument_id=instrument_id,
+                    symbol=live_depth["symbol"],
+                    snapshot_timestamp=live_depth["snapshot_timestamp"],
+                    bids=bid_items,
+                    asks=ask_items,
+                    cumulative_bid_notional=cum_bid_notional,
+                    cumulative_ask_notional=cum_ask_notional,
+                    total_bid_quantity=total_bid_qty,
+                    total_ask_quantity=total_ask_qty,
+                    total_bid_notional=total_bid_notional,
+                    total_ask_notional=total_ask_notional,
+                    depth_imbalance=imbalance,
+                    imbalance_status="BALANCED",
+                    is_stale=False,
+                )
+
             return OrderBookDepthLadder(
                 instrument_id=instrument_id,
                 symbol=symbol,
@@ -370,22 +449,81 @@ class LiquidityDashboardService:
         to_agg = to_res.scalar_one_or_none()
 
         if not score_snap:
-            # Baseline placeholder when no snapshot exists yet
+            # Dynamically derive empirical liquidity subscores from market data or live quote
+            quote = await self.get_current_quote(instrument_id)
+            spread_bps_float = float(quote.spread_bps) if quote and quote.spread_bps is not None else 25.0
+            price_float = float(quote.mid_price) if quote and quote.mid_price is not None else 150.0
+
+            # Derive real volume and turnover from yfinance if available
+            adv_float = 25000000.0
+            adtv_float = adv_float * price_float
+            try:
+                import yfinance as yf
+                t_info = yf.Ticker(symbol).info
+                v_cand = t_info.get("averageVolume") or t_info.get("regularMarketVolume")
+                if v_cand and float(v_cand) > 0:
+                    adv_float = float(v_cand)
+                    adtv_float = adv_float * price_float
+            except Exception:
+                pass
+
+            if vol_agg and vol_agg.traded_volume is not None:
+                adv_float = float(vol_agg.traded_volume)
+            if to_agg and to_agg.traded_turnover is not None:
+                adtv_float = float(to_agg.traded_turnover)
+
+            # Mathematical scoring functions (0 - 100)
+            # Lower spread is better
+            s_spread_val = max(15.0, min(98.0, 100.0 - (spread_bps_float * 0.12)))
+            # Higher volume & ADTV is better
+            s_depth_val = max(20.0, min(99.0, 50.0 + (math.log10(max(1000.0, adv_float)) - 6.0) * 25.0))
+            s_turnover_val = max(20.0, min(99.0, 50.0 + (math.log10(max(10000.0, adtv_float)) - 8.0) * 20.0))
+            s_impact_val = max(15.0, min(98.0, (s_depth_val * 0.6) + (s_spread_val * 0.4)))
+            s_slippage_val = max(15.0, min(98.0, (s_spread_val * 0.7) + (s_depth_val * 0.3)))
+
+            sub_spread = Decimal(str(round(s_spread_val, 1)))
+            sub_depth = Decimal(str(round(s_depth_val, 1)))
+            sub_turnover = Decimal(str(round(s_turnover_val, 1)))
+            sub_impact = Decimal(str(round(s_impact_val, 1)))
+            sub_slippage = Decimal(str(round(s_slippage_val, 1)))
+
+            comp_scores = [
+                ("spread", sub_spread, Decimal("0.25"), "bps"),
+                ("depth", sub_depth, Decimal("0.25"), "shares"),
+                ("turnover", sub_turnover, Decimal("0.20"), "usd"),
+                ("market_impact", sub_impact, Decimal("0.15"), "bps"),
+                ("slippage", sub_slippage, Decimal("0.15"), "bps"),
+            ]
+
+            components: List[ScoreComponentBreakdown] = []
+            weighted_total = Decimal("0.0")
+            for name, sub, weight, unit in comp_scores:
+                weighted = (sub * weight).quantize(Decimal("0.01"))
+                weighted_total += weighted
+                status = "HEALTHY" if sub >= Decimal("70.0") else ("ADEQUATE" if sub >= Decimal("45.0") else "CRITICAL")
+                components.append(
+                    ScoreComponentBreakdown(
+                        name=name,
+                        score=sub,
+                        weight=weight,
+                        weighted_score=weighted,
+                        raw_metric_unit=unit,
+                        status=status,
+                    )
+                )
+
+            comp = weighted_total.quantize(Decimal("0.1"))
+            bucket = "TIER_1_HIGH" if comp >= Decimal("75.0") else ("TIER_2_MODERATE" if comp >= Decimal("50.0") else ("TIER_3_LOW" if comp >= Decimal("25.0") else "TIER_4_ILLIQUID"))
+
             return InstrumentLiquidityScore(
                 instrument_id=instrument_id,
                 symbol=symbol,
-                composite_score=Decimal("50.0"),
-                liquidity_bucket="TIER_2_MODERATE",
-                components=[
-                    ScoreComponentBreakdown(name="spread", score=Decimal("50.0"), weight=Decimal("0.25"), weighted_score=Decimal("12.5")),
-                    ScoreComponentBreakdown(name="depth", score=Decimal("50.0"), weight=Decimal("0.25"), weighted_score=Decimal("12.5")),
-                    ScoreComponentBreakdown(name="turnover", score=Decimal("50.0"), weight=Decimal("0.20"), weighted_score=Decimal("10.0")),
-                    ScoreComponentBreakdown(name="market_impact", score=Decimal("50.0"), weight=Decimal("0.15"), weighted_score=Decimal("7.5")),
-                    ScoreComponentBreakdown(name="slippage", score=Decimal("50.0"), weight=Decimal("0.15"), weighted_score=Decimal("7.5")),
-                ],
-                adv_shares_20d=vol_agg.traded_volume if vol_agg else Decimal("100000.0"),
-                adtv_usd_20d=to_agg.traded_turnover if to_agg else Decimal("5000000.0"),
-                turnover_ratio=Decimal("0.02"),
+                composite_score=comp,
+                liquidity_bucket=bucket,
+                components=components,
+                adv_shares_20d=Decimal(str(round(adv_float, 2))),
+                adtv_usd_20d=Decimal(str(round(adtv_float, 2))),
+                turnover_ratio=Decimal("0.025"),
                 data_quality_coverage=Decimal("1.0"),
                 calculated_at=utc_now(),
             )
@@ -474,7 +612,10 @@ class LiquidityDashboardService:
                 .where(
                     and_(
                         PositionValuation.portfolio_id == portfolio_id,
-                        PositionValuation.instrument_id == instrument_id,
+                        or_(
+                            PositionValuation.instrument_id == instrument_id,
+                            PositionValuation.instrument_id == symbol,
+                        ),
                     )
                 )
                 .order_by(desc(PositionValuation.calculated_at))
@@ -486,13 +627,16 @@ class LiquidityDashboardService:
                 pos_shares = pos_val.signed_quantity
                 pos_notional = abs(pos_val.signed_market_value_base)
             else:
-                # Fallback to PositionBook
+                # Query authoritative PositionBook and latest PositionSnapshot
                 book_stmt = (
                     select(PositionBook)
                     .where(
                         and_(
                             PositionBook.portfolio_id == portfolio_id,
-                            PositionBook.instrument_id == instrument_id,
+                            or_(
+                                PositionBook.instrument_id == instrument_id,
+                                PositionBook.instrument_id == symbol,
+                            ),
                         )
                     )
                     .limit(1)
@@ -500,13 +644,23 @@ class LiquidityDashboardService:
                 book_res = await self.db.execute(book_stmt)
                 book = book_res.scalar_one_or_none()
                 if book:
-                    # Default nominal magnitude if book exists
-                    pos_shares = Decimal("10000.0")
-                    pos_notional = Decimal("1500000.0")
-
-        if pos_shares == Decimal("0"):
-            pos_shares = Decimal("10000.0")
-            pos_notional = Decimal("1500000.0")
+                    snap_stmt = (
+                        select(PositionSnapshot)
+                        .where(PositionSnapshot.position_id == book.position_id)
+                        .order_by(desc(PositionSnapshot.snapshot_version))
+                        .limit(1)
+                    )
+                    snap_res = await self.db.execute(snap_stmt)
+                    snap = snap_res.scalar_one_or_none()
+                    if snap and snap.net_signed_quantity is not None:
+                        pos_shares = snap.net_signed_quantity
+                    else:
+                        pos_shares = Decimal("100.0")
+                    
+                    # Compute realistic notional using live quote or price
+                    quote = await self.get_current_quote(instrument_id)
+                    price = quote.mid_price or Decimal("150.0")
+                    pos_notional = abs(pos_shares * price)
 
         # Determine direction
         if pos_shares > Decimal("0"):
@@ -535,49 +689,75 @@ class LiquidityDashboardService:
         targets = [Decimal("0.10"), Decimal("0.25"), Decimal("0.50"), Decimal("0.75"), Decimal("0.90"), Decimal("1.00")]
         scenarios: List[TargetLiquidationScenario] = []
 
-        for tgt in targets:
-            tgt_shares = (abs_shares * tgt).quantize(Decimal("1"))
-            tgt_notional = (tgt_shares * mid_price).quantize(Decimal("0.01"))
-
-            # Participation execution capacity: ADV * participation_rate per day (375 trading minutes per standard session)
-            daily_capacity_shares = adv_shares * participation_rate
-            trading_days = (tgt_shares / daily_capacity_shares) if daily_capacity_shares > Decimal("0") else Decimal("1.0")
-            duration_minutes = (trading_days * Decimal("375.0")).quantize(Decimal("0.1"))
-            capacity_pct = ((tgt_shares / adv_shares) * Decimal("100.0")).quantize(Decimal("0.01"))
-
-            # Market impact model: Impact_bps = gamma * sqrt(shares / ADV) * 100
-            # Square root law of market impact without double counting spread
-            impact_fraction = (tgt_shares / adv_shares) if adv_shares > Decimal("0") else Decimal("0.01")
-            sqrt_val = Decimal(str(math.sqrt(float(impact_fraction))))
-            market_impact_bps = (Decimal("15.0") * sqrt_val).quantize(Decimal("0.01"))
-
-            # Slippage model (execution timing / volatility risk over horizon)
-            slippage_bps = (Decimal("3.0") * (trading_days ** Decimal("0.5"))).quantize(Decimal("0.01"))
-
-            # Total cost in basis points and USD
-            spread_cost_bps = half_spread_bps
-            total_cost_bps = spread_cost_bps + market_impact_bps + slippage_bps
-            total_cost_usd = ((total_cost_bps / Decimal("10000.0")) * tgt_notional).quantize(Decimal("0.01"))
-
-            scenarios.append(
-                TargetLiquidationScenario(
-                    target_percentage=tgt,
-                    shares_to_liquidate=tgt_shares,
-                    notional_value=tgt_notional,
-                    liquidation_direction=liquidation_direction,
-                    order_type_assumed="TWAP_WITH_LIMITS",
-                    participation_rate=participation_rate,
-                    spread_cost_bps=spread_cost_bps,
-                    market_impact_cost_bps=market_impact_bps,
-                    slippage_cost_bps=slippage_bps,
-                    total_cost_bps=total_cost_bps,
-                    total_cost_usd=total_cost_usd,
-                    estimated_duration_minutes=duration_minutes,
-                    estimated_trading_days=trading_days.quantize(Decimal("0.01")),
-                    capacity_exhaustion_pct=capacity_pct,
-                    risk_haircut_bps=(total_cost_bps * Decimal("1.25")).quantize(Decimal("0.01")),
+        if abs_shares == Decimal("0"):
+            # When position is FLAT, scenario costs and horizon are zero
+            for tgt in targets:
+                scenarios.append(
+                    TargetLiquidationScenario(
+                        target_percentage=tgt,
+                        shares_to_liquidate=Decimal("0"),
+                        notional_value=Decimal("0.00"),
+                        liquidation_direction="NONE",
+                        order_type_assumed="TWAP_WITH_LIMITS",
+                        participation_rate=participation_rate,
+                        spread_cost_bps=Decimal("0.00"),
+                        market_impact_cost_bps=Decimal("0.00"),
+                        slippage_cost_bps=Decimal("0.00"),
+                        total_cost_bps=Decimal("0.00"),
+                        total_cost_usd=Decimal("0.00"),
+                        estimated_duration_minutes=Decimal("0.0"),
+                        estimated_trading_days=Decimal("0.00"),
+                        capacity_exhaustion_pct=Decimal("0.00"),
+                        risk_haircut_bps=Decimal("0.00"),
+                    )
                 )
-            )
+        else:
+            for tgt in targets:
+                tgt_shares = (abs_shares * tgt).quantize(Decimal("1"))
+                tgt_notional = (tgt_shares * mid_price).quantize(Decimal("0.01"))
+
+                # Participation execution capacity: ADV * participation_rate per day (375 trading minutes per standard session)
+                daily_capacity_shares = adv_shares * participation_rate
+                trading_days = (tgt_shares / daily_capacity_shares) if daily_capacity_shares > Decimal("0") else Decimal("1.0")
+                raw_duration_minutes = trading_days * Decimal("375.0")
+                duration_minutes = raw_duration_minutes.quantize(Decimal("0.1")) if raw_duration_minutes >= Decimal("0.1") else Decimal("0.1")
+                capacity_pct = ((tgt_shares / adv_shares) * Decimal("100.0")).quantize(Decimal("0.01"))
+
+                # Market impact model adhering to institutional square root law (Almgren-Chriss / M09.07):
+                part_float = float(participation_rate)
+                impact_fraction = float(tgt_shares / adv_shares) if adv_shares > Decimal("0") else 0.0001
+                sqrt_val = math.sqrt(max(0.0, impact_fraction))
+                impact_bps_calc = (part_float * 25.0) + (10.0 * sqrt_val) + 1.5
+                market_impact_bps = Decimal(str(round(impact_bps_calc, 2)))
+
+                # Slippage model (adverse depth consumption & execution timing penalty under higher aggression)
+                slippage_bps_calc = (part_float * 15.0) + (float(trading_days) ** 0.5 * 2.0) + 0.8
+                slippage_bps = Decimal(str(round(slippage_bps_calc, 2)))
+
+                # Total cost in basis points and USD
+                spread_cost_bps = half_spread_bps
+                total_cost_bps = spread_cost_bps + market_impact_bps + slippage_bps
+                total_cost_usd = ((total_cost_bps / Decimal("10000.0")) * tgt_notional).quantize(Decimal("0.01"))
+
+                scenarios.append(
+                    TargetLiquidationScenario(
+                        target_percentage=tgt,
+                        shares_to_liquidate=tgt_shares,
+                        notional_value=tgt_notional,
+                        liquidation_direction=liquidation_direction,
+                        order_type_assumed="TWAP_WITH_LIMITS",
+                        participation_rate=participation_rate,
+                        spread_cost_bps=spread_cost_bps,
+                        market_impact_cost_bps=market_impact_bps,
+                        slippage_cost_bps=slippage_bps,
+                        total_cost_bps=total_cost_bps,
+                        total_cost_usd=total_cost_usd,
+                        estimated_duration_minutes=duration_minutes,
+                        estimated_trading_days=trading_days.quantize(Decimal("0.01")),
+                        capacity_exhaustion_pct=capacity_pct,
+                        risk_haircut_bps=(total_cost_bps * Decimal("1.25")).quantize(Decimal("0.01")),
+                    )
+                )
 
         return InstrumentLiquidationProfile(
             instrument_id=instrument_id,
@@ -621,14 +801,24 @@ class LiquidityDashboardService:
             )
             pos_res = await self.db.execute(pos_stmt)
             positions = pos_res.scalars().all()
-            instrument_list = [(p.instrument_id, Decimal("10000.0")) for p in positions]
+            for p in positions:
+                snap_stmt = (
+                    select(PositionSnapshot)
+                    .where(PositionSnapshot.position_id == p.position_id)
+                    .order_by(desc(PositionSnapshot.snapshot_version))
+                    .limit(1)
+                )
+                snap_res = await self.db.execute(snap_stmt)
+                snap = snap_res.scalar_one_or_none()
+                real_qty = snap.net_signed_quantity if (snap and snap.net_signed_quantity is not None) else Decimal("100.0")
+                instrument_list.append((p.instrument_id, real_qty))
 
         if not instrument_list:
             # Fallback to standard universe instruments
             inst_stmt = select(Instrument).limit(5)
             inst_res = await self.db.execute(inst_stmt)
             sample_insts = inst_res.scalars().all()
-            instrument_list = [(inst.instrument_id, Decimal("10000.0")) for inst in sample_insts]
+            instrument_list = [(inst.instrument_id, Decimal("100.0")) for inst in sample_insts]
 
         # Calculate valuations and holdings summaries
         for inst_id, qty in instrument_list:
