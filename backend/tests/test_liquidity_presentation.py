@@ -148,7 +148,7 @@ async def test_local_remove_uses_actual_account_and_preserves_ledger(monkeypatch
         assert calls == []
 
 
-async def test_local_removal_persists_and_disappears_from_overview(session):
+async def test_local_removal_persists_and_disappears_from_overview(session, monkeypatch):
     from sqlalchemy import select, func
     from backend.app.modules.portfolio_management.portfolio_creation.models import Portfolio
     from backend.app.modules.instrument_reference_data.instrument_master.models import Instrument
@@ -161,14 +161,41 @@ async def test_local_removal_persists_and_disappears_from_overview(session):
     await session.commit()
     service=PositionManagementService(session)
     await service.apply_position_event(PositionEventRegisterRequest(portfolio_id='PORT_REMOVE',account_id='ACTUAL_ACCOUNT',instrument_id='TEST_STOCK',event_type='TRADE_BUY',signed_quantity_delta=D(25),idempotency_key='TEST_OPEN'))
+    from backend.app.modules.dashboard_visualization.liquidity_dashboard.schemas.liquidity_dashboard_schemas import OrderBookDepthLadder
+    async def quote(self, instrument_id):return CurrentQuoteItem(instrument_id=instrument_id,symbol=instrument_id,mid_price=D(100),spread_bps=D(2),currency='USD')
+    async def score(self, instrument_id):return InstrumentLiquidityScore(instrument_id=instrument_id,symbol=instrument_id,composite_score=D(75),liquidity_bucket='TIER_1_HIGH',calculated_at=datetime.now(timezone.utc),adv_shares_20d=D(1000))
+    async def depth(self, instrument_id, levels_count=5):return OrderBookDepthLadder(instrument_id=instrument_id,symbol=instrument_id,levels_count=levels_count,snapshot_timestamp=datetime.now(timezone.utc))
+    monkeypatch.setattr(LiquidityDashboardService,'get_current_quote',quote)
+    monkeypatch.setattr(LiquidityDashboardService,'get_instrument_liquidity_score',score)
+    monkeypatch.setattr(LiquidityDashboardService,'get_order_book_depth_ladder',depth)
+    first=await LiquidityDashboardService(session).get_portfolio_liquidity_overview('PORT_REMOVE')
+    assert first.holdings[0].position_shares == 25
+    assert first.total_nav == 2500
+    await service.apply_position_event(PositionEventRegisterRequest(portfolio_id='PORT_REMOVE',account_id='SECOND_ACCOUNT',instrument_id='TEST_STOCK',event_type='TRADE_BUY',signed_quantity_delta=D(10),idempotency_key='TEST_ADD'))
+    updated=await LiquidityDashboardService(session).get_portfolio_liquidity_overview('PORT_REMOVE')
+    assert len(updated.holdings)==1
+    assert updated.holdings[0].position_shares == 35
+    assert updated.total_nav == 3500
     await remove_local_position('PORT_REMOVE','TEST_STOCK',session)
-    book=(await session.execute(select(PositionBook))).scalar_one()
+    book=(await session.execute(select(PositionBook).where(PositionBook.account_id=='ACTUAL_ACCOUNT'))).scalar_one()
     snapshot=(await session.execute(select(PositionSnapshot).order_by(PositionSnapshot.snapshot_version.desc()).limit(1))).scalar_one()
     assert snapshot.net_signed_quantity == 0
     assert book.position_status.value == 'CLOSED'
     count=(await session.execute(select(func.count()).select_from(PositionEvent))).scalar_one()
-    assert count == 2
+    assert count == 4
     await remove_local_position('PORT_REMOVE','TEST_STOCK',session)
     assert (await session.execute(select(func.count()).select_from(PositionEvent))).scalar_one() == count
     overview=await LiquidityDashboardService(session).get_portfolio_liquidity_overview('PORT_REMOVE')
     assert overview.holdings == []
+
+
+async def test_conversion_is_timestamped_and_missing_fx_is_not_one(monkeypatch):
+    from backend.app.modules.dashboard_visualization.liquidity_dashboard.services.presentation import conversion_rate
+    from backend.app.modules.market_data_ingestion.adapters.yfinance import latest_quote
+    async def valid(symbol):return {'status':'available','price':0.012,'currency':'USD','source_time':datetime.now(timezone.utc).isoformat()}
+    monkeypatch.setattr(latest_quote,'latest_market_quote',valid)
+    rate, stamp, source=await conversion_rate('INR','USD')
+    assert rate==D('.012') and stamp and 'INRUSD=X' in source
+    async def missing(symbol):return {'status':'unavailable'}
+    monkeypatch.setattr(latest_quote,'latest_market_quote',missing)
+    assert (await conversion_rate('INR','USD'))[0] is None

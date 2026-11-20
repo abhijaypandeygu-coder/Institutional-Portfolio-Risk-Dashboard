@@ -23,6 +23,8 @@ interface LiquidityDashboardPageProps {
   portfolioId?: string;
   defaultInstrumentId?: string;
   onOpenOrderModal?: () => void;
+  revision?: number;
+  onPositionsChanged?: () => void;
   onPortfolioUpdated?: (data: PortfolioLiquidityDashboardResponse) => void;
 }
 
@@ -31,6 +33,8 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
   defaultInstrumentId,
   onOpenOrderModal,
   onPortfolioUpdated,
+  revision = 0,
+  onPositionsChanged,
 }) => {
   const [currentPortfolioId, setCurrentPortfolioId] = useState<string>(portfolioId || '');
   const [availablePortfolios, setAvailablePortfolios] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
@@ -159,7 +163,7 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
     setPortfolioData(null);
     fetchPortfolioLiquidity();
     return () => portfolioRequest.current?.abort();
-  }, [currentPortfolioId, portfolioId, participationRate]);
+  }, [currentPortfolioId, portfolioId, participationRate, revision]);
 
   useEffect(() => {
     if (!selectedInstrumentId) return;
@@ -188,12 +192,12 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
     });
     const refreshContext = setInterval(() => { axios.get<MarketContext>(`${root}/market-context`, options).then(apply(setMarketContext)).catch(() => {}); }, 60000);
     return () => { controller.abort(); clearInterval(refreshContext); };
-  }, [selectedInstrumentId, currentPortfolioId, lookbackDays, depthLevels, participationRate, positionRevision]);
+  }, [selectedInstrumentId, currentPortfolioId, lookbackDays, depthLevels, participationRate, positionRevision, revision]);
 
   return (
     <div className="flex min-w-0 flex-col gap-7 text-ink">
       {/* Top Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
+      <div className="workspace-hero flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-semibold text-ink ">Liquidity Analytics</h1>
@@ -239,7 +243,7 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
         selectedInstrumentId={selectedInstrumentId}
         onSelectInstrument={inspectInstrument}
         onOpenOrderModal={onOpenOrderModal}
-        onPositionChange={() => { setPositionRevision(n => n + 1); void fetchPortfolioLiquidity(); }}
+        onPositionChange={() => { setPositionRevision(n => n + 1); if (onPositionsChanged) onPositionsChanged(); else void fetchPortfolioLiquidity(); }}
       />
 
       {/* Selected Instrument Microstructure Explorer */}

@@ -275,7 +275,7 @@ export const StressTestingDashboardPage: React.FC<StressTestingDashboardPageProp
   return (
     <div className="min-w-0 text-ink space-y-7">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-line">
+      <div className="workspace-hero flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-semibold text-ink ">

@@ -21,7 +21,7 @@ from sqlalchemy import select, and_, or_, desc
 
 from backend.app.modules.instrument_reference_data.instrument_master.models import Instrument
 from backend.app.modules.portfolio_management.portfolio_creation.models import Portfolio
-from .presentation import market_context, volume_context, native_currency
+from .presentation import market_context, volume_context, native_currency, conversion_rate
 from backend.app.modules.portfolio_management.position_management.models import PositionBook, PositionSnapshot, PositionStatus
 from backend.app.modules.portfolio_management.position_valuation.models import PositionValuation
 from backend.app.modules.portfolio_management.portfolio_history.models import PortfolioBookSnapshot
@@ -90,6 +90,7 @@ class LiquidityDashboardService:
         self._quotes = {}
         self._scores = {}
         self._contexts = {}
+        self._fx_metadata = {}
 
     async def _latest_valuations(self, portfolio_id):
         rows = (await self.db.execute(select(PositionValuation).where(
@@ -326,8 +327,14 @@ class LiquidityDashboardService:
         snapshot: Optional[OrderBookDepthSnapshot] = res.scalar_one_or_none()
 
         if not snapshot:
-            # Query live simulated order book depth via yfinance as fallback
-            live_depth = await YFinanceMarketDataAdapter.get_live_depth(symbol or instrument_id, levels_count=levels_count)
+            # 1. First attempt to query authentic live broker depth (Upstox L2 / Alpaca)
+            from backend.app.modules.market_data_ingestion.adapters.live_depth_adapter import MarketDepthAdapter
+            live_depth = await MarketDepthAdapter.get_live_depth(symbol or instrument_id, levels_count=levels_count)
+            
+            # 2. If live depth adapter did not return, fallback to yfinance depth
+            if not live_depth:
+                live_depth = await YFinanceMarketDataAdapter.get_live_depth(symbol or instrument_id, levels_count=levels_count)
+
             if live_depth:
                 bid_items = [DepthLevelItem(**b) for b in live_depth["bids"]]
                 ask_items = [DepthLevelItem(**a) for a in live_depth["asks"]]
@@ -349,7 +356,18 @@ class LiquidityDashboardService:
                     running_ask += a.notional
                     cum_ask_notional.append(running_ask)
 
-                imbalance = (total_bid_qty - total_ask_qty) / (total_bid_qty + total_ask_qty) if (total_bid_qty + total_ask_qty) > 0 else Decimal("0")
+                denom = total_bid_qty + total_ask_qty
+                imbalance = (total_bid_qty - total_ask_qty) / denom if denom > 0 else Decimal("0")
+                imb_status = "BALANCED"
+                if imbalance > Decimal("0.20"):
+                    imb_status = "BID_HEAVY"
+                elif imbalance < Decimal("-0.20"):
+                    imb_status = "ASK_HEAVY"
+
+                venue = live_depth.get("venue", "SIMULATED")
+                quality = live_depth.get("quality_status", "SIMULATED")
+                source_kind = live_depth.get("source_kind", "SIMULATED")
+                is_stale = live_depth.get("is_stale", False)
 
                 return OrderBookDepthLadder(
                     instrument_id=instrument_id,
@@ -364,8 +382,12 @@ class LiquidityDashboardService:
                     total_bid_notional=total_bid_notional,
                     total_ask_notional=total_ask_notional,
                     depth_imbalance=imbalance,
-                    imbalance_status="BALANCED",
-                    is_stale=True, currency=live_depth.get("currency"), venue="SIMULATED", quality_status="SIMULATED", source_kind="SIMULATED",
+                    imbalance_status=imb_status,
+                    is_stale=is_stale,
+                    currency=live_depth.get("currency"),
+                    venue=venue,
+                    quality_status=quality,
+                    source_kind=source_kind,
                 )
 
             return OrderBookDepthLadder(
@@ -673,43 +695,37 @@ class LiquidityDashboardService:
                 pos_notional = abs(sum((v.signed_market_value_base for v in vals), Decimal(0)))
                 portfolio = (await self.db.execute(select(Portfolio).where(Portfolio.portfolio_id == portfolio_id))).scalar_one_or_none()
                 cost_currency = portfolio.base_currency if portfolio else cost_currency
-            else:
-                # Query authoritative PositionBook and latest PositionSnapshot
-                book_stmt = (
-                    select(PositionBook)
-                    .where(
-                        and_(
-                            PositionBook.portfolio_id == portfolio_id,
-                            PositionBook.position_status != PositionStatus.CLOSED,
-                            or_(
-                                PositionBook.instrument_id == instrument_id,
-                                PositionBook.instrument_id == symbol,
-                            ),
-                        )
-                    )
-                    .limit(1)
-                )
-                book_res = await self.db.execute(book_stmt)
-                book = book_res.scalar_one_or_none()
-                if book:
+            # Current books/snapshots override stale valuation quantities, across all accounts.
+            books = (await self.db.execute(select(PositionBook).where(
+                PositionBook.portfolio_id == portfolio_id,
+                PositionBook.instrument_id.in_([instrument_id, symbol]),
+            ))).scalars().all()
+            if books:
+                pos_shares = Decimal(0)
+                signed_notional = Decimal(0)
+                is_member = False
+                portfolio = (await self.db.execute(select(Portfolio).where(Portfolio.portfolio_id == portfolio_id))).scalar_one_or_none()
+                base = portfolio.base_currency if portfolio else cost_currency
+                rate, fx_time, fx_source = await conversion_rate(quote.currency or native_currency(symbol), base)
+                self._fx_metadata[instrument_id] = {"fx_rate_to_base": rate, "fx_as_of": fx_time, "fx_source": fx_source, "valuation_complete": rate is not None}
+                for book in books:
+                    if book.position_status == PositionStatus.CLOSED:
+                        continue
+                    snap = (await self.db.execute(select(PositionSnapshot).where(
+                        PositionSnapshot.position_id == book.position_id
+                    ).order_by(desc(PositionSnapshot.snapshot_version)).limit(1))).scalar_one_or_none()
+                    qty = snap.net_signed_quantity if snap else Decimal(0)
                     is_member = True
-                    snap_stmt = (
-                        select(PositionSnapshot)
-                        .where(PositionSnapshot.position_id == book.position_id)
-                        .order_by(desc(PositionSnapshot.snapshot_version))
-                        .limit(1)
-                    )
-                    snap_res = await self.db.execute(snap_stmt)
-                    snap = snap_res.scalar_one_or_none()
-                    if snap and snap.net_signed_quantity is not None:
-                        pos_shares = snap.net_signed_quantity
-                    else:
-                        pos_shares = Decimal("0")
-                    
-                    # Compute realistic notional using live quote or price
-                    quote = await self.get_current_quote(instrument_id)
-                    price = quote.mid_price or Decimal("0")
-                    pos_notional = abs(pos_shares * price)
+                    pos_shares += qty
+                    mark = next((v for v in vals if v.account_id == book.account_id and v.listing_id == book.listing_id), None)
+                    price = quote.mid_price
+                    if price is None and mark is not None and mark.signed_quantity:
+                        price = abs(mark.signed_market_value_native / mark.signed_quantity)
+                    if qty and price is None:
+                        self._fx_metadata[instrument_id]['valuation_complete'] = False
+                    signed_notional += qty * (price or Decimal(0)) * (rate if rate is not None else Decimal(1))
+                cost_currency = base if rate is not None else quote.currency or native_currency(symbol)
+                pos_notional = abs(signed_notional)
 
         # Determine direction
         if pos_shares > Decimal("0"):
@@ -851,30 +867,21 @@ class LiquidityDashboardService:
         total_nav = Decimal("0")
         holdings: List[HoldingLiquiditySummary] = []
 
-        instrument_list: List[Tuple[str, Decimal]] = []
-        if valuations:
-            quantities = {}
-            for v in valuations:
-                quantities[v.instrument_id] = quantities.get(v.instrument_id, Decimal(0)) + v.signed_quantity
-            instrument_list = [(i, q) for i, q in quantities.items() if q != 0]
-        else:
-            pos_stmt = (
-                select(PositionBook)
-                .where(PositionBook.portfolio_id == portfolio_id, PositionBook.position_status != PositionStatus.CLOSED)
-            )
-            pos_res = await self.db.execute(pos_stmt)
-            positions = pos_res.scalars().all()
-            for p in positions:
-                snap_stmt = (
-                    select(PositionSnapshot)
-                    .where(PositionSnapshot.position_id == p.position_id)
-                    .order_by(desc(PositionSnapshot.snapshot_version))
-                    .limit(1)
-                )
-                snap_res = await self.db.execute(snap_stmt)
-                snap = snap_res.scalar_one_or_none()
-                real_qty = snap.net_signed_quantity if (snap and snap.net_signed_quantity is not None) else Decimal("0")
-                instrument_list.append((p.instrument_id, real_qty))
+        quantities = {}
+        books = (await self.db.execute(select(PositionBook).where(PositionBook.portfolio_id == portfolio_id))).scalars().all()
+        book_instruments = {book.instrument_id for book in books}
+        for book in books:
+            if book.position_status == PositionStatus.CLOSED:
+                continue
+            snap = (await self.db.execute(select(PositionSnapshot).where(
+                PositionSnapshot.position_id == book.position_id
+            ).order_by(desc(PositionSnapshot.snapshot_version)).limit(1))).scalar_one_or_none()
+            quantity = snap.net_signed_quantity if snap else Decimal(0)
+            quantities[book.instrument_id] = quantities.get(book.instrument_id, Decimal(0)) + quantity
+        for valuation in valuations:
+            if valuation.instrument_id not in book_instruments:
+                quantities[valuation.instrument_id] = quantities.get(valuation.instrument_id, Decimal(0)) + valuation.signed_quantity
+        instrument_list = list(quantities.items())
 
         # Calculate valuations and holdings summaries
         for inst_id, qty in instrument_list:
@@ -929,6 +936,7 @@ class LiquidityDashboardService:
                     full_liquidation_minutes=full_liq.estimated_duration_minutes if full_liq else None,
                     calendar_description=liq_profile.calendar_description,
                     market_region=market_region,
+                    **self._fx_metadata.get(inst_id, {}),
                 )
             )
 

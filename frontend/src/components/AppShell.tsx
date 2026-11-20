@@ -1,23 +1,36 @@
 import React, { useEffect, useRef } from 'react';
-import { LayoutDashboard, ShieldAlert, ChartNoAxesCombined, FlaskConical, Cable, Search, Command, ChevronDown, PanelLeft, ArrowUpRight } from 'lucide-react';
-import { cn } from '../utils/cn';
-export type DashboardView = 'overview' | 'alerts' | 'liquidity' | 'stress' | 'providers';
+import { LayoutDashboard, ShieldAlert, ChartNoAxesCombined, FlaskConical, Cable, Search, Command, ChevronDown, PanelLeft, UserRound } from 'lucide-react';
+export type DashboardView = 'overview' | 'alerts' | 'liquidity' | 'stress' | 'providers' | 'profile';
 const views = [
   { id: 'overview', name: 'Overview', icon: LayoutDashboard },
   { id: 'alerts', name: 'Risk Alerts', icon: ShieldAlert },
   { id: 'liquidity', name: 'Liquidity', icon: ChartNoAxesCombined },
   { id: 'stress', name: 'Stress Testing', icon: FlaskConical },
   { id: 'providers', name: 'Data Feeds', icon: Cable },
+  { id: 'profile', name: 'Personal profile', icon: UserRound },
 ] as const;
 type Props = { view: DashboardView; onView: (v: DashboardView) => void; portfolio: string; onPortfolio: (id: string) => void; portfolios: { portfolio_id: string; portfolio_name: string }[]; onSearch: () => void; children: React.ReactNode };
 export function AppShell({ view, onView, portfolio, onPortfolio, portfolios, onSearch, children }: Props) {
   const mobileNav = useRef<HTMLDetailsElement>(null);
   useEffect(() => { window.scrollTo(0, 0); }, [view]);
-  const navigation = (close?: () => void) => <nav aria-label="Dashboard views" className="space-y-1">{views.map(v => <button type="button" key={v.id} aria-current={view === v.id ? 'page' : undefined} onClick={() => { onView(v.id); close?.(); }} className={cn('flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium', view === v.id ? 'bg-brand text-white' : 'text-secondary hover:bg-hover hover:text-ink')}><v.icon className="size-4 shrink-0" strokeWidth={1.7} />{v.name}</button>)}</nav>;
-  return <div className="app-shell min-h-dvh bg-canvas text-ink">
+  const navigation = (close?: () => void) => (
+    <nav aria-label="Dashboard views" className="workspace-nav" style={{
+      '--view-index': views.findIndex(v => v.id === view),
+      '--view-count': views.length,
+    } as React.CSSProperties}>
+      {views.map(v => (
+        <button type="button" key={v.id} data-section={v.id} className="workspace-link"
+          aria-current={view === v.id ? 'page' : undefined} onClick={() => { onView(v.id); close?.(); }}>
+          <span className="workspace-glyph"><v.icon aria-hidden="true" size={17} strokeWidth={2} /></span>
+          {v.name}
+        </button>
+      ))}
+    </nav>
+  );
+  return <div data-section={view} className="app-shell min-h-dvh bg-canvas text-ink">
     <a className="ui-skip-link rounded-lg bg-brand px-4 py-3 text-sm text-white" href="#main-content">Skip to content</a>
     <aside className="app-sidebar hidden lg:flex" aria-label="Workspace sidebar">
-      <button type="button" onClick={() => onView('overview')} className="mb-12 flex items-center gap-2.5 rounded-xl px-2 text-left"><span className="flex size-9 items-center justify-center rounded-xl bg-ink text-white"><ChartNoAxesCombined className="size-5" strokeWidth={1.7} /></span><span className="text-xl font-semibold">FinSight</span></button>
+      <button type="button" onClick={() => onView('overview')} className="mb-10 flex items-center gap-3 rounded-xl px-2 text-left"><span className="brand-tile"><ChartNoAxesCombined aria-hidden="true" size={23} strokeWidth={2} /></span><span className="text-xl font-semibold tracking-tight">FinSight</span></button>
       <p className="mb-3 px-3 text-xs font-medium text-muted">Workspace</p>{navigation()}
       <div className="mt-auto border-t border-line px-3 pt-5"><span className="flex items-center gap-2 text-xs font-medium text-secondary"><span className="size-1.5 rounded-full bg-muted" />Local workspace</span><p className="mt-2 text-xs leading-relaxed text-muted">Portfolio analytics<br />and risk intelligence.</p></div>
     </aside>
@@ -31,6 +44,8 @@ export function AppShell({ view, onView, portfolio, onPortfolio, portfolios, onS
         <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2 sm:gap-3">
           <label className="relative block min-w-0"><span className="sr-only">Select active portfolio</span><select value={portfolio} onChange={e => onPortfolio(e.target.value)} className="max-w-48 appearance-none rounded-lg border border-line bg-surface py-2.5 pl-3 pr-8 text-xs font-medium text-secondary sm:max-w-56">{portfolios.map(p => <option key={p.portfolio_id} value={p.portfolio_id}>{p.portfolio_name}</option>)}</select><ChevronDown aria-hidden className="pointer-events-none absolute right-2.5 top-3 size-3.5 text-muted" /></label>
           <button type="button" onClick={onSearch} aria-label="Open command palette" className="flex items-center gap-2 rounded-lg border border-line bg-surface p-2.5 text-muted sm:min-w-40"><Search className="size-4" /><span className="hidden text-xs sm:inline">Search anything</span><kbd className="ml-auto hidden items-center gap-0.5 text-xs sm:flex"><Command className="size-3" />K</kbd></button>
+          <button type="button" className="profile-avatar" aria-label="Open personal profile" aria-current={view === 'profile' ? 'page' : undefined}
+            title="Personal profile" onClick={() => onView('profile')}><UserRound size={20} aria-hidden="true" /></button>
         </div>
       </header>
       <main id="main-content" tabIndex={-1} className="app-content mx-auto min-w-0 max-w-screen-2xl space-y-7 p-4 sm:p-8 lg:p-10">{children}</main>

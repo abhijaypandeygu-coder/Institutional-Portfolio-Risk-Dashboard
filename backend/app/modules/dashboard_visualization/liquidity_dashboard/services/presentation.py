@@ -13,6 +13,21 @@ from backend.app.modules.market_microstructure.liquidity_estimation.models impor
 _volume_cache = {}
 
 
+async def conversion_rate(native: str, base: str):
+    if native == base:
+        return Decimal(1), None, "Same currency"
+    from backend.app.modules.market_data_ingestion.adapters.yfinance.latest_quote import latest_market_quote
+    quote = await latest_market_quote(f"{native}{base}=X")
+    stamp = quote.get('source_time')
+    if quote.get('status') != 'available' or not stamp or quote.get('currency') != base:
+        return None, None, "FX unavailable"
+    age = (datetime.now(timezone.utc) - datetime.fromisoformat(stamp)).total_seconds()
+    value = Decimal(str(quote['price']))
+    if not value.is_finite() or value <= 0 or age < -60 or age > 7 * 86400:
+        return None, stamp, "FX unavailable or stale"
+    return value, stamp, f"Yahoo Finance {native}{base}=X; provider quote, may be delayed"
+
+
 def native_currency(symbol: str) -> str:
     return "INR" if symbol.upper().endswith((".NS", ".BO")) else "USD"
 

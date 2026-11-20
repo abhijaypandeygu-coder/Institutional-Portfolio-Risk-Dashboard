@@ -1,8 +1,9 @@
 from typing import Any
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 from backend.app.core.security import require_role, UserRole
 from .service import ExternalDataService, ProviderError, provider_status
+from .public_news import public_news
 
 router = APIRouter(prefix='/api/v1/external-data', tags=['External data providers'])
 
@@ -10,6 +11,11 @@ router = APIRouter(prefix='/api/v1/external-data', tags=['External data provider
 class DataQuery(BaseModel):
     model_config = ConfigDict(extra='forbid')
     parameters: dict[str, Any] = Field(default_factory=dict, max_length=10)
+
+
+@router.get('/news')
+async def profile_news(symbol: str | None = Query(None, max_length=24, pattern=r'^[a-zA-Z0-9][a-zA-Z0-9.^=\-]*$')):
+    return await public_news(symbol)
 
 
 @router.get('/providers', dependencies=[Depends(require_role(UserRole.READ_ONLY))])

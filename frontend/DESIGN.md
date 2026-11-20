@@ -3,7 +3,7 @@ version: alpha
 name: FinSight Portfolio Workspace
 description: Apple-inspired light financial workspace with a persistent sidebar, quiet surfaces, system typography and blue actions.
 colors:
-  canvas: "#f5f5f7"
+  canvas: "#f4f6fb"
   surface: "#ffffff"
   subtle: "#f0f0f2"
   hover: "#e9e9ed"
@@ -42,6 +42,8 @@ FinSight is an Apple-inspired portfolio and risk workspace. The user's instructi
 The implementation authority is src/index.css, AppShell.tsx and the live dashboard consumers. These named roles replace dark-theme utility colors across the frontend. Preserve data connections, calculations, unavailable states and broker account separation.
 
 ## Colors
+
+Each workspace pairs a navigation tile with a matching page header. Overview uses blue and lilac, Risk Alerts uses apricot and rose, Liquidity uses teal and sky, Stress Testing uses violet and pink, and Data Feeds uses sky and mint. These accents identify destinations. Gains, losses and warnings retain their financial meanings.
 
 Use canvas for the page background and surface for cards and dialogs. Subtle and hover provide quiet control states; line and line-strong separate content without heavy shadows. Ink, secondary and muted establish text hierarchy. Brand is the blue action and selection color, with brand-hover and brand-soft states. Positive, negative and warning colors always accompany a sign, label or status. Do not use pale dark-theme text on light surfaces.
 

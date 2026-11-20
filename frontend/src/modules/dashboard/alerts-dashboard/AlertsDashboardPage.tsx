@@ -251,7 +251,7 @@ export const AlertsDashboardPage: React.FC<AlertsDashboardPageProps> = ({ portfo
   return (
     <div className="min-w-0 text-ink space-y-7">
       {/* Top Banner / Breadcrumb */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-line gap-4">
+      <div className="workspace-hero flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-ink ">Risk Alerts</h1>
           <p className="text-xs text-muted mt-1">

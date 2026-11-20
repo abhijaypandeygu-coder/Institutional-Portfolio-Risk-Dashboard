@@ -93,15 +93,57 @@ class MarketStreamerService:
 
                 now_iso = datetime.now(timezone.utc).isoformat()
 
-                # Check if real Upstox stream has fresh L2 depth
-                upstox_match = None
-                if upstox_stream and upstox_stream.state == 'CONNECTED':
-                    for k, q in upstox_stream.quotes.items():
-                        if clean_sym in k or raw_id in k or k.endswith(clean_sym):
-                            upstox_match = normalize_quote(k, q)
-                            break
+                # 1. First check live MarketDepthAdapter (real Upstox L2 depth or Alpaca L1/L2)
+                from backend.app.modules.market_data_ingestion.adapters.live_depth_adapter import MarketDepthAdapter
+                live_depth = None
+                try:
+                    live_depth = await MarketDepthAdapter.get_live_depth(clean_sym, levels_count=levels_count)
+                except Exception as e:
+                    logger.debug(f"Live depth adapter lookup: {e}")
 
-                if upstox_match and upstox_match.get('bids') and upstox_match.get('asks'):
+                if live_depth and live_depth.get("bids") and live_depth.get("asks"):
+                    bids = [
+                        {
+                            "level_index": b["level_index"],
+                            "price": float(b["price"]),
+                            "quantity": int(b["quantity"]),
+                            "notional": float(b["notional"]),
+                            "distance_bps": float(b["distance_bps"]),
+                            "order_count": int(b.get("order_count", 1)),
+                        }
+                        for b in live_depth["bids"]
+                    ]
+                    asks = [
+                        {
+                            "level_index": a["level_index"],
+                            "price": float(a["price"]),
+                            "quantity": int(a["quantity"]),
+                            "notional": float(a["notional"]),
+                            "distance_bps": float(a["distance_bps"]),
+                            "order_count": int(a.get("order_count", 1)),
+                        }
+                        for a in live_depth["asks"]
+                    ]
+
+                    total_bid_qty = sum(b["quantity"] for b in bids)
+                    total_ask_qty = sum(a["quantity"] for a in asks)
+                    total_bid_notional = round(sum(b["notional"] for b in bids), 2)
+                    total_ask_notional = round(sum(a["notional"] for a in asks), 2)
+                    cum_bid_notional = [round(sum(b["notional"] for b in bids[:i+1]), 2) for i in range(len(bids))]
+                    cum_ask_notional = [round(sum(a["notional"] for a in asks[:i+1]), 2) for i in range(len(asks))]
+                    
+                    denom = total_bid_qty + total_ask_qty
+                    imbalance = round((total_bid_qty - total_ask_qty) / denom, 4) if denom > 0 else 0.0
+                    
+                    venue_tag = live_depth.get("venue", "LIVE_FEED")
+                    best_bid = bids[0]["price"] if bids else best_bid_base
+                    best_ask = asks[0]["price"] if asks else best_ask_base
+                    current_mid = round((best_bid + best_ask) / 2.0, 3)
+                    stable_spread_abs = round(best_ask - best_bid, 2)
+                    actual_bps = round((stable_spread_abs / current_mid) * 10000.0, 2) if current_mid > 0 else 0.0
+                    currency = live_depth.get("currency", currency)
+
+                elif upstox_match and upstox_match.get('bids') and upstox_match.get('asks'):
                     # Use authentic exchange L2 order book directly
                     bids = []
                     cum_b = 0.0

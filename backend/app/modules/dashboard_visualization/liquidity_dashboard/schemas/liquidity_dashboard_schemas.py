@@ -215,6 +215,10 @@ class HoldingLiquiditySummary(BaseModel):
     full_liquidation_minutes: Optional[Decimal] = None
     calendar_description: Optional[str] = None
     market_region: Optional[str] = None
+    valuation_complete: bool = True
+    fx_rate_to_base: Optional[Decimal] = None
+    fx_as_of: Optional[str] = None
+    fx_source: Optional[str] = None
 
 
 class PortfolioLiquidityDashboardResponse(BaseModel):

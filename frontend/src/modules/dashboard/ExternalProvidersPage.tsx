@@ -96,7 +96,7 @@ export const ExternalProvidersPage: React.FC = () => {
   return (
     <div className="min-w-0 space-y-7 text-ink">
       {/* Header */}
-      <div>
+      <div className="workspace-hero">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-3xl font-semibold text-ink ">
             Data Feeds

@@ -1,5 +1,7 @@
 import { useLiveRefresh, useLiveUpdates } from './hooks/useLiveRefresh';
-import { AppShell } from './components/AppShell';
+import { AppShell, type DashboardView } from './components/AppShell';
+import { PersonalProfile } from './components/profile/PersonalProfile';
+import { PhysicalAssets } from './components/profile/PhysicalAssets';
 import { ExecutivePortfolioLayout } from './components/ExecutivePortfolioLayout';
 import { cn } from './utils/cn';
 import { ModalSurface } from './components/ModalSurface';
@@ -37,11 +39,13 @@ import { OrderAllocationModal } from './components/OrderAllocationModal';
 
 export const App: React.FC = () => {
   const { refreshAll } = useLiveUpdates();
-  const [activeTab, setActiveTab] = useState<'overview' | 'alerts' | 'liquidity' | 'stress' | 'providers'>('overview');
+  const [portfolioRevision, setPortfolioRevision] = useState(0);
+  const positionChannel = useRef<BroadcastChannel | null>(null);
+  const [activeTab, setActiveTab] = useState<DashboardView>('overview');
   const [timeRange, setTimeRange] = useState<'1D' | '1W' | '1M' | '3M' | '6M' | '1Y' | 'All'>('1Y');
   const [selectedPortfolio, setSelectedPortfolio] = useState<string>('PORT_API_RISK_484889');
   const [selectedTicker, setSelectedTicker] = useState<string | null>('AAPL');
-  const [portfolioList, setPortfolioList] = useState<Array<{ portfolio_id: string; portfolio_name: string }>>([]);
+  const [portfolioList, setPortfolioList] = useState<Array<{ portfolio_id: string; portfolio_name: string; base_currency?: string }>>([]);
   const [showEngineDetails, setShowEngineDetails] = useState<boolean>(false);
   const [overviewData, setOverviewData] = useState<any>(null);
   const [liquidityData, setLiquidityData] = useState<any>(null);
@@ -126,11 +130,21 @@ export const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    setOverviewData(null); setLiquidityData(null); setRecentTransactions([]);
+    if (typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel('finsight-position-changes');
+    positionChannel.current = channel;
+    channel.onmessage = event => {
+      if (event.data === selectedPortfolio) setPortfolioRevision(n => n + 1);
+    };
+    return () => { positionChannel.current = null; channel.close(); };
+  }, [selectedPortfolio]);
+
+  useEffect(() => {
     if (!selectedPortfolio) return;
     const controller = new AbortController();
-    setOverviewData(null); setLiquidityData(null);
     // Fetch real position transactions from authoritative position ledger
-    fetch(`/api/v1/positions/portfolios/${selectedPortfolio}`)
+    fetch(`/api/v1/positions/portfolios/${selectedPortfolio}`, { signal: controller.signal })
       .then((res) => (res.ok ? res.json() : []))
       .then(async (positions) => {
         if (!Array.isArray(positions) || positions.length === 0) {
@@ -138,7 +152,7 @@ export const App: React.FC = () => {
           return;
         }
         const eventPromises = positions.slice(0, 8).map((p: any) =>
-          fetch(`/api/v1/positions/${p.position_id}/events`)
+          fetch(`/api/v1/positions/${p.position_id}/events`, { signal: controller.signal })
             .then((res) => (res.ok ? res.json() : []))
             .catch(() => [])
         );
@@ -164,19 +178,19 @@ export const App: React.FC = () => {
             isNegative: qty < 0,
           };
         });
-        setRecentTransactions(formatted);
+        if (!controller.signal.aborted) setRecentTransactions(formatted);
       })
-      .catch(() => setRecentTransactions([]));
+      .catch(() => { if (!controller.signal.aborted) setRecentTransactions([]); });
     return () => controller.abort();
-  }, [selectedPortfolio]);
+  }, [selectedPortfolio, portfolioRevision]);
 
-  const overviewRefresh = useLiveRefresh(`overview:${selectedPortfolio}`, async signal => {
+  const overviewRefresh = useLiveRefresh(`overview:${selectedPortfolio}:${portfolioRevision}`, async signal => {
     if (!selectedPortfolio) return;
     const response = await fetch(`/api/v1/dashboard/portfolios/${encodeURIComponent(selectedPortfolio)}/overview`, { signal });
     if (!response.ok) throw new Error(`Portfolio valuation refresh failed (HTTP ${response.status}). Previous values are retained.`);
     const data = await response.json(); if (!signal.aborted) setOverviewData(data);
   });
-  const holdingsRefresh = useLiveRefresh(`holdings:${selectedPortfolio}`, async signal => {
+  const holdingsRefresh = useLiveRefresh(`holdings:${selectedPortfolio}:${portfolioRevision}`, async signal => {
     if (!selectedPortfolio) return;
     const response = await fetch(`/api/v1/dashboard/liquidity/portfolio/${encodeURIComponent(selectedPortfolio)}`, { signal });
     if (!response.ok) throw new Error('Holdings refresh failed. Previous values are retained.');
@@ -216,6 +230,13 @@ export const App: React.FC = () => {
   }, [selectedPortfolio]);
 
 
+  const currentHoldings = liquidityData?.portfolio_id === selectedPortfolio ? liquidityData : null;
+  const physicalAssets = <PhysicalAssets key={selectedPortfolio} portfolioId={selectedPortfolio}
+    baseCurrency={currentHoldings?.reporting_currency || portfolioList.find(p => p.portfolio_id === selectedPortfolio)?.base_currency || 'USD'} />;
+  const positionsChanged = (portfolioId = selectedPortfolio) => {
+    if (portfolioId === selectedPortfolio) { setPortfolioRevision(n => n + 1); refreshAll(); }
+    positionChannel.current?.postMessage(portfolioId);
+  };
   return (
     <>
       <AppShell view={activeTab} onView={setActiveTab} portfolio={selectedPortfolio} onPortfolio={setSelectedPortfolio}
@@ -223,13 +244,18 @@ export const App: React.FC = () => {
         {activeTab !== 'overview' && (
           <div className="min-w-0">
             <ErrorBoundary fallbackTitle="Module View Error">
+              {activeTab === 'profile' && <PersonalProfile key={selectedPortfolio} portfolioId={selectedPortfolio}
+                name={portfolioList.find(p => p.portfolio_id === selectedPortfolio)?.portfolio_name}
+                data={currentHoldings} error={holdingsRefresh.error} revision={portfolioRevision}>{physicalAssets}</PersonalProfile>}
               {activeTab === 'alerts' && <AlertsDashboardPage portfolioId={selectedPortfolio} />}
               {activeTab === 'liquidity' && (
                 <LiquidityDashboardPage
                   portfolioId={selectedPortfolio}
                   defaultInstrumentId={selectedTicker || undefined}
                   onOpenOrderModal={() => setIsOrderModalOpen(true)}
-                  onPortfolioUpdated={data => { setLiquidityData(data); refreshAll(); }}
+                  onPortfolioUpdated={data => { if (data.portfolio_id === selectedPortfolio) setLiquidityData(data); }}
+                  revision={portfolioRevision}
+                  onPositionsChanged={positionsChanged}
                 />
               )}
               {activeTab === 'stress' && <StressTestingDashboardPage portfolioId={selectedPortfolio} />}
@@ -241,7 +267,7 @@ export const App: React.FC = () => {
         {activeTab === 'overview' && (
           <>
             {/* Top Bar: Title & Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pb-1">
+            <div className="workspace-hero flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-semibold text-ink text-balance flex flex-wrap items-center gap-2.5">
                   Overview
@@ -289,10 +315,11 @@ export const App: React.FC = () => {
             </div>
 
             {(overviewRefresh.error || marketRefresh.error || holdingsRefresh.error) && <p role="status" className="rounded-lg bg-warning-soft p-3 text-xs text-warning">{overviewRefresh.error || marketRefresh.error || holdingsRefresh.error} Data may be stale.</p>}
-            <ExecutivePortfolioLayout overview={overviewData} holdings={liquidityData?.holdings || []} quotes={liveMarketWatch}
+            <ExecutivePortfolioLayout overview={overviewData} holdings={liquidityData?.portfolio_id === selectedPortfolio ? liquidityData.holdings : []} quotes={liveMarketWatch}
               currentValuation={liquidityData?.portfolio_id === selectedPortfolio ? liquidityData : null} portfolioId={selectedPortfolio} holdingsPending={liquidityData === null} range={timeRange} onRange={setTimeRange}
               onInstrument={symbol => { setSelectedTicker(symbol); setActiveTab('liquidity'); }} />
 
+            {physicalAssets}
             {/* Section 3: Recent Transactions | Top Holdings | Upcoming Events */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="bg-surface border border-line rounded-2xl p-6 flex flex-col justify-between">
@@ -440,6 +467,7 @@ export const App: React.FC = () => {
                 <div className="space-y-0.5 mt-1">
                   {[
                     { id: 'overview', label: 'Executive Dashboard', desc: 'Summary NAV, P&L, holdings and market events', icon: Activity },
+                    { id: 'profile', label: 'Personal profile', desc: 'Company performance and physical assets', icon: Wallet },
                     { id: 'alerts', label: 'Risk Alerts & Breaches', desc: 'Active limit violations, warnings and utilization thresholds', icon: Flame },
                     { id: 'liquidity', label: 'Liquidity Analytics', desc: 'Holdings depth, liquidation cost, bid-ask spread', icon: SlidersHorizontal },
                     { id: 'stress', label: 'Stress Testing & Monte Carlo', desc: 'Historical stress shocks, tail quantiles, loss attribution', icon: Layers },
@@ -615,20 +643,7 @@ export const App: React.FC = () => {
         onClose={() => setIsOrderModalOpen(false)}
         selectedPortfolio={selectedPortfolio}
         portfolioList={portfolioList}
-        onOrderSuccess={() => {
-          refreshAll();
-          // Re-fetch overview and liquidity data to reflect updated balances/positions
-          if (selectedPortfolio) {
-            fetch(`/api/v1/dashboard/portfolios/${selectedPortfolio}/overview`)
-              .then((res) => (res.ok ? res.json() : null))
-              .then((data) => setOverviewData(data))
-              .catch(() => { });
-            fetch(`/api/v1/dashboard/liquidity/portfolio/${selectedPortfolio}`)
-              .then((res) => (res.ok ? res.json() : null))
-              .then((data) => setLiquidityData(data))
-              .catch(() => { });
-          }
-        }}
+        onOrderSuccess={positionsChanged}
       />
     </>
   );

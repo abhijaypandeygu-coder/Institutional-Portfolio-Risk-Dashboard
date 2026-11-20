@@ -1043,6 +1043,10 @@ export interface HoldingLiquiditySummary {
   full_liquidation_cost_usd?: number | null;
   full_liquidation_days?: number | null;
   market_region?: 'INDIAN_MARKET' | 'US_MARKET' | 'OTHER_GLOBAL';
+  valuation_complete?: boolean;
+  fx_rate_to_base?: number;
+  fx_as_of?: string;
+  fx_source?: string;
 }
 
 export interface PortfolioLiquidityDashboardResponse {

@@ -21,7 +21,7 @@ interface OrderModalProps {
   onClose: () => void;
   selectedPortfolio: string;
   portfolioList: Array<{ portfolio_id: string; portfolio_name: string }>;
-  onOrderSuccess?: () => void;
+  onOrderSuccess?: (portfolioId: string) => void;
 }
 
 interface ValidationCheckResult {
@@ -208,7 +208,7 @@ export const OrderAllocationModal: React.FC<OrderModalProps> = ({
       const snap = await res.json();
       setExecutionResult(snap);
       setStep('confirmed');
-      if (onOrderSuccess) onOrderSuccess();
+      onOrderSuccess?.(targetPortfolio);
     } catch (err: any) {
       setErrorMsg(err.message || 'Execution failed');
     } finally {

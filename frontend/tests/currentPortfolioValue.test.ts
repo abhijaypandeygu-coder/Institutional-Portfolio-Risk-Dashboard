@@ -18,3 +18,7 @@ test('missing or invalid current data is unavailable instead of old stored NAV',
   assert.equal(currentPortfolioValue(null).display, 'Unavailable');
   assert.equal(currentPortfolioValue(snapshot([{position_notional: 'bad'}])).display, 'Unavailable');
 });
+
+test('missing FX prevents a misleading zero-value holding total', () => {
+  assert.equal(currentPortfolioValue(snapshot([{position_notional:0,valuation_complete:false}])).display,'Unavailable');
+});

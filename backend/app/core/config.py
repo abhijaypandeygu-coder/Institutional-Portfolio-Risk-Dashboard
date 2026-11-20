@@ -48,6 +48,9 @@ class Settings(BaseSettings):
     FMP_API_KEY: Optional[str] = None
     UPSTOX_ACCESS_TOKEN: Optional[str] = None
     UPSTOX_ALLOW_30_LEVEL: bool = False
+    ALPACA_API_KEY: Optional[str] = None
+    ALPACA_API_SECRET: Optional[str] = None
+    ALPACA_DATA_URL: str = "https://data.alpaca.markets"
 
     model_config = SettingsConfigDict(
         env_file=".env",
