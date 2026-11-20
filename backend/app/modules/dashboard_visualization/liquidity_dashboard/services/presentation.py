@@ -45,6 +45,26 @@ def regular_session(symbol: str, exchange: str = "") -> dict:
     }
 
 
+def compute_exchange_session(symbol: str, exchange: str = "") -> str:
+    """Computes whether the exchange is currently in regular session (OPEN vs CLOSED)."""
+    indian = symbol.upper().endswith((".NS", ".BO")) or exchange in ("NSE", "BSE")
+    now_utc = datetime.now(timezone.utc)
+    if indian:
+        tz = ZoneInfo("Asia/Kolkata")
+        local_time = now_utc.astimezone(tz)
+        is_weekday = local_time.weekday() < 5
+        curr_min = local_time.hour * 60 + local_time.minute
+        is_open = is_weekday and (9 * 60 + 15 <= curr_min < 15 * 60 + 30)
+        return "OPEN" if is_open else "CLOSED"
+    else:
+        tz = ZoneInfo("America/New_York")
+        local_time = now_utc.astimezone(tz)
+        is_weekday = local_time.weekday() < 5
+        curr_min = local_time.hour * 60 + local_time.minute
+        is_open = is_weekday and (9 * 60 + 30 <= curr_min < 16 * 60)
+        return "OPEN" if is_open else "CLOSED"
+
+
 async def market_context(db, instrument_id: str, symbol: str) -> dict:
     listing = (await db.execute(select(InstrumentListing).where(
         InstrumentListing.instrument_id == instrument_id,
@@ -52,6 +72,8 @@ async def market_context(db, instrument_id: str, symbol: str) -> dict:
     ).order_by(desc(InstrumentListing.id)).limit(1))).scalar_one_or_none()
     exchange = listing.exchange_id if listing else ""
     result = regular_session(symbol, exchange)
+    # Check live session calculation
+    result["session_status"] = compute_exchange_session(symbol, exchange)
     # Do not infer an authoritative US exchange from an unregistered ticker.
     code = exchange or ("NSE" if symbol.endswith(".NS") else "BSE" if symbol.endswith(".BO") else "")
     if code:

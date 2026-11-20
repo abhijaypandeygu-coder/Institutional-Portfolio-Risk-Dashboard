@@ -7,6 +7,7 @@ interface OrderBookDepthPanelProps {
   levelsCount: number;
   onLevelsCountChange: (count: number) => void;
   isStreaming?: boolean;
+  marketContext?: { session_status?: string; exchange?: string; regular_hours?: string } | null;
 }
 
 export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
@@ -14,6 +15,7 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
   levelsCount,
   onLevelsCountChange,
   isStreaming = false,
+  marketContext = null,
 }) => {
   if (!ladder) {
     return (
@@ -31,6 +33,7 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
     return '$';
   };
   const currSym = getCurrencySymbol();
+  const isL1Depth = String(ladder.quality_status || '').toUpperCase().includes('L1');
 
   const visibleBids = (ladder.bids || []).slice(0, levelsCount);
   const visibleAsks = (ladder.asks || []).slice(0, levelsCount);
@@ -69,28 +72,36 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
 
         {/* Data Freshness & Quality Badges */}
         <div className="flex flex-wrap items-center gap-2 text-[11px] font-sans">
+          {/* Feed connection */}
           <span className={`px-2 py-0.5 rounded bg-canvas border flex items-center gap-1.5 ${
             isStreaming ? 'text-positive border-positive/30' : 'text-secondary border-line'
           }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isStreaming ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
             {isStreaming ? 'FEED: STREAMING' : 'FEED: SNAPSHOT'}
           </span>
+
+          {/* Venue & Data Quality */}
           <span className="px-2 py-0.5 rounded bg-canvas text-brand border border-line">
             VENUE: {ladder.venue || 'PRIMARY'}
           </span>
           <span className="px-2 py-0.5 rounded bg-canvas text-positive border border-line">
             QUALITY: {ladder.quality_status || 'UNVERIFIED'}
           </span>
-          <span className={`px-2 py-0.5 rounded border ${
-            ladder.is_locked_crossed 
-              ? 'bg-negative-soft text-negative border-negative/20' 
+
+          {/* Explicit Exchange Session (Open vs Closed) */}
+          <span className={`px-2 py-0.5 rounded border font-semibold flex items-center gap-1 ${
+            marketContext?.session_status?.toUpperCase() === 'OPEN'
+              ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400'
               : 'bg-canvas text-muted border-line'
           }`}>
-            BOOK: {ladder.is_locked_crossed ? 'LOCKED/CROSSED' : 'UNLOCKED'}
+            <span className={`w-1.5 h-1.5 rounded-full ${marketContext?.session_status?.toUpperCase() === 'OPEN' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+            SESSION: {marketContext?.session_status?.toUpperCase() || (ladder.symbol?.endsWith('.NS') ? 'OPEN (NSE)' : 'CLOSED (US)')}
           </span>
+
+          {/* Quote Freshness / Timestamp */}
           {ladder.snapshot_timestamp && (
-            <span className="text-muted">
-              {new Date(ladder.snapshot_timestamp).toLocaleTimeString()}
+            <span className="px-2 py-0.5 rounded bg-canvas text-secondary border border-line">
+              UPDATE: {new Date(ladder.snapshot_timestamp).toLocaleTimeString()}
             </span>
           )}
         </div>
@@ -111,6 +122,7 @@ export const OrderBookDepthPanel: React.FC<OrderBookDepthPanelProps> = ({
       </div>
 
       <p className="text-xs text-muted">Quantity imbalance = (displayed bid quantity − displayed ask quantity) ÷ total displayed quantity, at the selected levels. Near-balanced: ±5%; leaning: 5–20%; heavy: above 20%. A book being unlocked does not establish an open exchange session.</p>
+      {isL1Depth && <p className="rounded-md border border-warning/25 bg-warning-soft px-3 py-2 text-xs text-warning">This provider supplies Level-1 bid/ask data. The first level is provider-reported; deeper ladder levels are generated estimates, not exchange Level-2 orders.</p>}
       {/* Depth Ladder Grid (Bids on Left, Asks on Right) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Bids Side */}

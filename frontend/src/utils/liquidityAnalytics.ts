@@ -20,8 +20,12 @@ export function quantityImbalance(bids: Array<{quantity: unknown}>, asks: Array<
 
 export function imbalanceLabel(value: number | null) {
   if (value === null || !Number.isFinite(value)) return 'Imbalance unavailable';
-  const label = Math.abs(value) <= .05 ? 'Near-balanced' : value > .20 ? 'Bid-heavy' : value < -.20 ? 'Ask-heavy' : value > 0 ? 'Bid-leaning' : 'Ask-leaning';
-  return `${label} (${(value * 100).toFixed(1)}%)`;
+  const pct = (value * 100).toFixed(1);
+  if (Math.abs(value) <= 0.05) return `Near-balanced (${pct}%)`;
+  if (value > 0.20) return `Bid-heavy (${pct}%)`;
+  if (value < -0.20) return `Ask-heavy (${pct}%)`;
+  if (value > 0.05) return `Bid-leaning (${pct}%)`;
+  return `Ask-leaning (${pct}%)`;
 }
 
 export function simulated(source?: { source_kind?: string | null; venue?: string | null } | null) {

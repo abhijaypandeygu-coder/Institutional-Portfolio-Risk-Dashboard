@@ -125,9 +125,11 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
 
   useEffect(() => {
     const ladder = effectiveDepthLadder;
-    const stamp = ladder?.source_timestamp;
-    if (!ladder || simulated(ladder) || !stamp || !ladder.bids.length || !ladder.asks.length) return;
-    const point = { timestamp: stamp, bid: ladder.bids.slice(0, depthLevels).reduce((sum, l) => sum + Number(l.notional), 0), ask: ladder.asks.slice(0, depthLevels).reduce((sum, l) => sum + Number(l.notional), 0) };
+    const stamp = ladder?.source_timestamp || ladder?.snapshot_timestamp;
+    if (!ladder || !stamp || !ladder.bids.length || !ladder.asks.length) return;
+    const bidNotional = ladder.bids.slice(0, depthLevels).reduce((sum, l) => sum + Number(l.notional), 0);
+    const askNotional = ladder.asks.slice(0, depthLevels).reduce((sum, l) => sum + Number(l.notional), 0);
+    const point = { timestamp: stamp, bid: bidNotional, ask: askNotional };
     setDepthHistory(old => ({ scope: historyScope, points: mergeDepthPoints(old.scope === historyScope ? old.points : [], [point]) }));
   }, [effectiveDepthLadder, historyScope, depthLevels]);
 
@@ -289,6 +291,7 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
                 levelsCount={depthLevels}
                 onLevelsCountChange={setDepthLevels}
                 isStreaming={isWsConnected && isProviderStreaming}
+                marketContext={marketContext}
               />
 
               <LiquidityScorePanel score={liquidityScore} currency={effectiveQuote?.currency} />
