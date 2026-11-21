@@ -72,6 +72,22 @@
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 
+.quote-session-row { transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+.quote-session-row-open { border: 1px solid color-mix(in srgb, var(--color-positive) 34%, var(--color-line)); background: color-mix(in srgb, var(--color-positive) 7%, var(--color-canvas)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-positive) 10%, transparent); }
+.market-session-label { display: flex; align-items: center; gap: 0.3rem; margin-top: 0.28rem; font-size: 0.625rem; line-height: 1; }
+.market-session-label-open { color: var(--color-positive); }
+.market-session-label-closed { color: var(--color-muted); }
+.market-session-dot { width: 0.35rem; height: 0.35rem; flex: 0 0 auto; border-radius: 9999px; background: currentColor; }
+.market-session-chip { display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 9999px; padding: 0.35rem 0.55rem; font-size: 0.6875rem; line-height: 1; }
+.market-session-chip-open { color: var(--color-positive); background: color-mix(in srgb, var(--color-positive) 10%, var(--color-surface)); border: 1px solid color-mix(in srgb, var(--color-positive) 22%, var(--color-line)); }
+.market-session-chip-closed { color: var(--color-muted); background: var(--color-canvas); border: 1px solid var(--color-line); }
+.market-session-inline { display: inline-flex; align-items: center; gap: 0.25rem; margin-left: 0.45rem; color: var(--color-muted); font-size: 0.625rem; font-weight: 500; }
+.market-session-inline-open { color: var(--color-positive); }
+@media (prefers-reduced-motion: no-preference) {
+  .market-session-label-open .market-session-dot { animation: market-session-pulse 1.8s ease-in-out infinite; }
+  @keyframes market-session-pulse { 0%, 100% { opacity: 0.45; transform: scale(0.82); } 50% { opacity: 1; transform: scale(1.12); } }
+}
+
 /* Each destination owns a hue. Semantic risk and return colors stay independent. */
 [data-section="overview"]  { --accent: #2555be; --bloom: #91bcff; --ribbon: #a79aef; }
 [data-section="alerts"]    { --accent: #9a421e; --bloom: #ffba8e; --ribbon: #ee91a9; }

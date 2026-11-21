@@ -192,8 +192,18 @@ export const LiquidityDashboardPage: React.FC<LiquidityDashboardPageProps> = ({
         if (results.some(r => r.status === 'rejected')) setError('Some instrument data is unavailable. Completed panels remain visible; missing data is not estimated silently.');
       }
     });
+    // Keep snapshot-backed panels moving when the provider WebSocket is unavailable
+    // or does not emit an event for this instrument. The response carries its own
+    // provider timestamp, so the UI can distinguish a fresh snapshot from stale data.
+    const refreshLiveSnapshot = () => {
+      if (controller.signal.aborted) return;
+      axios.get<CurrentQuoteItem>(`${root}/quote`, options).then(apply(setQuote)).catch(() => {});
+      axios.get<InstrumentSpreadDetail>(`${root}/spread?lookback_days=${lookbackDays}`, options).then(apply(setSpreadDetail)).catch(() => {});
+      axios.get<OrderBookDepthLadder>(`${root}/depth?levels=${depthLevels}`, options).then(apply(setDepthLadder)).catch(() => {});
+    };
+    const snapshotRefresh = window.setInterval(refreshLiveSnapshot, 10000);
     const refreshContext = setInterval(() => { axios.get<MarketContext>(`${root}/market-context`, options).then(apply(setMarketContext)).catch(() => {}); }, 60000);
-    return () => { controller.abort(); clearInterval(refreshContext); };
+    return () => { controller.abort(); clearInterval(snapshotRefresh); clearInterval(refreshContext); };
   }, [selectedInstrumentId, currentPortfolioId, lookbackDays, depthLevels, participationRate, positionRevision, revision]);
 
   return (

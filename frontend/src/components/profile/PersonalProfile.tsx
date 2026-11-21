@@ -11,6 +11,16 @@ type Lot = { instrument_id: string; position_side: string; remaining_quantity: s
 const palette = ['#2555be', '#a34416', '#007570', '#8945a3', '#a53163', '#526c17', '#654ec3', '#805723'];
 const dateLabel = (day: number) => new Date(day).toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
 const percent = (n: number) => (n > 0 ? '+' : '') + n.toFixed(2) + '%';
+function sessionStatus(symbol: string) {
+  const india = /(^\^NSEI$|\.NS$|\.BO$|^NSE_|^BSE_)/i.test(symbol);
+  const market = india ? 'India' : 'US';
+  const timezone = india ? 'Asia/Kolkata' : 'America/New_York';
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: timezone, weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(new Date());
+  const weekday = parts.find(part => part.type === 'weekday')?.value || 'Sun';
+  const minutes = Number(parts.find(part => part.type === 'hour')?.value || 0) * 60 + Number(parts.find(part => part.type === 'minute')?.value || 0);
+  const open = !['Sat', 'Sun'].includes(weekday) && (india ? minutes >= 555 && minutes < 930 : minutes >= 570 && minutes < 960);
+  return { market, open, label: open ? 'Open · regular session' : 'Closed · regular session' };
+}
 
 async function history(symbol: string, signal: AbortSignal): Promise<Point[]> {
   const response = await fetch('/api/v1/dashboard/liquidity/stock-history?symbol=' + encodeURIComponent(symbol), { signal });
@@ -53,6 +63,7 @@ function PositionChart({ symbols }: { symbols: string[] }) {
     <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="profile-chart-heading" className="text-lg font-semibold">Company performance</h2>
       <button className="text-sm text-brand" onClick={refresh.refresh} disabled={refresh.running}>Refresh prices</button></div>
     <p className="mt-1 text-sm text-muted">One month of adjusted daily closes from Yahoo Finance. Each line starts at 0% on its first available trading day and tracks the share price in its own currency.</p>
+    <div className="mt-3 flex flex-wrap gap-2" aria-label="Market session status">{symbols.map(symbol => { const session = sessionStatus(symbol); return <span key={symbol} className={session.open ? 'market-session-chip market-session-chip-open' : 'market-session-chip market-session-chip-closed'}><span aria-hidden className="market-session-dot" />{symbol}: {session.label}</span>; })}</div>
     {points.length > 0 ? <svg viewBox="0 0 708 231" className="profile-plot" role="img" aria-label="One-month percentage price change for the selected companies">
       {[top, (top + bottom) / 2, bottom].map(v => <g key={v}><line x1="60" x2="691" y1={y(v)} y2={y(v)} stroke="#dce2ec" /><text x="52" y={y(v) + 4} textAnchor="end">{v.toFixed(1)}%</text></g>)}
       <line x1="60" x2="691" y1={y(0)} y2={y(0)} stroke="#818b9d" strokeDasharray="4 4" />
@@ -63,7 +74,7 @@ function PositionChart({ symbols }: { symbols: string[] }) {
     <div className="mt-3 flex flex-wrap gap-2">{symbols.map((s, i) => {
       const rows = series[s], latest = rows?.[rows.length - 1];
       return <button key={s} aria-pressed={!hidden.includes(s)} className="profile-series" onClick={() => setHidden(old => old.includes(s) ? old.filter(t => t !== s) : [...old, s])}>
-        <i aria-hidden="true" style={{ background: palette[i % palette.length] }} /><strong>{s}</strong>
+        <i aria-hidden="true" style={{ background: palette[i % palette.length] }} /><strong>{s}</strong><span className={sessionStatus(s).open ? 'market-session-inline market-session-inline-open' : 'market-session-inline'}><span aria-hidden className="market-session-dot" />{sessionStatus(s).open ? 'Open' : 'Closed'}</span>
         <span>{latest ? percent(latest.change) + ' · ' + dateLabel(latest.day) : rows || refresh.error ? 'History unavailable' : 'Loading…'}</span></button>;
     })}</div>
   </section>;

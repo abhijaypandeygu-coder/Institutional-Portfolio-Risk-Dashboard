@@ -167,7 +167,44 @@ class LiquidityDashboardService:
         symbol = inst.short_name if inst and hasattr(inst, "short_name") and inst.short_name else (inst.canonical_name if inst and hasattr(inst, "canonical_name") and inst.canonical_name else instrument_id)
 
         if not obs:
-            # Query live feed via yfinance as fallback
+            # Prefer an authenticated broker quote for the current book. This keeps
+            # the top-of-book panel consistent with the depth panel when Alpaca or
+            # Upstox credentials are configured. The adapter may still report only
+            # L1, so the UI must not present it as full exchange depth.
+            try:
+                from backend.app.modules.market_data_ingestion.adapters.live_depth_adapter import MarketDepthAdapter
+                live_depth = await MarketDepthAdapter.get_live_depth(symbol or instrument_id, levels_count=1)
+                if live_depth and live_depth.get("bids") and live_depth.get("asks"):
+                    bid = Decimal(str(live_depth["bids"][0]["price"]))
+                    ask = Decimal(str(live_depth["asks"][0]["price"]))
+                    mid = (bid + ask) / Decimal("2")
+                    spread = ask - bid
+                    spread_rel = spread / mid if mid > 0 else None
+                    spread_bps = spread_rel * Decimal("10000") if spread_rel is not None else None
+                    condition = "WIDE" if spread_bps is not None and spread_bps > Decimal("100") else "NORMAL"
+                    return CurrentQuoteItem(
+                        instrument_id=instrument_id,
+                        symbol=live_depth.get("symbol") or symbol,
+                        best_bid=bid,
+                        best_ask=ask,
+                        mid_price=mid,
+                        spread_abs=spread,
+                        spread_rel=spread_rel,
+                        spread_bps=spread_bps,
+                        quote_condition=condition,
+                        observation_timestamp=live_depth.get("snapshot_timestamp"),
+                        source_timestamp=live_depth.get("snapshot_timestamp"),
+                        timestamp_basis="Authenticated broker quote snapshot",
+                        source_kind=live_depth.get("source_kind", "LIVE_FEED"),
+                        venue=live_depth.get("venue", "PRIMARY"),
+                        currency=live_depth.get("currency", "USD"),
+                    )
+            except Exception:
+                # A provider outage should fall through to the existing public-data
+                # fallback rather than breaking the liquidity page.
+                pass
+
+            # Query public feed via yfinance as fallback
             live = await YFinanceMarketDataAdapter.get_live_quote(symbol or instrument_id)
             if live:
                 return CurrentQuoteItem(
